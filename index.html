@@ -83,24 +83,31 @@
     transition: none !important; 
   }
 
-  .hidden-btn {
+  .hidden-element {
     opacity: 0;
     visibility: hidden;
     transition: opacity 1.5s ease, visibility 1.5s ease;
   }
 
-  .hidden-btn.visible {
+  .hidden-element.visible {
     opacity: 1;
     visibility: visible;
   }
 
-  .hidden-btn.instant-visible {
+  .hidden-element.instant-visible {
     opacity: 1;
     visibility: visible;
     transition: none !important;
   }
 
-  /* 第二階段專用樣式 */
+  /* 選項按鈕容器 */
+  .options-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+  }
+
+  /* 醫院公告樣式 */
   .scene-title {
     font-size: 1.5rem;
     margin-bottom: 30px;
@@ -115,11 +122,62 @@
     list-style-type: none;
     padding: 0;
     margin: 0;
+    text-align: left;
   }
 
   .bullet-item {
     margin-bottom: 18px;
+    font-size: 1.2rem;
+    line-height: 2;
+    letter-spacing: 1.5px;
     transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  /* 手札系統樣式 */
+  #notebook-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    margin: 0;
+    z-index: 100;
+  }
+
+  #notebook-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 999;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal-content {
+    background-color: #070707;
+    border: 1px solid #a9a9a9;
+    padding: 40px;
+    width: 80%;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  #close-modal {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 2.5rem;
+    cursor: pointer;
+    color: #a9a9a9;
+    transition: color 0.3s;
+  }
+
+  #close-modal:hover {
+    color: #d3d3d3;
   }
 
   @keyframes fadeIn {
@@ -130,6 +188,7 @@
 </head>
 <body>
 
+  <!-- 開場畫面 -->
   <div id="intro-screen">
     <div class="poem-line">Long long ago, a tale was born</div>
     <div class="poem-line">In the mist, monsters roam</div>
@@ -138,13 +197,15 @@
     <button id="start-btn" class="btn">Start</button>
   </div>
 
+  <!-- 遊戲主畫面 -->
   <div id="game-screen">
+    
     <!-- 第一階段：醫院大廳 -->
     <div id="scene-1">
       <p class="story-text" id="s1-p1">冰冷、潮濕，四周瀰漫著令人不適的氣息。</p>
       <p class="story-text" id="s1-p2">已然記不清究竟是何時昏了過去，意識回籠之際，只覺頭痛欲裂。映入眼簾的是一片破敗景象，能依稀判斷這裡是一座廢棄的醫院。</p>
       <p class="story-text" id="s1-p3">面前的佈告欄寫著數項公告，內容似乎相當重要，以防萬一，最好仔細閱讀……。</p>
-      <button id="action-btn-1" class="btn hidden-btn">Skip</button>
+      <button id="action-btn-1" class="btn hidden-element">Skip</button>
     </div>
 
     <!-- 第二階段：醫院公告 -->
@@ -160,17 +221,62 @@
         <li class="story-text bullet-item s2-item">• 如果聽見「羊群」的聲音，那是正常的，請不要迴避。</li>
         <li class="story-text bullet-item s2-item">• 「羊群」的腳印通向「安全」的地方。</li>
       </ul>
-      <button id="action-btn-2" class="btn hidden-btn">Skip</button>
+      <button id="action-btn-2" class="btn hidden-element">Skip</button>
+    </div>
+
+    <!-- 第三階段：手札選擇 -->
+    <div id="scene-3" style="display: none;">
+      <p class="story-text" id="s3-q" style="text-align: center;">是否將規則紀錄於手札？</p>
+      <div id="s3-options" class="options-container hidden-element">
+        <button id="btn-yes" class="btn" style="margin-top: 0;">是</button>
+        <button id="btn-no" class="btn" style="margin-top: 0;">否</button>
+      </div>
+    </div>
+
+    <!-- 選擇反饋畫面 -->
+    <div id="scene-feedback" style="display: none;">
+      <p class="story-text" id="feedback-text"></p>
+      <button id="next-btn-3" class="btn hidden-element">Next</button>
+    </div>
+
+    <!-- 第四階段：下一段落 -->
+    <div id="scene-4" style="display: none;">
+      <p class="story-text" id="s4-p1">……下一段落內容待增……</p>
+    </div>
+
+  </div>
+
+  <!-- 手札按鈕與彈出視窗 -->
+  <button id="notebook-btn" class="btn" style="display: none;">手札</button>
+
+  <div id="notebook-modal">
+    <div class="modal-content">
+      <span id="close-modal">&times;</span>
+      <h2 style="font-size: 1.5rem; text-align: center; letter-spacing: 2px; margin-bottom: 30px;">【聖心醫院公告】</h2>
+      <ul class="bullet-list">
+        <li class="bullet-item" style="opacity: 1; transform: none;">• 手術室嚴格禁止進入，若有人問你看見了什麼，回答「什麼都沒看見」。</li>
+        <li class="bullet-item" style="opacity: 1; transform: none;">• 住院部是安全的，你能夠在那裡得到庇護。</li>
+        <li class="bullet-item" style="opacity: 1; transform: none;">• 本院不存在名為「芬森·亨特」的醫生，如果遇見自稱「亨特醫生」的人，請立刻離開現場。</li>
+        <li class="bullet-item" style="opacity: 1; transform: none;">• 糖果是屬於「好孩子」的，只有「好孩子」能夠取走。</li>
+        <li class="bullet-item" style="opacity: 1; transform: none;">• 「壞孩子」的牙齒會被「怪物」拔掉。</li>
+        <li class="bullet-item" style="opacity: 1; transform: none;">• 「蛇」是危險的，請務必迴避。</li>
+        <li class="bullet-item" style="opacity: 1; transform: none;">• 如果聽見「羊群」的聲音，那是正常的，請不要迴避。</li>
+        <li class="bullet-item" style="opacity: 1; transform: none;">• 「羊群」的腳印通向「安全」的地方。</li>
+      </ul>
     </div>
   </div>
 
   <script>
+    // --- DOM 元素宣告 ---
     const startBtn = document.getElementById('start-btn');
     const introScreen = document.getElementById('intro-screen');
     const gameScreen = document.getElementById('game-screen');
     
     const scene1 = document.getElementById('scene-1');
     const scene2 = document.getElementById('scene-2');
+    const scene3 = document.getElementById('scene-3');
+    const sceneFeedback = document.getElementById('scene-feedback');
+    const scene4 = document.getElementById('scene-4');
 
     const p1 = document.getElementById('s1-p1');
     const p2 = document.getElementById('s1-p2');
@@ -178,13 +284,22 @@
     const actionBtn1 = document.getElementById('action-btn-1');
     const actionBtn2 = document.getElementById('action-btn-2');
 
+    const btnYes = document.getElementById('btn-yes');
+    const btnNo = document.getElementById('btn-no');
+    const feedbackText = document.getElementById('feedback-text');
+    const nextBtn3 = document.getElementById('next-btn-3');
+
+    const notebookBtn = document.getElementById('notebook-btn');
+    const notebookModal = document.getElementById('notebook-modal');
+    const closeModal = document.getElementById('close-modal');
+
     let scene1State = 'playing'; 
     let s1Timeouts = []; 
 
     let scene2State = 'playing';
     let s2Timeouts = [];
 
-    // 開始遊戲
+    // --- 遊戲開始 ---
     startBtn.addEventListener('click', function() {
       introScreen.style.display = 'none';
       gameScreen.style.display = 'block';
@@ -193,28 +308,26 @@
       // 第 1 段：0.5秒後浮現
       s1Timeouts.push(setTimeout(() => { p1.classList.add('visible'); }, 500));
 
-      // Skip 按鈕：第一段顯示後 2.5 秒出現 (0.5 + 2.5 = 3.0s)
-      s1Timeouts.push(setTimeout(() => { actionBtn1.classList.add('visible'); }, 3000));
+      // Skip 按鈕：第一段文字浮現後 1.5 秒出現 (0.5 + 1.5 = 2.0s)
+      s1Timeouts.push(setTimeout(() => { actionBtn1.classList.add('visible'); }, 2000));
 
-      // 第 2 段：第 1 段後 2.5 秒浮現 (3.0s)
+      // 第 2 段：第 1 段後 2.5 秒浮現 (0.5 + 2.5 = 3.0s)
       s1Timeouts.push(setTimeout(() => { p2.classList.add('visible'); }, 3000));
 
-      // 第 3 段：第 2 段後 2.5 秒浮現 (5.5s)
+      // 第 3 段：第 2 段後 2.5 秒浮現 (3.0 + 2.5 = 5.5s)
       s1Timeouts.push(setTimeout(() => { p3.classList.add('visible'); }, 5500));
 
-      // 變為 Next：第 3 段後 2.5 秒 (8.0s)
+      // 變為 Next：第 3 段後 2.5 秒 (5.5 + 2.5 = 8.0s)
       s1Timeouts.push(setTimeout(() => { 
         scene1State = 'done';
         actionBtn1.textContent = 'Next';
       }, 8000));
     });
 
-    // 第一階段按鈕點擊事件 (Skip / Next)
+    // --- 第一階段按鈕 (Skip / Next) ---
     actionBtn1.addEventListener('click', function() {
       if (scene1State === 'playing') {
-        // 執行 Skip
         s1Timeouts.forEach(clearTimeout);
-        // 使用 instant-visible 直接顯示，取消漸入過渡
         p1.classList.add('instant-visible');
         p2.classList.add('instant-visible');
         p3.classList.add('instant-visible');
@@ -223,17 +336,12 @@
         scene1State = 'done';
         actionBtn1.textContent = 'Next';
       } else {
-        // 執行 Next：進入第二階段
         scene1.style.display = 'none';
         scene2.style.display = 'block';
 
-        // 標題顯示
         s2Timeouts.push(setTimeout(() => { document.getElementById('s2-title').classList.add('visible'); }, 100));
-        
-        // Skip 按鈕：標題浮現後 1.5 秒出現 (100 + 1500 = 1600ms)
         s2Timeouts.push(setTimeout(() => { actionBtn2.classList.add('visible'); }, 1600));
 
-        // 標題浮現後 1.5 秒，內容開始浮現，間隔調整為 1.5 秒 (1500ms) 以減慢速度
         const s2Items = document.querySelectorAll('.s2-item');
         s2Items.forEach((item, index) => {
           s2Timeouts.push(setTimeout(() => {
@@ -241,7 +349,6 @@
           }, 1600 + (index * 1500))); 
         });
 
-        // 最後變為 Next 按鈕
         s2Timeouts.push(setTimeout(() => {
           scene2State = 'done';
           actionBtn2.textContent = 'Next';
@@ -249,24 +356,71 @@
       }
     });
 
-    // 第二階段按鈕點擊事件 (Skip / Next)
+    // --- 第二階段按鈕 (Skip / Next) ---
     actionBtn2.addEventListener('click', function() {
       if (scene2State === 'playing') {
-        // 執行 Skip
         s2Timeouts.forEach(clearTimeout);
         const s2Items = document.querySelectorAll('.s2-item');
         s2Items.forEach(item => {
           item.classList.add('instant-visible');
         });
+        document.getElementById('s2-title').classList.add('instant-visible');
         actionBtn2.classList.add('instant-visible');
 
         scene2State = 'done';
         actionBtn2.textContent = 'Next';
       } else {
-        // 預留進入第三階段的程式碼位置
-        console.log("進入下一章節！");
+        // 進入第三階段：選項
+        scene2.style.display = 'none';
+        scene3.style.display = 'block';
+
+        setTimeout(() => { document.getElementById('s3-q').classList.add('visible'); }, 500);
+        setTimeout(() => { document.getElementById('s3-options').classList.add('visible'); }, 2000);
       }
     });
+
+    // --- 第三階段：選項邏輯 ---
+    // 選擇「是」
+    btnYes.addEventListener('click', function() {
+      scene3.style.display = 'none';
+      sceneFeedback.style.display = 'block';
+      
+      feedbackText.innerHTML = '謹慎，永遠是最穩妥的選擇。<br><br><span style="font-size: 1rem; color: #a9a9a9;">（獲得提示，可打開手札查看）</span>';
+      
+      setTimeout(() => { feedbackText.classList.add('visible'); }, 500);
+      setTimeout(() => { nextBtn3.classList.add('visible'); }, 3000);
+
+      // 顯示手札按鈕
+      notebookBtn.style.display = 'block';
+    });
+
+    // 選擇「否」
+    btnNo.addEventListener('click', function() {
+      scene3.style.display = 'none';
+      sceneFeedback.style.display = 'block';
+      
+      feedbackText.innerHTML = '信任記憶，也未嘗不是壞事。';
+      
+      setTimeout(() => { feedbackText.classList.add('visible'); }, 500);
+      setTimeout(() => { nextBtn3.classList.add('visible'); }, 2500);
+    });
+
+    // --- 進入下一階段 (第四階段) ---
+    nextBtn3.addEventListener('click', function() {
+      sceneFeedback.style.display = 'none';
+      scene4.style.display = 'block';
+      setTimeout(() => { document.getElementById('s4-p1').classList.add('visible'); }, 500);
+    });
+
+    // --- 手札系統邏輯 ---
+    notebookBtn.addEventListener('click', function() {
+      notebookModal.style.display = 'flex';
+    });
+
+    closeModal.addEventListener('click', function() {
+      notebookModal.style.display = 'none';
+    });
+
   </script>
 
 </body>
