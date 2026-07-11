@@ -1,0 +1,102 @@
+!DOCTYPE html
+html lang=zh-TW
+head
+meta charset=UTF-8
+meta name=viewport content=width=device-width, initial-scale=1.0
+titleDentist's Swamptitle
+style
+   基礎頁面設定：黑暗色調與置中對齊 
+  body {
+    margin 0;
+    padding 0;
+    background-color #070707;  深黑色背景 
+    color #d3d3d3;  淺灰色文字 
+    font-family 'Courier New', Courier, monospace;  等寬字體增添打字機劇情遊戲感 
+    display flex;
+    justify-content center;
+    align-items center;
+    height 100vh;
+    overflow hidden;
+  }
+
+   開場畫面容器與淡入動畫 
+  #intro-screen {
+    text-align center;
+    animation fadeIn 2.5s ease-in-out;
+  }
+
+   詩句排版 
+  .poem-line {
+    margin 12px 0;
+    font-size 1.2rem;
+    letter-spacing 2px;
+  }
+
+   Start 按鈕設計 
+  #start-btn {
+    margin-top 40px;
+    padding 10px 30px;
+    background-color transparent;
+    color #a9a9a9;
+    border 1px solid #a9a9a9;
+    font-size 1.2rem;
+    font-family inherit;
+    cursor pointer;
+    letter-spacing 2px;
+    transition all 0.3s ease;
+  }
+
+   按鈕懸停效果 
+  #start-btnhover {
+    background-color #d3d3d3;
+    color #070707;
+  }
+
+   遊戲主畫面容器（初始隱藏） 
+  #game-screen {
+    display none;
+    text-align center;
+    animation fadeIn 1.5s ease-in-out;
+  }
+
+   動畫定義 
+  @keyframes fadeIn {
+    from { opacity 0; }
+    to { opacity 1; }
+  }
+style
+head
+body
+
+  !-- 開場畫面 --
+  div id=intro-screen
+    div class=poem-lineLong long ago, a tale was borndiv
+    div class=poem-lineIn the mist, monsters roamdiv
+    div class=poem-lineA land of mystery, a hunting grounddiv
+    div class=poem-lineWelcome to the dentist's swampdiv
+    button id=start-btnStartbutton
+  div
+
+  !-- 遊戲主畫面 --
+  div id=game-screen
+    !-- 內容待增 --
+    p...遊戲內容待增...p
+  div
+
+  script
+     取得按鈕與畫面容器的 DOM 元素
+    const startBtn = document.getElementById('start-btn');
+    const introScreen = document.getElementById('intro-screen');
+    const gameScreen = document.getElementById('game-screen');
+
+     設定 Start 按鈕的點擊事件
+    startBtn.addEventListener('click', function() {
+       隱藏開場畫面
+      introScreen.style.display = 'none';
+       顯示遊戲畫面
+      gameScreen.style.display = 'block';
+    });
+  script
+
+body
+html
