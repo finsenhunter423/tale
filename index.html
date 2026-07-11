@@ -102,6 +102,7 @@
     display: flex;
     justify-content: center;
     gap: 30px;
+    flex-wrap: wrap; /* 避免選項過多超出畫面 */
   }
 
   .scene-title {
@@ -282,6 +283,14 @@
 
     <div id="scene-feedback" style="display: none;">
       <p class="story-text" id="feedback-text"></p>
+      <button id="next-btn-3" class="btn hidden-element" style="display: none;">Next</button>
+    </div>
+
+    <div id="scene-4" style="display: none;">
+      <p class="story-text" id="s4-text"></p>
+      <div id="s4-options" class="options-container"></div>
+      <p class="story-text" id="s4-feedback" style="display: none;"></p>
+      <button id="next-btn-4" class="btn hidden-element" style="display: none;">Next</button>
     </div>
 
   </div>
@@ -296,6 +305,7 @@
       </svg>
     </div>
     <button id="notebook-btn" class="btn" style="display: none; margin-top: 0;">手札</button>
+    <button id="candy-btn" class="btn" style="display: none; margin-top: 15px; padding: 5px 15px;">🍬 糖果</button>
   </div>
 
   <div id="notebook-modal">
@@ -316,10 +326,13 @@
   </div>
 
   <script>
-    // --- 隱藏數值初始化 ---
+    // --- 隱藏數值與狀態初始化 ---
+    let fearValue = 0; 
     let sheepIndex = 0;
     let snakeIndex = 0;
-    let fearValue = 0; 
+    
+    let hasCandy = false;
+    let ateCandy = false;
 
     // --- DOM 元素宣告 ---
     const startBtn = document.getElementById('start-btn');
@@ -330,6 +343,7 @@
     const scene2 = document.getElementById('scene-2');
     const scene3 = document.getElementById('scene-3');
     const sceneFeedback = document.getElementById('scene-feedback');
+    const scene4 = document.getElementById('scene-4');
 
     const p1 = document.getElementById('s1-p1');
     const p2 = document.getElementById('s1-p2');
@@ -340,17 +354,19 @@
     const btnYes = document.getElementById('btn-yes');
     const btnNo = document.getElementById('btn-no');
     const feedbackText = document.getElementById('feedback-text');
+    const nextBtn3 = document.getElementById('next-btn-3');
 
     const fearContainer = document.getElementById('fear-container');
     const fearHeart = document.getElementById('fear-heart');
     const heartPath = document.getElementById('heart-path');
+    
     const notebookBtn = document.getElementById('notebook-btn');
     const notebookModal = document.getElementById('notebook-modal');
     const closeModal = document.getElementById('close-modal');
+    const candyBtn = document.getElementById('candy-btn');
 
     let scene1State = 'playing'; 
     let s1Timeouts = []; 
-
     let scene2State = 'playing';
     let s2Timeouts = [];
 
@@ -359,21 +375,32 @@
       fearHeart.classList.remove('slight-beat', 'violent-beat', 'cracked');
       
       if (fearValue <= 20) {
-        heartPath.setAttribute('fill', '#cccccc'); // 淺灰
+        heartPath.setAttribute('fill', '#cccccc'); 
       } else if (fearValue > 20 && fearValue <= 35) {
-        heartPath.setAttribute('fill', '#cccccc'); // 淺灰
+        heartPath.setAttribute('fill', '#cccccc'); 
         fearHeart.classList.add('slight-beat');
       } else if (fearValue > 35 && fearValue <= 45) {
-        heartPath.setAttribute('fill', '#888888'); // 變深
+        heartPath.setAttribute('fill', '#888888'); 
         fearHeart.classList.add('slight-beat');
       } else if (fearValue > 45 && fearValue < 60) {
-        heartPath.setAttribute('fill', '#888888'); // 變深
+        heartPath.setAttribute('fill', '#888888'); 
         fearHeart.classList.add('violent-beat');
       } else if (fearValue >= 60) {
-        heartPath.setAttribute('fill', '#555555'); // 最深灰不動
+        heartPath.setAttribute('fill', '#555555'); 
         fearHeart.classList.add('cracked');
       }
     }
+
+    // --- 糖果系統 ---
+    candyBtn.addEventListener('click', function() {
+      if (hasCandy) {
+        hasCandy = false;
+        ateCandy = true;
+        candyBtn.style.display = 'none';
+        fearValue = Math.max(0, fearValue - 10);
+        updateFearUI();
+      }
+    });
 
     // --- 遊戲開始 ---
     startBtn.addEventListener('click', function() {
@@ -455,7 +482,10 @@
       sceneFeedback.style.display = 'block';
       feedbackText.innerHTML = '謹慎，永遠是最穩妥的選擇。<br><br><span style="font-size: 1rem; color: #a9a9a9;">（獲得提示，可打開手札查看）</span>';
       feedbackText.classList.add('instant-visible');
+      
       notebookBtn.style.display = 'block';
+      nextBtn3.style.display = 'inline-block';
+      nextBtn3.classList.add('instant-visible');
     });
 
     btnNo.addEventListener('click', function() {
@@ -463,15 +493,243 @@
       sceneFeedback.style.display = 'block';
       feedbackText.innerHTML = '信任記憶，也未嘗不是壞事。';
       feedbackText.classList.add('instant-visible');
+      
+      nextBtn3.style.display = 'inline-block';
+      nextBtn3.classList.add('instant-visible');
     });
 
     // --- 手札系統 ---
-    notebookBtn.addEventListener('click', function() {
-      notebookModal.style.display = 'flex';
-    });
+    notebookBtn.addEventListener('click', function() { notebookModal.style.display = 'flex'; });
+    closeModal.addEventListener('click', function() { notebookModal.style.display = 'none'; });
 
-    closeModal.addEventListener('click', function() {
-      notebookModal.style.display = 'none';
+    // ==========================================
+    // 第四階段：醫院大廳動態事件腳本系統
+    // ==========================================
+    
+    let played1_1 = false;
+    let randomEvents = ["1-2", "1-3", "1-4", "1-6", "1-7"];
+    let nextFixed = "1-8";
+
+    // 陣列洗牌工具
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+    shuffleArray(randomEvents);
+
+    // 取得下一題 ID 控制邏輯
+    function getNextEventId() {
+      if (!played1_1) {
+        played1_1 = true;
+        return "1-1";
+      }
+      if (randomEvents.length > 0) {
+        return randomEvents.pop(); 
+      }
+      if (nextFixed === "1-8") {
+        nextFixed = "1-9";
+        return "1-8";
+      }
+      if (nextFixed === "1-9") {
+        nextFixed = null;
+        return "1-9";
+      }
+      return null;
+    }
+
+    // 事件資料庫
+    const eventsData = {
+      "1-1": {
+        text: "醫院大門緊閉，門鎖上蒙著一層厚重的塵埃。",
+        options: [
+          { label: "試著開鎖", effect: () => { fearValue += 10; return { text: "灰塵染污了雙手，門鎖沒能被打開。" }; } },
+          { label: "試著推開", effect: () => { fearValue += 5; return { text: "大門紋絲不動。" }; } },
+          { label: "不做嘗試", effect: () => { return { text: "或許有其他離開的方法。" }; } }
+        ]
+      },
+      "1-2": {
+        text: "窗外，一道模糊的身影一閃而過。",
+        options: [
+          { label: "上前查看", effect: () => { sheepIndex += 10; return { text: "透過玻璃能勉強辨認出，那些黑影的頭上似乎長著……羊角？" }; } },
+          { label: "靜觀其變", effect: () => { return { text: "隔著一段距離，加上玻璃十分厚重，因此什麼也看不見。" }; } }
+        ]
+      },
+      "1-3": {
+        text: "暗處似乎有雙黏膩的視線，一直凝視著這片迷霧……。",
+        options: [
+          { label: "上前查看", effect: () => { snakeIndex += 10; return { text: "那雙眼眸明顯不屬於人類，在察覺到窺伺的瞬間便隱入了黑暗，只留下一道濕滑的爬行痕跡。" }; } },
+          { label: "靜觀其變", effect: () => { fearValue += 5; return { text: "只是一瞬的愣神，那道視線便已消失，彷彿方才的一切都只是錯覺……。" }; } }
+        ]
+      },
+      "1-4": {
+        text: "牆邊靠著一張陳舊的木桌，上面放置的糖果罐，卻是嶄新的。",
+        options: [
+          { label: "拿走糖果", effect: () => { 
+              hasCandy = true; 
+              candyBtn.style.display = 'block';
+              randomEvents.push("1-5"); shuffleArray(randomEvents);
+              return { text: "或許它會派上用場……或許。" }; 
+            } 
+          },
+          { label: "吃下糖果", effect: () => { 
+              fearValue = Math.max(0, fearValue - 15); 
+              sheepIndex += 5; 
+              ateCandy = true; 
+              randomEvents.push("1-5"); shuffleArray(randomEvents);
+              return { text: "甜蜜的味道，暫時安撫了內心的不安。" }; 
+            } 
+          },
+          { label: "置之不理", effect: () => { 
+              randomEvents.push("1-5"); shuffleArray(randomEvents);
+              return { text: "來路不明的饋贈，反而是一種陷阱。" }; 
+            } 
+          }
+        ]
+      },
+      "1-5": {
+        text: "一道嚴厲的聲音從背後傳來：「為什麼一個人待在這裡，很危險的。」，回頭看去，卻沒有任何人。",
+        options: [
+          { label: "「你是誰？」", effect: () => {
+              if (ateCandy || hasCandy) {
+                return { text: "「這裡不是好孩子該待的地方，快點離開。」" };
+              } else {
+                fearValue += 10;
+                return { text: "「這不是你該過問的。」" };
+              }
+            }
+          },
+          { label: "立刻離開", effect: () => { fearValue += 10; return { text: "在廢棄的醫院裡的，會是什麼人？" }; } }
+        ]
+      },
+      "1-6": {
+        text: "好幾道聲音窸窣作響，像是一群人在交談，情緒激動。",
+        options: [
+          { label: "凝神細聽", effect: () => { sheepIndex += 5; return { text: "「罪人……沉沼……。」他們在說的是什麼？" }; } },
+          { label: "無視", effect: () => { return { text: "或許他們會自己安靜下來……？" }; } },
+          { label: "捂上耳朵", effect: () => { snakeIndex += 5; return { text: "不該知道的事，非禮勿聽。" }; } }
+        ]
+      },
+      "1-7": {
+        text: "一旁的房間門扉緊閉，上頭寫著「手術室」。",
+        options: [
+          { label: "偷聽動靜", effect: () => { fearValue += 10; return { text: "裡面傳來一陣騷動，聽起來並不像手術室該發出的聲音……腳下隱隱有深色液體滲出，讓人不得不立刻逃離。" }; } },
+          { label: "悄悄進入", effect: () => { return { text: "這座廢墟裡，有什麼正在發生？", goto: "1-7-1" }; } },
+          { label: "立刻離開", effect: () => { return { text: "有時過多的好奇心，只會害了自己。" }; } }
+        ]
+      },
+      "1-7-1": {
+        text: "一片昏暗裡，只有手術臺的燈光，照亮著上面躺著的慘白身影。穿著白袍的模糊背影，正在進行手術……又或者，某種實驗？",
+        options: [
+          { label: "繼續觀察", effect: () => { return { goto: "1-7-2", skipFeedback: true }; } },
+          { label: "悄然離開", effect: () => { return { goto: "1-7-2", skipFeedback: true }; } }
+        ]
+      },
+      "1-7-2": {
+        text: "瞬息之間，原先正在手術臺前的人已來到了面前，面容在黑暗之中無法看清，「你看見了什麼？」",
+        options: [
+          { label: "「什麼都沒看見。」", effect: () => { fearValue += 15; return { text: "「現在立刻離開，別讓我說第二次。」" }; } },
+          { label: "「……。」", effect: () => { return { text: "「干擾手術的『壞孩子』……該怎麼懲罰呢？」", isEnding: true }; } },
+          { label: "「一場手術。」", effect: () => { return { text: "「不，那可不是一般的手術，倘若好奇……不如，你親自來參與吧……。」", isEnding: true }; } }
+        ]
+      },
+      "1-8": {
+        text: "透過昏暗的燈光，依稀能見到前方出現了一串腳印，但看上去並不像人類的。",
+        options: [
+          { label: "跟隨腳印", effect: () => { sheepIndex += 10; return { text: "直到腳步與之重疊才發現，眼前的腳印，竟然是羊蹄的形狀……。", isEnding: true, transitionText: "（進入住院部）" }; } },
+          { label: "忽視腳印", effect: () => { return { text: "資訊不足時，不要相信任何事物。" }; } },
+          { label: "反向離開", effect: () => { snakeIndex += 10; return { text: "迷霧中的指引，更像是誘人深入的陷阱。" }; } }
+        ]
+      },
+      "1-9": {
+        text: "映入眼簾的是一條長廊，末端似乎通往……。",
+        options: [
+          { label: "診療室", effect: () => { return { text: "（進入診療室）", isEnding: true }; } },
+          { label: "住院部", effect: () => { return { text: "（進入住院部）", isEnding: true }; } }
+        ]
+      }
+    };
+
+    const s4Text = document.getElementById('s4-text');
+    const s4Options = document.getElementById('s4-options');
+    const s4Feedback = document.getElementById('s4-feedback');
+    const nextBtn4 = document.getElementById('next-btn-4');
+
+    // 算圖與渲染題目
+    function renderEvent(eventId) {
+      if (!eventId) return; // 沒題目可出時防錯
+      const ev = eventsData[eventId];
+      
+      // 介面重設
+      s4Text.textContent = ev.text;
+      s4Text.className = 'story-text'; 
+      void s4Text.offsetWidth; // 觸發重繪以重啟動畫
+      s4Text.classList.add('instant-visible');
+
+      s4Options.innerHTML = '';
+      s4Options.style.display = 'flex';
+      s4Feedback.style.display = 'none';
+      nextBtn4.style.display = 'none';
+      nextBtn4.classList.remove('instant-visible');
+
+      // 產生選項按鈕
+      ev.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'btn';
+        btn.style.marginTop = '0';
+        btn.textContent = opt.label;
+        btn.onclick = () => handleOptionClick(opt);
+        s4Options.appendChild(btn);
+      });
+    }
+
+    // 選項點擊事件處理
+    function handleOptionClick(opt) {
+      s4Options.style.display = 'none'; // 隱藏選項
+      const result = opt.effect();
+      updateFearUI(); 
+
+      // 特殊無轉場直接跳題 (例如 1-7-1 進入 1-7-2)
+      if (result.skipFeedback && result.goto) {
+          renderEvent(result.goto);
+          return;
+      }
+
+      // 顯示反饋文字
+      let finalFeedbackHtml = result.text;
+      if (result.transitionText) {
+         finalFeedbackHtml += `<br><br><span style="font-size: 1rem; color: #a9a9a9;">${result.transitionText}</span>`;
+      }
+      s4Feedback.innerHTML = finalFeedbackHtml;
+      s4Feedback.style.display = 'block';
+      s4Feedback.className = 'story-text';
+      void s4Feedback.offsetWidth;
+      s4Feedback.classList.add('instant-visible');
+
+      nextBtn4.style.display = 'inline-block';
+      nextBtn4.classList.add('instant-visible');
+      
+      // 根據結局/普通題型綁定 Next 行為
+      if (result.isEnding) {
+          nextBtn4.textContent = "To Be Continued...";
+          nextBtn4.onclick = () => { /* 這裡可擴充為進入下一階段網頁的邏輯 */ };
+      } else {
+          nextBtn4.textContent = "Next";
+          nextBtn4.onclick = () => {
+              const nextId = result.goto ? result.goto : getNextEventId();
+              if (nextId) renderEvent(nextId);
+          };
+      }
+    }
+
+    // 銜接第三階段的 Next 按鈕
+    nextBtn3.addEventListener('click', function() {
+      sceneFeedback.style.display = 'none';
+      
+      // 開啟第四階段介面
+      scene4.style.display = 'block';
+      renderEvent(getNextEventId());
     });
 
   </script>
