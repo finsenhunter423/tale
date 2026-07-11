@@ -321,7 +321,7 @@
       </svg>
     </div>
     <button id="notebook-btn" class="btn" style="display: none; margin-top: 0;">手札</button>
-    <button id="inventory-btn" class="btn" style="display: none; margin-top: 15px; padding: 5px 15px;">隨身物品</button>
+    <button id="inventory-btn" class="btn" style="display: none; margin-top: 15px;">隨身物品</button>
   </div>
 
   <div id="notebook-modal">
@@ -540,7 +540,7 @@
       if (hasCandy) {
         const candyItem = document.createElement('div');
         candyItem.className = 'inventory-item';
-        candyItem.textContent = '🍬 糖果';
+        candyItem.textContent = '糖果'; // 移除了表情符號
         candyItem.onclick = () => { confirmModal.style.display = 'flex'; };
         inventoryList.appendChild(candyItem);
       } else {
