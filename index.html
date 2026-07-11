@@ -70,13 +70,13 @@
     transition: opacity 2s ease, transform 2s ease;
   }
 
-  /* 漸入動畫顯示 */
+  /* 漸入動畫顯示（僅用於開場與規則） */
   .visible {
     opacity: 1 !important;
     transform: translateY(0) !important;
   }
 
-  /* 按下 Skip 時的直接顯示（取消漸入過渡效果） */
+  /* 直接顯示（用於後續所有文本，無過渡效果） */
   .instant-visible {
     opacity: 1 !important;
     transform: translateY(0) !important;
@@ -133,15 +133,61 @@
     transition: opacity 0.8s ease, transform 0.8s ease;
   }
 
-  /* 手札系統樣式 */
-  #notebook-btn {
+  /* 右下角 UI 容器（手札與心形符號） */
+  .ui-container {
     position: fixed;
     bottom: 30px;
     right: 30px;
-    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     z-index: 100;
   }
 
+  /* 恐懼值心形樣式與動畫 */
+  #fear-container {
+    font-size: 2.5rem;
+    line-height: 1;
+    user-select: none;
+    display: none;
+    margin-bottom: 15px;
+  }
+
+  .heart-icon {
+    display: inline-block;
+  }
+
+  /* 輕微顫動 */
+  @keyframes slightShake {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(-1px, 1px); }
+    50% { transform: translate(1px, -1px); }
+    75% { transform: translate(-1px, -1px); }
+    100% { transform: translate(0, 0); }
+  }
+  .slight-shake {
+    animation: slightShake 0.6s infinite;
+  }
+
+  /* 劇烈顫動 */
+  @keyframes violentShake {
+    0% { transform: translate(0, 0); }
+    10% { transform: translate(-3px, 2px); }
+    20% { transform: translate(3px, -2px); }
+    30% { transform: translate(-3px, -2px); }
+    40% { transform: translate(3px, 2px); }
+    50% { transform: translate(-2px, 1px); }
+    60% { transform: translate(2px, -1px); }
+    70% { transform: translate(-3px, 1px); }
+    80% { transform: translate(3px, -1px); }
+    90% { transform: translate(-1px, -2px); }
+    100% { transform: translate(0, 0); }
+  }
+  .violent-shake {
+    animation: violentShake 0.15s infinite;
+  }
+
+  /* 手札彈出視窗樣式 */
   #notebook-modal {
     display: none;
     position: fixed;
@@ -214,12 +260,12 @@
       <ul class="bullet-list">
         <li class="story-text bullet-item s2-item">• 手術室嚴格禁止進入，若有人問你看見了什麼，回答「什麼都沒看見」。</li>
         <li class="story-text bullet-item s2-item">• 住院部是安全的，你能夠在那裡得到庇護。</li>
-        <li class="story-text bullet-item s2-item">• 本院不存在名為「芬森·亨特」的醫生，如果遇見自稱「亨特醫生」的人，請立刻離開現場。</li>
         <li class="story-text bullet-item s2-item">• 糖果是屬於「好孩子」的，只有「好孩子」能夠取走。</li>
         <li class="story-text bullet-item s2-item">• 「壞孩子」的牙齒會被「怪物」拔掉。</li>
         <li class="story-text bullet-item s2-item">• 「蛇」是危險的，請務必迴避。</li>
         <li class="story-text bullet-item s2-item">• 如果聽見「羊群」的聲音，那是正常的，請不要迴避。</li>
         <li class="story-text bullet-item s2-item">• 「羊群」的腳印通向「安全」的地方。</li>
+        <li class="story-text bullet-item s2-item">• 本院不存在名為「芬森·亨特」的醫生，如果遇見自稱「亨特醫生」的人，請立刻離開現場。</li>
       </ul>
       <button id="action-btn-2" class="btn hidden-element">Skip</button>
     </div>
@@ -246,9 +292,15 @@
 
   </div>
 
-  <!-- 手札按鈕與彈出視窗 -->
-  <button id="notebook-btn" class="btn" style="display: none;">手札</button>
+  <!-- 右下角固定 UI 區域 -->
+  <div class="ui-container">
+    <div id="fear-container">
+      <span id="fear-heart" class="heart-icon">♥</span>
+    </div>
+    <button id="notebook-btn" class="btn" style="display: none; margin-top: 0;">手札</button>
+  </div>
 
+  <!-- 手札彈出視窗 -->
   <div id="notebook-modal">
     <div class="modal-content">
       <span id="close-modal">&times;</span>
@@ -256,17 +308,22 @@
       <ul class="bullet-list">
         <li class="bullet-item" style="opacity: 1; transform: none;">• 手術室嚴格禁止進入，若有人問你看見了什麼，回答「什麼都沒看見」。</li>
         <li class="bullet-item" style="opacity: 1; transform: none;">• 住院部是安全的，你能夠在那裡得到庇護。</li>
-        <li class="bullet-item" style="opacity: 1; transform: none;">• 本院不存在名為「芬森·亨特」的醫生，如果遇見自稱「亨特醫生」的人，請立刻離開現場。</li>
         <li class="bullet-item" style="opacity: 1; transform: none;">• 糖果是屬於「好孩子」的，只有「好孩子」能夠取走。</li>
-        <li class="bullet-item" style="opacity: 1; transform: none;">• 「壞孩子」的牙齒會被「怪物」拔掉。</li>
+        <li class="bullet-item" style="opacity: 1; transform: none;">• 「壞孩子」的牙齒會變「怪物」拔掉。</li>
         <li class="bullet-item" style="opacity: 1; transform: none;">• 「蛇」是危險的，請務必迴避。</li>
         <li class="bullet-item" style="opacity: 1; transform: none;">• 如果聽見「羊群」的聲音，那是正常的，請不要迴避。</li>
         <li class="bullet-item" style="opacity: 1; transform: none;">• 「羊群」的腳印通向「安全」的地方。</li>
+        <li class="bullet-item" style="opacity: 1; transform: none;">• 本院不存在名為「芬森·亨特」的醫生，如果遇見自稱「亨特醫生」的人，請立刻離開現場。</li>
       </ul>
     </div>
   </div>
 
   <script>
+    // --- 隱藏數值初始化 ---
+    let sheepIndex = 0;
+    let snakeIndex = 0;
+    let fearValue = 0; // 恐懼值 x
+
     // --- DOM 元素宣告 ---
     const startBtn = document.getElementById('start-btn');
     const introScreen = document.getElementById('intro-screen');
@@ -289,6 +346,8 @@
     const feedbackText = document.getElementById('feedback-text');
     const nextBtn3 = document.getElementById('next-btn-3');
 
+    const fearContainer = document.getElementById('fear-container');
+    const fearHeart = document.getElementById('fear-heart');
     const notebookBtn = document.getElementById('notebook-btn');
     const notebookModal = document.getElementById('notebook-modal');
     const closeModal = document.getElementById('close-modal');
@@ -299,11 +358,41 @@
     let scene2State = 'playing';
     let s2Timeouts = [];
 
+    // --- 恐懼值心形狀態更新函式 ---
+    function updateFearUI() {
+      // 重設類別
+      fearHeart.className = 'heart-icon';
+      
+      if (fearValue >= 0 && fearValue <= 20) {
+        fearHeart.textContent = '♥';
+        fearHeart.style.color = '#ffffff'; // 白色
+      } else if (fearValue > 20 && fearValue <= 35) {
+        fearHeart.textContent = '♥';
+        fearHeart.style.color = '#ffffff'; // 白色
+        fearHeart.classList.add('slight-shake'); // 微微顫動
+      } else if (fearValue > 35 && fearValue <= 45) {
+        fearHeart.textContent = '♥';
+        fearHeart.style.color = '#ff3333'; // 紅色
+        fearHeart.classList.add('slight-shake'); // 微微顫動
+      } else if (fearValue > 45 && fearValue < 60) {
+        fearHeart.textContent = '♥';
+        fearHeart.style.color = '#ff3333'; // 紅色
+        fearHeart.classList.add('violent-shake'); // 劇烈顫動
+      } else if (fearValue >= 60) {
+        fearHeart.textContent = '💔'; // 裂開
+        fearHeart.style.color = '#888888'; // 灰色
+      }
+    }
+
     // --- 遊戲開始 ---
     startBtn.addEventListener('click', function() {
       introScreen.style.display = 'none';
       gameScreen.style.display = 'block';
       gameScreen.style.animation = 'fadeIn 1.5s ease-in-out';
+      
+      // 顯示心形符號並初始化狀態
+      fearContainer.style.display = 'block';
+      updateFearUI();
 
       // 第 1 段：0.5秒後浮現
       s1Timeouts.push(setTimeout(() => { p1.classList.add('visible'); }, 500));
@@ -370,12 +459,12 @@
         scene2State = 'done';
         actionBtn2.textContent = 'Next';
       } else {
-        // 進入第三階段：選項
+        // 進入第三階段（自此階段起除規則外皆直接顯示）
         scene2.style.display = 'none';
         scene3.style.display = 'block';
 
-        setTimeout(() => { document.getElementById('s3-q').classList.add('visible'); }, 500);
-        setTimeout(() => { document.getElementById('s3-options').classList.add('visible'); }, 2000);
+        document.getElementById('s3-q').classList.add('instant-visible');
+        document.getElementById('s3-options').classList.add('instant-visible');
       }
     });
 
@@ -387,8 +476,8 @@
       
       feedbackText.innerHTML = '謹慎，永遠是最穩妥的選擇。<br><br><span style="font-size: 1rem; color: #a9a9a9;">（獲得提示，可打開手札查看）</span>';
       
-      setTimeout(() => { feedbackText.classList.add('visible'); }, 500);
-      setTimeout(() => { nextBtn3.classList.add('visible'); }, 3000);
+      feedbackText.classList.add('instant-visible');
+      nextBtn3.classList.add('instant-visible');
 
       // 顯示手札按鈕
       notebookBtn.style.display = 'block';
@@ -401,15 +490,15 @@
       
       feedbackText.innerHTML = '信任記憶，也未嘗不是壞事。';
       
-      setTimeout(() => { feedbackText.classList.add('visible'); }, 500);
-      setTimeout(() => { nextBtn3.classList.add('visible'); }, 2500);
+      feedbackText.classList.add('instant-visible');
+      nextBtn3.classList.add('instant-visible');
     });
 
     // --- 進入下一階段 (第四階段) ---
     nextBtn3.addEventListener('click', function() {
       sceneFeedback.style.display = 'none';
       scene4.style.display = 'block';
-      setTimeout(() => { document.getElementById('s4-p1').classList.add('visible'); }, 500);
+      document.getElementById('s4-p1').classList.add('instant-visible');
     });
 
     // --- 手札系統邏輯 ---
