@@ -102,7 +102,7 @@
     display: flex;
     justify-content: center;
     gap: 30px;
-    flex-wrap: wrap; /* 避免選項過多超出畫面 */
+    flex-wrap: wrap; 
   }
 
   .scene-title {
@@ -158,7 +158,6 @@
     transition: fill 0.5s ease;
   }
 
-  /* 裂痕樣式 */
   .crack-line {
     stroke: #000000;
     stroke-width: 1.2;
@@ -173,7 +172,6 @@
     opacity: 1;
   }
 
-  /* 微幅跳動 */
   @keyframes slightBeat {
     0%, 100% { transform: scale(1); }
     20% { transform: scale(1.06); }
@@ -184,7 +182,6 @@
     animation: slightBeat 1.2s infinite ease-in-out;
   }
 
-  /* 劇烈跳動 */
   @keyframes violentBeat {
     0%, 100% { transform: scale(1); }
     15% { transform: scale(1.15); }
@@ -195,7 +192,8 @@
     animation: violentBeat 0.8s infinite ease-in-out;
   }
 
-  #notebook-modal {
+  /* 共用 Modal 樣式 */
+  #notebook-modal, #inventory-modal, #confirm-modal {
     display: none;
     position: fixed;
     top: 0;
@@ -206,6 +204,10 @@
     z-index: 999;
     justify-content: center;
     align-items: center;
+  }
+
+  #confirm-modal {
+    z-index: 1000; /* 對話框層級最高 */
   }
 
   .modal-content {
@@ -219,7 +221,7 @@
     position: relative;
   }
 
-  #close-modal {
+  .close-modal {
     position: absolute;
     top: 10px;
     right: 20px;
@@ -229,8 +231,22 @@
     transition: color 0.3s;
   }
 
-  #close-modal:hover {
+  .close-modal:hover {
     color: #d3d3d3;
+  }
+
+  /* 物品列表樣式 */
+  .inventory-item {
+    font-size: 1.3rem;
+    padding: 10px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-block;
+  }
+  .inventory-item:hover {
+    border-color: #a9a9a9;
+    background-color: rgba(255, 255, 255, 0.1);
   }
 
   @keyframes fadeIn {
@@ -305,12 +321,12 @@
       </svg>
     </div>
     <button id="notebook-btn" class="btn" style="display: none; margin-top: 0;">手札</button>
-    <button id="candy-btn" class="btn" style="display: none; margin-top: 15px; padding: 5px 15px;">🍬 糖果</button>
+    <button id="inventory-btn" class="btn" style="display: none; margin-top: 15px; padding: 5px 15px;">隨身物品</button>
   </div>
 
   <div id="notebook-modal">
     <div class="modal-content">
-      <span id="close-modal">&times;</span>
+      <span class="close-modal" id="close-notebook">&times;</span>
       <h2 style="font-size: 1.5rem; text-align: center; letter-spacing: 2px; margin-bottom: 30px;">【聖心醫院公告】</h2>
       <ul class="bullet-list">
         <li class="bullet-item" style="opacity: 1; transform: none;">• 手術室嚴格禁止進入，若有人問你看見了什麼，回答「什麼都沒看見」。</li>
@@ -322,6 +338,25 @@
         <li class="bullet-item" style="opacity: 1; transform: none;">• 「羊群」的腳印通向「安全」的地方。</li>
         <li class="bullet-item" style="opacity: 1; transform: none;">• 本院不存在名為「芬森·亨特」的醫生，如果遇見自稱「亨特醫生」的人，請立刻離開現場。</li>
       </ul>
+    </div>
+  </div>
+
+  <div id="inventory-modal">
+    <div class="modal-content" style="text-align: center; max-width: 500px;">
+      <span class="close-modal" id="close-inventory">&times;</span>
+      <h2 style="font-size: 1.5rem; letter-spacing: 2px; margin-bottom: 30px;">【隨身物品】</h2>
+      <div id="inventory-list">
+        </div>
+    </div>
+  </div>
+
+  <div id="confirm-modal">
+    <div class="modal-content" style="text-align: center; max-width: 400px; padding: 30px;">
+      <p class="story-text" style="text-align: center; margin-bottom: 20px;" id="confirm-text">是否吃下糖果？</p>
+      <div class="options-container">
+        <button id="confirm-yes" class="btn" style="margin-top: 0;">是</button>
+        <button id="confirm-no" class="btn" style="margin-top: 0;">否</button>
+      </div>
     </div>
   </div>
 
@@ -362,8 +397,16 @@
     
     const notebookBtn = document.getElementById('notebook-btn');
     const notebookModal = document.getElementById('notebook-modal');
-    const closeModal = document.getElementById('close-modal');
-    const candyBtn = document.getElementById('candy-btn');
+    const closeNotebook = document.getElementById('close-notebook');
+
+    const inventoryBtn = document.getElementById('inventory-btn');
+    const inventoryModal = document.getElementById('inventory-modal');
+    const closeInventory = document.getElementById('close-inventory');
+    const inventoryList = document.getElementById('inventory-list');
+
+    const confirmModal = document.getElementById('confirm-modal');
+    const confirmYes = document.getElementById('confirm-yes');
+    const confirmNo = document.getElementById('confirm-no');
 
     let scene1State = 'playing'; 
     let s1Timeouts = []; 
@@ -390,17 +433,6 @@
         fearHeart.classList.add('cracked');
       }
     }
-
-    // --- 糖果系統 ---
-    candyBtn.addEventListener('click', function() {
-      if (hasCandy) {
-        hasCandy = false;
-        ateCandy = true;
-        candyBtn.style.display = 'none';
-        fearValue = Math.max(0, fearValue - 10);
-        updateFearUI();
-      }
-    });
 
     // --- 遊戲開始 ---
     startBtn.addEventListener('click', function() {
@@ -499,8 +531,44 @@
     });
 
     // --- 手札系統 ---
-    notebookBtn.addEventListener('click', function() { notebookModal.style.display = 'flex'; });
-    closeModal.addEventListener('click', function() { notebookModal.style.display = 'none'; });
+    notebookBtn.addEventListener('click', () => { notebookModal.style.display = 'flex'; });
+    closeNotebook.addEventListener('click', () => { notebookModal.style.display = 'none'; });
+
+    // --- 隨身物品系統 ---
+    inventoryBtn.addEventListener('click', function() {
+      inventoryList.innerHTML = '';
+      if (hasCandy) {
+        const candyItem = document.createElement('div');
+        candyItem.className = 'inventory-item';
+        candyItem.textContent = '🍬 糖果';
+        candyItem.onclick = () => { confirmModal.style.display = 'flex'; };
+        inventoryList.appendChild(candyItem);
+      } else {
+        inventoryList.innerHTML = '<p class="story-text" style="text-align: center;">空無一物</p>';
+      }
+      inventoryModal.style.display = 'flex';
+    });
+
+    closeInventory.addEventListener('click', () => { inventoryModal.style.display = 'none'; });
+
+    // 吃糖果確認框邏輯
+    confirmYes.addEventListener('click', () => {
+      confirmModal.style.display = 'none';
+      if (hasCandy) {
+        hasCandy = false;
+        ateCandy = true;
+        fearValue = Math.max(0, fearValue - 10);
+        updateFearUI();
+        
+        // 更新列表畫面為空
+        inventoryList.innerHTML = '<p class="story-text" style="text-align: center;">空無一物</p>';
+      }
+    });
+
+    confirmNo.addEventListener('click', () => {
+      confirmModal.style.display = 'none';
+    });
+
 
     // ==========================================
     // 第四階段：醫院大廳動態事件腳本系統
@@ -510,7 +578,6 @@
     let randomEvents = ["1-2", "1-3", "1-4", "1-6", "1-7"];
     let nextFixed = "1-8";
 
-    // 陣列洗牌工具
     function shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -519,7 +586,6 @@
     }
     shuffleArray(randomEvents);
 
-    // 取得下一題 ID 控制邏輯
     function getNextEventId() {
       if (!played1_1) {
         played1_1 = true;
@@ -539,7 +605,6 @@
       return null;
     }
 
-    // 事件資料庫
     const eventsData = {
       "1-1": {
         text: "醫院大門緊閉，門鎖上蒙著一層厚重的塵埃。",
@@ -568,7 +633,7 @@
         options: [
           { label: "拿走糖果", effect: () => { 
               hasCandy = true; 
-              candyBtn.style.display = 'block';
+              inventoryBtn.style.display = 'block'; // 顯示隨身物品按鈕
               randomEvents.push("1-5"); shuffleArray(randomEvents);
               return { text: "或許它會派上用場……或許。" }; 
             } 
@@ -656,15 +721,15 @@
     const s4Feedback = document.getElementById('s4-feedback');
     const nextBtn4 = document.getElementById('next-btn-4');
 
-    // 算圖與渲染題目
     function renderEvent(eventId) {
-      if (!eventId) return; // 沒題目可出時防錯
+      if (!eventId) return; 
       const ev = eventsData[eventId];
       
-      // 介面重設
+      // 確保題目文字被顯示出來
+      s4Text.style.display = 'block';
       s4Text.textContent = ev.text;
       s4Text.className = 'story-text'; 
-      void s4Text.offsetWidth; // 觸發重繪以重啟動畫
+      void s4Text.offsetWidth; 
       s4Text.classList.add('instant-visible');
 
       s4Options.innerHTML = '';
@@ -673,7 +738,6 @@
       nextBtn4.style.display = 'none';
       nextBtn4.classList.remove('instant-visible');
 
-      // 產生選項按鈕
       ev.options.forEach(opt => {
         const btn = document.createElement('button');
         btn.className = 'btn';
@@ -684,19 +748,19 @@
       });
     }
 
-    // 選項點擊事件處理
     function handleOptionClick(opt) {
-      s4Options.style.display = 'none'; // 隱藏選項
+      // 隱藏選項按鈕與題目文字
+      s4Options.style.display = 'none'; 
+      s4Text.style.display = 'none'; 
+
       const result = opt.effect();
       updateFearUI(); 
 
-      // 特殊無轉場直接跳題 (例如 1-7-1 進入 1-7-2)
       if (result.skipFeedback && result.goto) {
           renderEvent(result.goto);
           return;
       }
 
-      // 顯示反饋文字
       let finalFeedbackHtml = result.text;
       if (result.transitionText) {
          finalFeedbackHtml += `<br><br><span style="font-size: 1rem; color: #a9a9a9;">${result.transitionText}</span>`;
@@ -710,10 +774,9 @@
       nextBtn4.style.display = 'inline-block';
       nextBtn4.classList.add('instant-visible');
       
-      // 根據結局/普通題型綁定 Next 行為
       if (result.isEnding) {
           nextBtn4.textContent = "To Be Continued...";
-          nextBtn4.onclick = () => { /* 這裡可擴充為進入下一階段網頁的邏輯 */ };
+          nextBtn4.onclick = () => { /* 待擴充結局後續邏輯 */ };
       } else {
           nextBtn4.textContent = "Next";
           nextBtn4.onclick = () => {
@@ -726,8 +789,6 @@
     // 銜接第三階段的 Next 按鈕
     nextBtn3.addEventListener('click', function() {
       sceneFeedback.style.display = 'none';
-      
-      // 開啟第四階段介面
       scene4.style.display = 'block';
       renderEvent(getNextEventId());
     });
