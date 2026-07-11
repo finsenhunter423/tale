@@ -399,7 +399,8 @@
         heartPath.setAttribute('fill', '#888888');
         fearHeart.classList.add('violent-beat');
       } else if (fearValue >= 60) {
-        heartPath.setAttribute('fill', '#888888');
+        // 將原本的 #888888 改為更深的 #555555
+        heartPath.setAttribute('fill', '#555555');
         fearHeart.classList.add('cracked');
       }
     }
