@@ -388,19 +388,18 @@
       fearHeart.classList.remove('slight-beat', 'violent-beat', 'cracked');
       
       if (fearValue <= 20) {
-        heartPath.setAttribute('fill', '#ffffff');
+        heartPath.setAttribute('fill', '#cccccc'); // 淺灰
       } else if (fearValue > 20 && fearValue <= 35) {
-        heartPath.setAttribute('fill', '#ffffff');
+        heartPath.setAttribute('fill', '#cccccc'); // 淺灰
         fearHeart.classList.add('slight-beat');
       } else if (fearValue > 35 && fearValue <= 45) {
-        heartPath.setAttribute('fill', '#888888');
+        heartPath.setAttribute('fill', '#888888'); // 變深
         fearHeart.classList.add('slight-beat');
       } else if (fearValue > 45 && fearValue < 60) {
-        heartPath.setAttribute('fill', '#888888');
+        heartPath.setAttribute('fill', '#888888'); // 變深
         fearHeart.classList.add('violent-beat');
       } else if (fearValue >= 60) {
-        // 將原本的 #888888 改為更深的 #555555
-        heartPath.setAttribute('fill', '#555555');
+        heartPath.setAttribute('fill', '#555555'); // 最深灰不動
         fearHeart.classList.add('cracked');
       }
     }
