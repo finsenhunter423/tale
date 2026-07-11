@@ -47,14 +47,9 @@
     transition: all 0.5s ease;
   }
 
-  .btn:hover:not(:disabled) {
+  .btn:hover {
     background-color: #d3d3d3;
     color: #070707;
-  }
-
-  .btn:disabled {
-    cursor: not-allowed;
-    opacity: 0.3;
   }
 
   #game-screen {
@@ -110,7 +105,7 @@
 
   .bullet-item {
     margin-bottom: 18px;
-    transition: opacity 0.8s ease, transform 0.8s ease; /* 較快的淡入速度 */
+    transition: opacity 0.8s ease, transform 0.8s ease;
   }
 
   @keyframes fadeIn {
@@ -135,7 +130,8 @@
       <p class="story-text" id="s1-p1">冰冷、潮濕，四周瀰漫著令人不適的氣息。</p>
       <p class="story-text" id="s1-p2">已然記不清究竟是何時昏了過去，意識回籠之際，只覺頭痛欲裂。映入眼簾的是一片破敗景象，能依稀判斷這裡是一座廢棄的醫院。</p>
       <p class="story-text" id="s1-p3">面前的佈告欄寫著數項公告，內容似乎相當重要，以防萬一，最好仔細閱讀……。</p>
-      <button id="next-btn-1" class="btn hidden-btn" disabled>Next</button>
+      <!-- 單一按鈕控制 Skip 與 Next 邏輯 -->
+      <button id="action-btn-1" class="btn hidden-btn">Skip</button>
     </div>
 
     <!-- 第二階段：醫院公告 -->
@@ -159,45 +155,76 @@
     const startBtn = document.getElementById('start-btn');
     const introScreen = document.getElementById('intro-screen');
     const gameScreen = document.getElementById('game-screen');
+    
     const scene1 = document.getElementById('scene-1');
     const scene2 = document.getElementById('scene-2');
 
     const p1 = document.getElementById('s1-p1');
     const p2 = document.getElementById('s1-p2');
     const p3 = document.getElementById('s1-p3');
-    const nextBtn1 = document.getElementById('next-btn-1');
+    const actionBtn1 = document.getElementById('action-btn-1');
 
+    let scene1State = 'playing'; // 記錄第一階段動畫狀態
+    let s1Timeouts = []; // 儲存計時器以便 Skip 時清除
+
+    // 開始遊戲
     startBtn.addEventListener('click', function() {
       introScreen.style.display = 'none';
       gameScreen.style.display = 'block';
       gameScreen.style.animation = 'fadeIn 1.5s ease-in-out';
 
-      setTimeout(() => { p1.classList.add('visible'); }, 500);
-      setTimeout(() => { p2.classList.add('visible'); }, 3500);
-      setTimeout(() => { p3.classList.add('visible'); }, 7000);
-      setTimeout(() => { nextBtn1.classList.add('visible'); }, 10000);
-      setTimeout(() => { nextBtn1.removeAttribute('disabled'); }, 12500);
+      // 第 1 段：0.5秒後浮現，同時顯示 Skip 按鈕
+      s1Timeouts.push(setTimeout(() => { 
+        p1.classList.add('visible'); 
+        actionBtn1.classList.add('visible');
+      }, 500));
+
+      // 第 2 段：2.5秒後浮現 (0.5 + 2.5 = 3.0s)
+      s1Timeouts.push(setTimeout(() => { p2.classList.add('visible'); }, 3000));
+
+      // 第 3 段：再2.5秒後浮現 (3.0 + 2.5 = 5.5s)
+      s1Timeouts.push(setTimeout(() => { p3.classList.add('visible'); }, 5500));
+
+      // 變為 Next：最後一段出現2.5秒後 (5.5 + 2.5 = 8.0s)
+      s1Timeouts.push(setTimeout(() => { 
+        scene1State = 'done';
+        actionBtn1.textContent = 'Next';
+      }, 8000));
     });
 
-    nextBtn1.addEventListener('click', function() {
-      // 隱藏第一階段，顯示第二階段
-      scene1.style.display = 'none';
-      scene2.style.display = 'block';
+    // 第一階段按鈕點擊事件 (Skip / Next)
+    actionBtn1.addEventListener('click', function() {
+      if (scene1State === 'playing') {
+        // 執行 Skip：清除尚未觸發的計時器
+        s1Timeouts.forEach(clearTimeout);
+        // 強制顯示所有段落
+        p1.classList.add('visible');
+        p2.classList.add('visible');
+        p3.classList.add('visible');
+        // 狀態改為完成，按鈕文字變為 Next
+        scene1State = 'done';
+        actionBtn1.textContent = 'Next';
+      } else {
+        // 執行 Next：進入第二階段
+        scene1.style.display = 'none';
+        scene2.style.display = 'block';
 
-      // 快速依序顯示標題與公告項目
-      setTimeout(() => { document.getElementById('s2-title').classList.add('visible'); }, 100);
-      
-      const s2Items = document.querySelectorAll('.s2-item');
-      s2Items.forEach((item, index) => {
+        // 標題顯示
+        setTimeout(() => { document.getElementById('s2-title').classList.add('visible'); }, 100);
+        
+        // 標題顯示後 1.5 秒 (100 + 1500 = 1600)，項目開始一一浮現，且速度減慢 (間隔 0.8 秒)
+        const s2Items = document.querySelectorAll('.s2-item');
+        s2Items.forEach((item, index) => {
+          setTimeout(() => {
+            item.classList.add('visible');
+          }, 1600 + (index * 800)); 
+        });
+
+        // 最後顯示 Next 按鈕
         setTimeout(() => {
-          item.classList.add('visible');
-        }, 400 + (index * 200)); // 標題出現後，每隔 0.2 秒出現一條
-      });
-
-      // 最後顯示 Next 按鈕
-      setTimeout(() => {
-        document.getElementById('next-btn-2').classList.add('visible');
-      }, 400 + (s2Items.length * 200) + 500);
+          document.getElementById('next-btn-2').classList.add('visible');
+        }, 1600 + (s2Items.length * 800) + 500);
+      }
     });
   </script>
 
