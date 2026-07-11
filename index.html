@@ -285,9 +285,16 @@
       <button id="next-btn-3" class="btn hidden-element">Next</button>
     </div>
 
-    <!-- 第四階段：下一段落 -->
+    <!-- 第四階段：下一段落（測試區域） -->
     <div id="scene-4" style="display: none;">
-      <p class="story-text" id="s4-p1">……下一段落內容待增……</p>
+      <p class="story-text instant-visible" id="s4-p1">此處為實驗性數值測試區域。點擊下方按鈕可增減隱藏的恐懼值，用以即時觀察右下角心形符號的顏色與顫動狀態變化。</p>
+      
+      <div class="options-container instant-visible" style="margin-top: 20px;">
+        <button id="test-fear-up" class="btn" style="margin-top: 0;">恐懼值 +10</button>
+        <button id="test-fear-down" class="btn" style="margin-top: 0;">恐懼值 -10</button>
+      </div>
+
+      <p class="story-text instant-visible" id="debug-fear-text" style="font-size: 1rem; color: #a9a9a9; margin-top: 20px; text-align: center;">當前測試數值：0</p>
     </div>
 
   </div>
@@ -309,7 +316,7 @@
         <li class="bullet-item" style="opacity: 1; transform: none;">• 手術室嚴格禁止進入，若有人問你看見了什麼，回答「什麼都沒看見」。</li>
         <li class="bullet-item" style="opacity: 1; transform: none;">• 住院部是安全的，你能夠在那裡得到庇護。</li>
         <li class="bullet-item" style="opacity: 1; transform: none;">• 糖果是屬於「好孩子」的，只有「好孩子」能夠取走。</li>
-        <li class="bullet-item" style="opacity: 1; transform: none;">• 「壞孩子」的牙齒會變「怪物」拔掉。</li>
+        <li class="bullet-item" style="opacity: 1; transform: none;">• 「壞孩子」的牙齒會被「怪物」拔掉。</li>
         <li class="bullet-item" style="opacity: 1; transform: none;">• 「蛇」是危險的，請務必迴避。</li>
         <li class="bullet-item" style="opacity: 1; transform: none;">• 如果聽見「羊群」的聲音，那是正常的，請不要迴避。</li>
         <li class="bullet-item" style="opacity: 1; transform: none;">• 「羊群」的腳印通向「安全」的地方。</li>
@@ -351,6 +358,10 @@
     const notebookBtn = document.getElementById('notebook-btn');
     const notebookModal = document.getElementById('notebook-modal');
     const closeModal = document.getElementById('close-modal');
+
+    const testFearUp = document.getElementById('test-fear-up');
+    const testFearDown = document.getElementById('test-fear-down');
+    const debugFearText = document.getElementById('debug-fear-text');
 
     let scene1State = 'playing'; 
     let s1Timeouts = []; 
@@ -494,7 +505,7 @@
       nextBtn3.classList.add('instant-visible');
     });
 
-    // --- 進入下一階段 (第四階段) ---
+    // --- 進入下一階段 (第四階段測試區域) ---
     nextBtn3.addEventListener('click', function() {
       sceneFeedback.style.display = 'none';
       scene4.style.display = 'block';
@@ -508,6 +519,22 @@
 
     closeModal.addEventListener('click', function() {
       notebookModal.style.display = 'none';
+    });
+
+    // --- 實驗用恐懼值測試按鈕邏輯 ---
+    // 按下 +10 按鈕
+    testFearUp.addEventListener('click', function() {
+      fearValue += 10;
+      updateFearUI(); // 觸發心形樣式更新
+      debugFearText.textContent = `當前測試數值：${fearValue}`;
+    });
+
+    // 按下 -10 按鈕
+    testFearDown.addEventListener('click', function() {
+      fearValue -= 10;
+      if (fearValue < 0) fearValue = 0; // 防止數值小於 0
+      updateFearUI(); // 觸發心形樣式更新
+      debugFearText.textContent = `當前測試數值：${fearValue}`;
     });
 
   </script>
