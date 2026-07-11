@@ -190,19 +190,19 @@
       gameScreen.style.display = 'block';
       gameScreen.style.animation = 'fadeIn 1.5s ease-in-out';
 
-      // 第 1 段與 Skip 按鈕：0.5秒後浮現
-      s1Timeouts.push(setTimeout(() => { 
-        p1.classList.add('visible'); 
-        actionBtn1.classList.add('visible');
-      }, 500));
+      // 第 1 段：0.5秒後浮現
+      s1Timeouts.push(setTimeout(() => { p1.classList.add('visible'); }, 500));
 
-      // 第 2 段：第 1 段後 2.5 秒浮現 (0.5 + 2.5 = 3.0s)
+      // Skip 按鈕：第一段顯示後 2.5 秒出現 (0.5 + 2.5 = 3.0s)
+      s1Timeouts.push(setTimeout(() => { actionBtn1.classList.add('visible'); }, 3000));
+
+      // 第 2 段：第 1 段後 2.5 秒浮現 (3.0s)
       s1Timeouts.push(setTimeout(() => { p2.classList.add('visible'); }, 3000));
 
-      // 第 3 段：第 2 段後 2.5 秒浮現 (3.0 + 2.5 = 5.5s)
+      // 第 3 段：第 2 段後 2.5 秒浮現 (5.5s)
       s1Timeouts.push(setTimeout(() => { p3.classList.add('visible'); }, 5500));
 
-      // 變為 Next：第 3 段後 2.5 秒 (5.5 + 2.5 = 8.0s)
+      // 變為 Next：第 3 段後 2.5 秒 (8.0s)
       s1Timeouts.push(setTimeout(() => { 
         scene1State = 'done';
         actionBtn1.textContent = 'Next';
@@ -233,7 +233,7 @@
         // Skip 按鈕：標題浮現後 1.5 秒出現 (100 + 1500 = 1600ms)
         s2Timeouts.push(setTimeout(() => { actionBtn2.classList.add('visible'); }, 1600));
 
-        // 標題浮現後 1.5 秒，內容開始浮現，間隔為 1.5 秒 (1500ms)
+        // 標題浮現後 1.5 秒，內容開始浮現，間隔調整為 1.5 秒 (1500ms) 以減慢速度
         const s2Items = document.querySelectorAll('.s2-item');
         s2Items.forEach((item, index) => {
           s2Timeouts.push(setTimeout(() => {
