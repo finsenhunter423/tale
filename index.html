@@ -152,7 +152,7 @@
     transform-origin: center;
   }
 
-  /* 調整後：微幅跳動 */
+  /* 微幅跳動 */
   @keyframes slightBeat {
     0%, 100% { transform: scale(1); }
     20% { transform: scale(1.06); }
@@ -163,7 +163,7 @@
     animation: slightBeat 1.2s infinite ease-in-out;
   }
 
-  /* 調整後：劇烈跳動（振幅縮小） */
+  /* 劇烈跳動（頻率已下調，時間從 0.5s 改為 0.8s） */
   @keyframes violentBeat {
     0%, 100% { transform: scale(1); }
     15% { transform: scale(1.15); }
@@ -171,7 +171,7 @@
     45% { transform: scale(1.15); }
   }
   .violent-beat {
-    animation: violentBeat 0.5s infinite ease-in-out;
+    animation: violentBeat 0.8s infinite ease-in-out;
   }
 
   #notebook-modal {
@@ -357,8 +357,9 @@
 
     // --- 恐懼值心形狀態更新函式 ---
     function updateFearUI() {
-      // 重設類別
+      // 重設類別與 CSS 濾鏡
       fearHeart.className = 'heart-icon';
+      fearHeart.style.filter = 'none';
       
       if (fearValue <= 20) {
         fearHeart.textContent = '♥';
@@ -374,10 +375,11 @@
       } else if (fearValue > 45 && fearValue < 60) {
         fearHeart.textContent = '♥';
         fearHeart.style.color = '#888888'; // 灰色
-        fearHeart.classList.add('violent-beat'); // 劇烈跳動（小振幅）
+        fearHeart.classList.add('violent-beat'); // 劇烈跳動（小振幅、低頻率）
       } else if (fearValue >= 60) {
         fearHeart.textContent = '💔'; // 裂開
-        fearHeart.style.color = '#555555'; // 深灰色
+        // 使用 CSS 濾鏡將系統內建紅色 emoji 轉為深灰色
+        fearHeart.style.filter = 'grayscale(100%) brightness(40%)'; 
       }
     }
 
@@ -497,7 +499,7 @@
     });
 
     testFearDown.addEventListener('click', function() {
-      fearValue -= 10; // 允許為負值，移除下限限制
+      fearValue -= 10; 
       updateFearUI(); 
       debugFearText.textContent = `當前測試數值：${fearValue}`;
     });
