@@ -52,6 +52,13 @@
     color: #070707;
   }
 
+  /* 新增固定按鈕寬度的樣式，用於統一隨身物品與手札按鈕大小 */
+  .ui-btn {
+    width: 140px;
+    text-align: center;
+    padding: 10px 0;
+  }
+
   #game-screen {
     display: none;
     text-align: center;
@@ -304,7 +311,7 @@
 
     <div id="scene-4" style="display: none;">
       <p class="story-text" id="s4-text"></p>
-      <div id="s4-options" class="options-container"></div>
+      <div id="s4-options" class="options-container hidden-element"></div>
       <p class="story-text" id="s4-feedback" style="display: none;"></p>
       <button id="next-btn-4" class="btn hidden-element" style="display: none;">Next</button>
     </div>
@@ -320,8 +327,8 @@
         </g>
       </svg>
     </div>
-    <button id="notebook-btn" class="btn" style="display: none; margin-top: 0;">手札</button>
-    <button id="inventory-btn" class="btn" style="display: none; margin-top: 15px;">隨身物品</button>
+    <button id="notebook-btn" class="btn ui-btn" style="display: none; margin-top: 0;">手札</button>
+    <button id="inventory-btn" class="btn ui-btn" style="display: none; margin-top: 15px;">隨身物品</button>
   </div>
 
   <div id="notebook-modal">
@@ -352,7 +359,7 @@
 
   <div id="confirm-modal">
     <div class="modal-content" style="text-align: center; max-width: 400px; padding: 30px;">
-      <p class="story-text" style="text-align: center; margin-bottom: 20px;" id="confirm-text">是否吃下糖果？</p>
+      <p class="story-text" style="text-align: center; margin-bottom: 20px; color: #d3d3d3;" id="confirm-text">是否吃下糖果？</p>
       <div class="options-container">
         <button id="confirm-yes" class="btn" style="margin-top: 0;">是</button>
         <button id="confirm-no" class="btn" style="margin-top: 0;">否</button>
@@ -502,9 +509,12 @@
       } else {
         scene2.style.display = 'none';
         scene3.style.display = 'block';
-
-        document.getElementById('s3-q').classList.add('instant-visible');
-        document.getElementById('s3-options').classList.add('instant-visible');
+        
+        // 增加些微延遲，觸發與開場相同的漸入效果
+        setTimeout(() => {
+          document.getElementById('s3-q').classList.add('visible');
+          document.getElementById('s3-options').classList.add('visible');
+        }, 50);
       }
     });
 
@@ -725,15 +735,21 @@
       if (!eventId) return; 
       const ev = eventsData[eventId];
       
-      // 確保題目文字被顯示出來
+      // 確保題目文字被顯示出來，並改用 visible 觸發漸入
       s4Text.style.display = 'block';
       s4Text.textContent = ev.text;
       s4Text.className = 'story-text'; 
       void s4Text.offsetWidth; 
-      s4Text.classList.add('instant-visible');
+      s4Text.classList.add('visible');
 
       s4Options.innerHTML = '';
       s4Options.style.display = 'flex';
+      // 將選項區塊初始化為隱藏狀態以備觸發動畫
+      s4Options.className = 'options-container hidden-element';
+      void s4Options.offsetWidth;
+      // 加上 visible 產生漸入效果
+      s4Options.classList.add('visible');
+
       s4Feedback.style.display = 'none';
       nextBtn4.style.display = 'none';
       nextBtn4.classList.remove('instant-visible');
@@ -769,9 +785,11 @@
       s4Feedback.style.display = 'block';
       s4Feedback.className = 'story-text';
       void s4Feedback.offsetWidth;
+      // 回饋文字維持無特效瞬間顯示
       s4Feedback.classList.add('instant-visible');
 
       nextBtn4.style.display = 'inline-block';
+      // 按鈕也維持無特效瞬間顯示
       nextBtn4.classList.add('instant-visible');
       
       if (result.isEnding) {
