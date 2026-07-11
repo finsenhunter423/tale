@@ -52,7 +52,6 @@
     color: #070707;
   }
 
-  /* 新增固定按鈕寬度的樣式，用於統一隨身物品與手札按鈕大小 */
   .ui-btn {
     width: 140px;
     text-align: center;
@@ -200,7 +199,7 @@
   }
 
   /* 共用 Modal 樣式 */
-  #notebook-modal, #inventory-modal, #confirm-modal {
+  #notebook-modal, #inventory-modal, #confirm-modal, #message-modal, #item-detail-modal {
     display: none;
     position: fixed;
     top: 0;
@@ -213,8 +212,12 @@
     align-items: center;
   }
 
-  #confirm-modal {
-    z-index: 1000; /* 對話框層級最高 */
+  #confirm-modal, #item-detail-modal {
+    z-index: 1000;
+  }
+
+  #message-modal {
+    z-index: 1005; 
   }
 
   .modal-content {
@@ -242,7 +245,6 @@
     color: #d3d3d3;
   }
 
-  /* 物品列表樣式 */
   .inventory-item {
     font-size: 1.3rem;
     padding: 10px;
@@ -353,13 +355,14 @@
       <span class="close-modal" id="close-inventory">&times;</span>
       <h2 style="font-size: 1.5rem; letter-spacing: 2px; margin-bottom: 30px;">【隨身物品】</h2>
       <div id="inventory-list">
-        </div>
+      </div>
     </div>
   </div>
 
+  <!-- 修復：移除了 story-text 類別，直接以靜態樣式控制文字顯示 -->
   <div id="confirm-modal">
     <div class="modal-content" style="text-align: center; max-width: 400px; padding: 30px;">
-      <p class="story-text" style="text-align: center; margin-bottom: 20px; color: #d3d3d3;" id="confirm-text">是否吃下糖果？</p>
+      <p style="font-size: 1.2rem; line-height: 2; letter-spacing: 1.5px; text-align: center; margin-bottom: 20px; color: #d3d3d3;" id="confirm-text">是否吃下糖果？</p>
       <div class="options-container">
         <button id="confirm-yes" class="btn" style="margin-top: 0;">是</button>
         <button id="confirm-no" class="btn" style="margin-top: 0;">否</button>
@@ -367,16 +370,33 @@
     </div>
   </div>
 
+  <!-- 新增：蛇鱗專用無選項視窗 -->
+  <div id="item-detail-modal">
+    <div class="modal-content" style="text-align: center; max-width: 400px; padding: 30px;">
+      <p style="font-size: 1.2rem; line-height: 2; letter-spacing: 1.5px; text-align: center; margin-bottom: 20px; color: #d3d3d3;">一片隱隱閃爍著光彩的鱗片，擁有它，似乎能和某個存在產生共鳴？</p>
+      <button id="close-item-detail" class="btn" style="margin-top: 0;">關閉</button>
+    </div>
+  </div>
+
+  <div id="message-modal">
+    <div class="modal-content" style="text-align: center; max-width: 400px; padding: 30px;">
+      <p class="story-text" id="message-text" style="text-align: center; margin-bottom: 20px; color: #d3d3d3;"></p>
+      <button id="message-close-btn" class="btn" style="margin-top: 0;">確認</button>
+    </div>
+  </div>
+
   <script>
-    // --- 隱藏數值與狀態初始化 ---
     let fearValue = 0; 
     let sheepIndex = 0;
     let snakeIndex = 0;
     
     let hasCandy = false;
     let ateCandy = false;
+    let hasSnakeScale = false; // 新增蛇鱗變數，供後續劇情控制
 
-    // --- DOM 元素宣告 ---
+    let uvTriggered = false;
+    let choiceTimer = null;
+
     const startBtn = document.getElementById('start-btn');
     const introScreen = document.getElementById('intro-screen');
     const gameScreen = document.getElementById('game-screen');
@@ -415,12 +435,30 @@
     const confirmYes = document.getElementById('confirm-yes');
     const confirmNo = document.getElementById('confirm-no');
 
+    const itemDetailModal = document.getElementById('item-detail-modal');
+    const closeItemDetail = document.getElementById('close-item-detail');
+
+    const messageModal = document.getElementById('message-modal');
+    const messageText = document.getElementById('message-text');
+    const messageCloseBtn = document.getElementById('message-close-btn');
+
     let scene1State = 'playing'; 
     let s1Timeouts = []; 
     let scene2State = 'playing';
     let s2Timeouts = [];
 
-    // --- 恐懼值心形狀態更新函式 ---
+    function showMessageModal(text) {
+      return new Promise(resolve => {
+        messageText.textContent = text;
+        messageModal.style.display = 'flex';
+        
+        messageCloseBtn.onclick = () => {
+          messageModal.style.display = 'none';
+          resolve();
+        };
+      });
+    }
+
     function updateFearUI() {
       fearHeart.classList.remove('slight-beat', 'violent-beat', 'cracked');
       
@@ -441,7 +479,6 @@
       }
     }
 
-    // --- 遊戲開始 ---
     startBtn.addEventListener('click', function() {
       introScreen.style.display = 'none';
       gameScreen.style.display = 'block';
@@ -461,7 +498,6 @@
       }, 8000));
     });
 
-    // --- 第一階段按鈕 ---
     actionBtn1.addEventListener('click', function() {
       if (scene1State === 'playing') {
         s1Timeouts.forEach(clearTimeout);
@@ -493,7 +529,6 @@
       }
     });
 
-    // --- 第二階段按鈕 ---
     actionBtn2.addEventListener('click', function() {
       if (scene2State === 'playing') {
         s2Timeouts.forEach(clearTimeout);
@@ -510,7 +545,6 @@
         scene2.style.display = 'none';
         scene3.style.display = 'block';
         
-        // 增加些微延遲，觸發與開場相同的漸入效果
         setTimeout(() => {
           document.getElementById('s3-q').classList.add('visible');
           document.getElementById('s3-options').classList.add('visible');
@@ -518,7 +552,6 @@
       }
     });
 
-    // --- 第三階段選項 ---
     btnYes.addEventListener('click', function() {
       scene3.style.display = 'none';
       sceneFeedback.style.display = 'block';
@@ -540,38 +573,51 @@
       nextBtn3.classList.add('instant-visible');
     });
 
-    // --- 手札系統 ---
     notebookBtn.addEventListener('click', () => { notebookModal.style.display = 'flex'; });
     closeNotebook.addEventListener('click', () => { notebookModal.style.display = 'none'; });
 
-    // --- 隨身物品系統 ---
+    // 修改：隨身物品清單渲染邏輯
     inventoryBtn.addEventListener('click', function() {
       inventoryList.innerHTML = '';
-      if (hasCandy) {
-        const candyItem = document.createElement('div');
-        candyItem.className = 'inventory-item';
-        candyItem.textContent = '糖果'; // 移除了表情符號
-        candyItem.onclick = () => { confirmModal.style.display = 'flex'; };
-        inventoryList.appendChild(candyItem);
+      
+      if (!hasCandy && !hasSnakeScale) {
+        inventoryList.innerHTML = '<p class="story-text" style="text-align: center; opacity: 1; transform: none;">空無一物</p>';
       } else {
-        inventoryList.innerHTML = '<p class="story-text" style="text-align: center;">空無一物</p>';
+        if (hasCandy) {
+          const candyItem = document.createElement('div');
+          candyItem.className = 'inventory-item';
+          candyItem.textContent = '糖果';
+          candyItem.onclick = () => { confirmModal.style.display = 'flex'; };
+          inventoryList.appendChild(candyItem);
+        }
+        if (hasSnakeScale) {
+          const scaleItem = document.createElement('div');
+          scaleItem.className = 'inventory-item';
+          scaleItem.textContent = '蛇鱗';
+          scaleItem.onclick = () => { itemDetailModal.style.display = 'flex'; };
+          inventoryList.appendChild(scaleItem);
+        }
       }
       inventoryModal.style.display = 'flex';
     });
 
     closeInventory.addEventListener('click', () => { inventoryModal.style.display = 'none'; });
 
-    // 吃糖果確認框邏輯
-    confirmYes.addEventListener('click', () => {
+    confirmYes.addEventListener('click', async () => {
       confirmModal.style.display = 'none';
       if (hasCandy) {
         hasCandy = false;
         ateCandy = true;
+        let oldFear = fearValue;
         fearValue = Math.max(0, fearValue - 10);
         updateFearUI();
         
-        // 更新列表畫面為空
-        inventoryList.innerHTML = '<p class="story-text" style="text-align: center;">空無一物</p>';
+        // 重新整理隨身物品清單視覺
+        inventoryBtn.click();
+        
+        if (fearValue < oldFear) {
+          await showMessageModal("情緒似乎得到了緩和");
+        }
       }
     });
 
@@ -579,6 +625,9 @@
       confirmModal.style.display = 'none';
     });
 
+    closeItemDetail.addEventListener('click', () => {
+      itemDetailModal.style.display = 'none';
+    });
 
     // ==========================================
     // 第四階段：醫院大廳動態事件腳本系統
@@ -643,7 +692,7 @@
         options: [
           { label: "拿走糖果", effect: () => { 
               hasCandy = true; 
-              inventoryBtn.style.display = 'block'; // 顯示隨身物品按鈕
+              inventoryBtn.style.display = 'block'; 
               randomEvents.push("1-5"); shuffleArray(randomEvents);
               return { text: "或許它會派上用場……或許。" }; 
             } 
@@ -706,7 +755,7 @@
         options: [
           { label: "「什麼都沒看見。」", effect: () => { fearValue += 15; return { text: "「現在立刻離開，別讓我說第二次。」" }; } },
           { label: "「……。」", effect: () => { return { text: "「干擾手術的『壞孩子』……該怎麼懲罰呢？」", isEnding: true }; } },
-          { label: "「一場手術。」", effect: () => { return { text: "「不，那可不是一般的手術，倘若好奇……不如，你親自來參與吧……。」", isEnding: true }; } }
+          { label: "「一場手術。」", effect: () => { return { text: "「不，那可不是一般的手術，倘若好奇……不如，親自來參與吧……。」", isEnding: true }; } }
         ]
       },
       "1-8": {
@@ -723,6 +772,14 @@
           { label: "診療室", effect: () => { return { text: "（進入診療室）", isEnding: true }; } },
           { label: "住院部", effect: () => { return { text: "（進入住院部）", isEnding: true }; } }
         ]
+      },
+      "uv": {
+        text: "強烈的恐懼湧上，使身體不自覺戰慄……此時，前方亮起了一道溫暖的紫色光芒。",
+        options: [
+          { label: "跟上光芒", effect: () => { fearValue = 0; snakeIndex += 15; return { text: "在治癒之光的照耀下，彷彿再也沒有什麼能夠讓人害怕了……。" }; } },
+          { label: "停留原地", effect: () => { return { text: "猶豫之際，那道光已然消失，只留下無盡的黑暗。" }; } },
+          { label: "轉身逃離", effect: () => { fearValue = Math.max(0, fearValue - 15); sheepIndex += 15; return { text: "一道急切的聲音響起：「不要走入那道光，快快遠離那道光……。」" }; } }
+        ]
       }
     };
 
@@ -732,10 +789,14 @@
     const nextBtn4 = document.getElementById('next-btn-4');
 
     function renderEvent(eventId) {
+      if (choiceTimer) {
+        clearTimeout(choiceTimer);
+        choiceTimer = null;
+      }
+      
       if (!eventId) return; 
       const ev = eventsData[eventId];
       
-      // 確保題目文字被顯示出來，並改用 visible 觸發漸入
       s4Text.style.display = 'block';
       s4Text.textContent = ev.text;
       s4Text.className = 'story-text'; 
@@ -744,33 +805,65 @@
 
       s4Options.innerHTML = '';
       s4Options.style.display = 'flex';
-      // 將選項區塊初始化為隱藏狀態以備觸發動畫
       s4Options.className = 'options-container hidden-element';
       void s4Options.offsetWidth;
-      // 加上 visible 產生漸入效果
       s4Options.classList.add('visible');
 
       s4Feedback.style.display = 'none';
       nextBtn4.style.display = 'none';
       nextBtn4.classList.remove('instant-visible');
 
-      ev.options.forEach(opt => {
-        const btn = document.createElement('button');
-        btn.className = 'btn';
-        btn.style.marginTop = '0';
-        btn.textContent = opt.label;
-        btn.onclick = () => handleOptionClick(opt);
-        s4Options.appendChild(btn);
-      });
+      if (ev.options && ev.options.length > 0) {
+        ev.options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = 'btn';
+          btn.style.marginTop = '0';
+          btn.textContent = opt.label;
+          btn.onclick = () => handleOptionClick(opt);
+          s4Options.appendChild(btn);
+        });
+
+        choiceTimer = setTimeout(() => {
+          handleOptionClick(null);
+        }, 40000);
+      }
     }
 
-    function handleOptionClick(opt) {
-      // 隱藏選項按鈕與題目文字
+    async function handleOptionClick(opt) {
+      if (choiceTimer) {
+        clearTimeout(choiceTimer);
+        choiceTimer = null;
+      }
+
       s4Options.style.display = 'none'; 
       s4Text.style.display = 'none'; 
 
-      const result = opt.effect();
+      let oldFear = fearValue;
+      let result;
+
+      if (opt) {
+        result = opt.effect();
+      } else {
+        fearValue += 30;
+        result = { text: "沉默裡，令人窒息的恐懼襲來……。" };
+      }
+
+      let newFear = fearValue;
       updateFearUI(); 
+
+      if (newFear > oldFear) {
+        await showMessageModal("一陣懼意漫上心頭");
+      } else if (newFear < oldFear) {
+        await showMessageModal("情緒似乎得到了緩和");
+      }
+
+      if (fearValue >= 60) {
+        result = { text: "恐懼徹底吞噬了理智，在無盡的黑暗與迷霧中，徹底迷失了方向……。", isEnding: true, transitionText: "（結局：迷失）" };
+      } else if (fearValue > 50 && !uvTriggered) {
+        uvTriggered = true;
+        renderEvent("uv");
+        return; 
+      }
 
       if (result.skipFeedback && result.goto) {
           renderEvent(result.goto);
@@ -785,16 +878,14 @@
       s4Feedback.style.display = 'block';
       s4Feedback.className = 'story-text';
       void s4Feedback.offsetWidth;
-      // 回饋文字維持無特效瞬間顯示
       s4Feedback.classList.add('instant-visible');
 
       nextBtn4.style.display = 'inline-block';
-      // 按鈕也維持無特效瞬間顯示
       nextBtn4.classList.add('instant-visible');
       
       if (result.isEnding) {
           nextBtn4.textContent = "To Be Continued...";
-          nextBtn4.onclick = () => { /* 待擴充結局後續邏輯 */ };
+          nextBtn4.onclick = () => { };
       } else {
           nextBtn4.textContent = "Next";
           nextBtn4.onclick = () => {
@@ -804,7 +895,6 @@
       }
     }
 
-    // 銜接第三階段的 Next 按鈕
     nextBtn3.addEventListener('click', function() {
       sceneFeedback.style.display = 'none';
       scene4.style.display = 'block';
