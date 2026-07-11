@@ -4,19 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dentist's Swamp</title>
-<!-- 引入 Google Fonts：Playfair Display (英文古典字體) 與 Noto Serif TC (思源宋體，適合中文閱讀) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
 <style>
-  /* 基礎頁面設定 */
   body {
     margin: 0;
     padding: 0;
-    background-color: #070707; /* 深黑色背景 */
-    color: #d3d3d3; /* 淺灰色文字 */
-    /* 套用古典且易讀的字體 */
+    background-color: #070707;
+    color: #d3d3d3;
     font-family: 'Playfair Display', 'Noto Serif TC', serif; 
     display: flex;
     justify-content: center;
@@ -25,21 +22,18 @@
     overflow: hidden;
   }
 
-  /* 開場畫面容器 */
   #intro-screen {
     text-align: center;
     animation: fadeIn 2.5s ease-in-out;
   }
 
-  /* 詩句排版 */
   .poem-line {
     margin: 12px 0;
-    font-size: 1.3rem; /* 稍微放大字體增加易讀性 */
+    font-size: 1.3rem;
     letter-spacing: 2px;
     line-height: 1.5;
   }
 
-  /* 通用按鈕設計 */
   .btn {
     margin-top: 40px;
     padding: 10px 30px;
@@ -53,19 +47,16 @@
     transition: all 0.5s ease;
   }
 
-  /* 按鈕懸停效果（排除停用狀態） */
   .btn:hover:not(:disabled) {
     background-color: #d3d3d3;
     color: #070707;
   }
 
-  /* 停用狀態的按鈕 */
   .btn:disabled {
     cursor: not-allowed;
-    opacity: 0.3; /* 視覺上呈現半透明，表示不可點擊 */
+    opacity: 0.3;
   }
 
-  /* 遊戲主畫面容器（初始隱藏） */
   #game-screen {
     display: none;
     text-align: center;
@@ -73,37 +64,55 @@
     max-width: 800px;
   }
 
-  /* 遊戲劇情文字 */
   .story-text {
     font-size: 1.2rem;
     line-height: 2;
     letter-spacing: 1.5px;
     margin-bottom: 30px;
-    text-align: left; /* 劇情文字靠左或置中皆可，靠左較利於長文閱讀 */
-    opacity: 0; /* 初始隱藏，透過 JS 淡入 */
-    transform: translateY(10px); /* 輕微的下移，配合淡入產生上浮感 */
+    text-align: left;
+    opacity: 0;
+    transform: translateY(10px);
     transition: opacity 2s ease, transform 2s ease;
   }
 
-  /* 觸發顯示的 Class */
   .visible {
-    opacity: 1;
-    transform: translateY(0);
+    opacity: 1 !important;
+    transform: translateY(0) !important;
   }
 
-  /* 隱藏下一個按鈕的初始狀態 */
-  #next-btn-1 {
+  .hidden-btn {
     opacity: 0;
     visibility: hidden;
     transition: opacity 1.5s ease, visibility 1.5s ease;
   }
 
-  #next-btn-1.visible {
+  .hidden-btn.visible {
     opacity: 1;
     visibility: visible;
   }
 
-  /* 基礎動畫定義 */
+  /* 第二階段專用樣式 */
+  .scene-title {
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 1s ease, transform 1s ease;
+    letter-spacing: 2px;
+  }
+
+  .bullet-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .bullet-item {
+    margin-bottom: 18px;
+    transition: opacity 0.8s ease, transform 0.8s ease; /* 較快的淡入速度 */
+  }
+
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -112,7 +121,6 @@
 </head>
 <body>
 
-  <!-- 開場畫面 -->
   <div id="intro-screen">
     <div class="poem-line">Long long ago, a tale was born</div>
     <div class="poem-line">In the mist, monsters roam</div>
@@ -121,73 +129,75 @@
     <button id="start-btn" class="btn">Start</button>
   </div>
 
-  <!-- 遊戲主畫面 -->
   <div id="game-screen">
     <!-- 第一階段：醫院大廳 -->
     <div id="scene-1">
       <p class="story-text" id="s1-p1">冰冷、潮濕，四周瀰漫著令人不適的氣息。</p>
-      <p class="story-text" id="s1-p2">已然記不清究竟是何時昏了過去，意識回籠之際，只覺頭痛欲裂。映入眼簾的是一片破敗，能依稀判斷這裡是一座廢棄的醫院。</p>
+      <p class="story-text" id="s1-p2">已然記不清究竟是何時昏了過去，意識回籠之際，只覺頭痛欲裂。映入眼簾的是一片破敗景象，能依稀判斷這裡是一座廢棄的醫院。</p>
       <p class="story-text" id="s1-p3">面前的佈告欄寫著數項公告，內容似乎相當重要，以防萬一，最好仔細閱讀……。</p>
-      
-      <!-- disabled 屬性讓按鈕初始不可點擊 -->
-      <button id="next-btn-1" class="btn" disabled>Next</button>
+      <button id="next-btn-1" class="btn hidden-btn" disabled>Next</button>
+    </div>
+
+    <!-- 第二階段：醫院公告 -->
+    <div id="scene-2" style="display: none;">
+      <h2 class="scene-title" id="s2-title">【聖心醫院公告】</h2>
+      <ul class="bullet-list">
+        <li class="story-text bullet-item s2-item">• 手術室嚴格禁止進入，若有人問你看見了什麼，回答「什麼都沒看見」。</li>
+        <li class="story-text bullet-item s2-item">• 住院部是安全的，你能夠在那裡得到庇護。</li>
+        <li class="story-text bullet-item s2-item">• 本院不存在名為「芬森·亨特」的醫生，如果遇見自稱「亨特醫生」的人，請立刻離開現場。</li>
+        <li class="story-text bullet-item s2-item">• 糖果是屬於「好孩子」的，只有「好孩子」能夠取走。</li>
+        <li class="story-text bullet-item s2-item">• 「壞孩子」的牙齒會被「怪物」拔掉。</li>
+        <li class="story-text bullet-item s2-item">• 「蛇」是危險的，請務必迴避。</li>
+        <li class="story-text bullet-item s2-item">• 如果聽見「羊群」的聲音，那是正常的，請不要迴避。</li>
+        <li class="story-text bullet-item s2-item">• 「羊群」的腳印通向「安全」的地方。</li>
+      </ul>
+      <button id="next-btn-2" class="btn hidden-btn">Next</button>
     </div>
   </div>
 
   <script>
-    // 取得 DOM 元素
     const startBtn = document.getElementById('start-btn');
     const introScreen = document.getElementById('intro-screen');
     const gameScreen = document.getElementById('game-screen');
     const scene1 = document.getElementById('scene-1');
+    const scene2 = document.getElementById('scene-2');
 
-    // Scene 1 段落與按鈕
     const p1 = document.getElementById('s1-p1');
     const p2 = document.getElementById('s1-p2');
     const p3 = document.getElementById('s1-p3');
     const nextBtn1 = document.getElementById('next-btn-1');
 
-    // 設定 Start 按鈕的點擊事件
     startBtn.addEventListener('click', function() {
-      // 隱藏開場畫面
       introScreen.style.display = 'none';
-      
-      // 顯示遊戲畫面容器
       gameScreen.style.display = 'block';
       gameScreen.style.animation = 'fadeIn 1.5s ease-in-out';
 
-      // 開始第一階段的文字播放排程 (時間可依需求微調，單位為毫秒)
-      
-      // 第 1 段：0.5秒後浮現
-      setTimeout(() => {
-        p1.classList.add('visible');
-      }, 500);
-
-      // 第 2 段：3.5秒後浮現 (等待第一段看完)
-      setTimeout(() => {
-        p2.classList.add('visible');
-      }, 3500);
-
-      // 第 3 段：7秒後浮現 (等待第二段看完)
-      setTimeout(() => {
-        p3.classList.add('visible');
-      }, 7000);
-
-      // Next 按鈕：10秒後浮現，此時仍是不可點擊狀態 (disabled)
-      setTimeout(() => {
-        nextBtn1.classList.add('visible');
-      }, 10000);
-
-      // Next 按鈕：12.5秒後解除不可點擊狀態，讓玩家可以按
-      setTimeout(() => {
-        nextBtn1.removeAttribute('disabled');
-      }, 12500);
+      setTimeout(() => { p1.classList.add('visible'); }, 500);
+      setTimeout(() => { p2.classList.add('visible'); }, 3500);
+      setTimeout(() => { p3.classList.add('visible'); }, 7000);
+      setTimeout(() => { nextBtn1.classList.add('visible'); }, 10000);
+      setTimeout(() => { nextBtn1.removeAttribute('disabled'); }, 12500);
     });
 
-    // 預留 Next 按鈕的點擊事件（進入下一階段）
     nextBtn1.addEventListener('click', function() {
-      // 這裡未來將填入進入佈告欄階段的程式碼
-      console.log("進入下一章節！");
+      // 隱藏第一階段，顯示第二階段
+      scene1.style.display = 'none';
+      scene2.style.display = 'block';
+
+      // 快速依序顯示標題與公告項目
+      setTimeout(() => { document.getElementById('s2-title').classList.add('visible'); }, 100);
+      
+      const s2Items = document.querySelectorAll('.s2-item');
+      s2Items.forEach((item, index) => {
+        setTimeout(() => {
+          item.classList.add('visible');
+        }, 400 + (index * 200)); // 標題出現後，每隔 0.2 秒出現一條
+      });
+
+      // 最後顯示 Next 按鈕
+      setTimeout(() => {
+        document.getElementById('next-btn-2').classList.add('visible');
+      }, 400 + (s2Items.length * 200) + 500);
     });
   </script>
 
