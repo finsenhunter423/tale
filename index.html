@@ -70,13 +70,11 @@
     transition: opacity 2s ease, transform 2s ease;
   }
 
-  /* 漸入動畫顯示（僅用於開場與規則） */
   .visible {
     opacity: 1 !important;
     transform: translateY(0) !important;
   }
 
-  /* 直接顯示（用於後續所有文本，無過渡效果） */
   .instant-visible {
     opacity: 1 !important;
     transform: translateY(0) !important;
@@ -100,14 +98,12 @@
     transition: none !important;
   }
 
-  /* 選項按鈕容器 */
   .options-container {
     display: flex;
     justify-content: center;
     gap: 30px;
   }
 
-  /* 醫院公告樣式 */
   .scene-title {
     font-size: 1.5rem;
     margin-bottom: 30px;
@@ -133,7 +129,6 @@
     transition: opacity 0.8s ease, transform 0.8s ease;
   }
 
-  /* 右下角 UI 容器（手札與心形符號） */
   .ui-container {
     position: fixed;
     bottom: 30px;
@@ -144,7 +139,6 @@
     z-index: 100;
   }
 
-  /* 恐懼值心形樣式與動畫 */
   #fear-container {
     font-size: 2.5rem;
     line-height: 1;
@@ -158,29 +152,28 @@
     transform-origin: center;
   }
 
-  /* 微微跳動（模擬心跳） */
+  /* 調整後：微幅跳動 */
   @keyframes slightBeat {
     0%, 100% { transform: scale(1); }
-    20% { transform: scale(1.15); }
-    40% { transform: scale(1.05); }
-    60% { transform: scale(1.15); }
+    20% { transform: scale(1.06); }
+    40% { transform: scale(1.02); }
+    60% { transform: scale(1.06); }
   }
   .slight-beat {
     animation: slightBeat 1.2s infinite ease-in-out;
   }
 
-  /* 劇烈跳動 */
+  /* 調整後：劇烈跳動（振幅縮小） */
   @keyframes violentBeat {
     0%, 100% { transform: scale(1); }
-    15% { transform: scale(1.35); }
-    30% { transform: scale(1.1); }
-    45% { transform: scale(1.35); }
+    15% { transform: scale(1.15); }
+    30% { transform: scale(1.05); }
+    45% { transform: scale(1.15); }
   }
   .violent-beat {
     animation: violentBeat 0.5s infinite ease-in-out;
   }
 
-  /* 手札彈出視窗樣式 */
   #notebook-modal {
     display: none;
     position: fixed;
@@ -322,7 +315,7 @@
     // --- 隱藏數值初始化 ---
     let sheepIndex = 0;
     let snakeIndex = 0;
-    let fearValue = 0; // 恐懼值 x
+    let fearValue = 0; 
 
     // --- DOM 元素宣告 ---
     const startBtn = document.getElementById('start-btn');
@@ -367,24 +360,24 @@
       // 重設類別
       fearHeart.className = 'heart-icon';
       
-      if (fearValue >= 0 && fearValue <= 20) {
+      if (fearValue <= 20) {
         fearHeart.textContent = '♥';
         fearHeart.style.color = '#ffffff'; // 白色
       } else if (fearValue > 20 && fearValue <= 35) {
         fearHeart.textContent = '♥';
         fearHeart.style.color = '#ffffff'; // 白色
-        fearHeart.classList.add('slight-beat'); // 微微跳動
+        fearHeart.classList.add('slight-beat'); // 微幅跳動
       } else if (fearValue > 35 && fearValue <= 45) {
         fearHeart.textContent = '♥';
         fearHeart.style.color = '#888888'; // 灰色
-        fearHeart.classList.add('slight-beat'); // 微微跳動
+        fearHeart.classList.add('slight-beat'); // 微幅跳動
       } else if (fearValue > 45 && fearValue < 60) {
         fearHeart.textContent = '♥';
         fearHeart.style.color = '#888888'; // 灰色
-        fearHeart.classList.add('violent-beat'); // 劇烈跳動
+        fearHeart.classList.add('violent-beat'); // 劇烈跳動（小振幅）
       } else if (fearValue >= 60) {
         fearHeart.textContent = '💔'; // 裂開
-        fearHeart.style.color = '#888888'; // 灰色
+        fearHeart.style.color = '#555555'; // 深灰色
       }
     }
 
@@ -394,23 +387,14 @@
       gameScreen.style.display = 'block';
       gameScreen.style.animation = 'fadeIn 1.5s ease-in-out';
       
-      // 顯示心形符號並初始化狀態
       fearContainer.style.display = 'block';
       updateFearUI();
 
-      // 第 1 段：0.5秒後浮現
       s1Timeouts.push(setTimeout(() => { p1.classList.add('visible'); }, 500));
-
-      // Skip 按鈕：第一段文字浮現後 1.5 秒出現 (0.5 + 1.5 = 2.0s)
       s1Timeouts.push(setTimeout(() => { actionBtn1.classList.add('visible'); }, 2000));
-
-      // 第 2 段：第 1 段後 2.5 秒浮現 (0.5 + 2.5 = 3.0s)
       s1Timeouts.push(setTimeout(() => { p2.classList.add('visible'); }, 3000));
-
-      // 第 3 段：第 2 段後 2.5 秒浮現 (3.0 + 2.5 = 5.5s)
       s1Timeouts.push(setTimeout(() => { p3.classList.add('visible'); }, 5500));
 
-      // 變為 Next：第 3 段後 2.5 秒 (5.5 + 2.5 = 8.0s)
       s1Timeouts.push(setTimeout(() => { 
         scene1State = 'done';
         actionBtn1.textContent = 'Next';
@@ -463,7 +447,6 @@
         scene2State = 'done';
         actionBtn2.textContent = 'Next';
       } else {
-        // 進入第三階段（自此階段起除規則外皆直接顯示）
         scene2.style.display = 'none';
         scene3.style.display = 'block';
 
@@ -473,27 +456,19 @@
     });
 
     // --- 第三階段：選項邏輯 ---
-    // 選擇「是」
     btnYes.addEventListener('click', function() {
       scene3.style.display = 'none';
       sceneFeedback.style.display = 'block';
-      
       feedbackText.innerHTML = '謹慎，永遠是最穩妥的選擇。<br><br><span style="font-size: 1rem; color: #a9a9a9;">（獲得提示，可打開手札查看）</span>';
-      
       feedbackText.classList.add('instant-visible');
       nextBtn3.classList.add('instant-visible');
-
-      // 顯示手札按鈕
       notebookBtn.style.display = 'block';
     });
 
-    // 選擇「否</button>」
     btnNo.addEventListener('click', function() {
       scene3.style.display = 'none';
       sceneFeedback.style.display = 'block';
-      
       feedbackText.innerHTML = '信任記憶，也未嘗不是壞事。';
-      
       feedbackText.classList.add('instant-visible');
       nextBtn3.classList.add('instant-visible');
     });
@@ -515,18 +490,15 @@
     });
 
     // --- 實驗用恐懼值測試按鈕邏輯 ---
-    // 按下 +10 按鈕
     testFearUp.addEventListener('click', function() {
       fearValue += 10;
-      updateFearUI(); // 觸發心形樣式更新
+      updateFearUI(); 
       debugFearText.textContent = `當前測試數值：${fearValue}`;
     });
 
-    // 按下 -10 按鈕
     testFearDown.addEventListener('click', function() {
-      fearValue -= 10;
-      if (fearValue < 0) fearValue = 0; // 防止數值小於 0
-      updateFearUI(); // 觸發心形樣式更新
+      fearValue -= 10; // 允許為負值，移除下限限制
+      updateFearUI(); 
       debugFearText.textContent = `當前測試數值：${fearValue}`;
     });
 
