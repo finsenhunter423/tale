@@ -153,12 +153,11 @@
     display: block;
   }
 
-  /* 心形顏色平滑過渡 */
   #heart-path {
     transition: fill 0.5s ease;
   }
 
-  /* 裂痕樣式：預設隱藏 */
+  /* 裂痕樣式 */
   .crack-line {
     stroke: #000000;
     stroke-width: 1.2;
@@ -169,7 +168,6 @@
     transition: opacity 0.3s ease;
   }
 
-  /* 當激活裂痕狀態時顯示 */
   .cracked .crack-line {
     opacity: 1;
   }
@@ -185,7 +183,7 @@
     animation: slightBeat 1.2s infinite ease-in-out;
   }
 
-  /* 劇烈跳動（低頻率） */
+  /* 劇烈跳動 */
   @keyframes violentBeat {
     0%, 100% { transform: scale(1); }
     15% { transform: scale(1.15); }
@@ -293,7 +291,7 @@
       <button id="next-btn-3" class="btn hidden-element">Next</button>
     </div>
 
-    <!-- 第四階段：下一段落（測試區域） -->
+    <!-- 第四階段：測試區域 -->
     <div id="scene-4" style="display: none;">
       <p class="story-text instant-visible" id="s4-p1">此處為實驗性數值測試區域。點擊下方按鈕可增減隱藏的恐懼值，用以即時觀察右下角心形符號的顏色與跳動狀態變化。</p>
       
@@ -310,15 +308,12 @@
   <!-- 右下角固定 UI 區域 -->
   <div class="ui-container">
     <div id="fear-container">
-      <!-- 使用 SVG 替換原本的文字符號，以便精確繪製黑色裂痕 -->
       <svg id="fear-heart" class="heart-svg" viewBox="0 0 24 24">
         <!-- 心形主體 -->
         <path id="heart-path" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-        <!-- 黑色裂痕線條組 -->
+        <!-- 中間單一條鋸齒狀裂痕 -->
         <g class="crack-lines">
-          <path class="crack-line" d="M12 5.5 l-0.5 3.5 l2 2.5 l-2.5 3 l2 3 l-1 2.5" />
-          <path class="crack-line" d="M11.5 9 l-3.5 1 l-1 2.5" />
-          <path class="crack-line" d="M11 14.5 l3.5 1 l1 -1.5" />
+          <path class="crack-line" d="M12 5.5 L11 8.5 L13.5 11.5 L10.5 14.5 L13 17.5 L12 20.5" />
         </g>
       </svg>
     </div>
@@ -390,23 +385,22 @@
 
     // --- 恐懼值心形狀態更新函式 ---
     function updateFearUI() {
-      // 清除所有動畫與狀態類別
       fearHeart.classList.remove('slight-beat', 'violent-beat', 'cracked');
       
       if (fearValue <= 20) {
-        heartPath.setAttribute('fill', '#ffffff'); // 白色
+        heartPath.setAttribute('fill', '#ffffff');
       } else if (fearValue > 20 && fearValue <= 35) {
-        heartPath.setAttribute('fill', '#ffffff'); // 白色
-        fearHeart.classList.add('slight-beat'); // 微幅跳動
+        heartPath.setAttribute('fill', '#ffffff');
+        fearHeart.classList.add('slight-beat');
       } else if (fearValue > 35 && fearValue <= 45) {
-        heartPath.setAttribute('fill', '#888888'); // 灰色
-        fearHeart.classList.add('slight-beat'); // 微幅跳動
+        heartPath.setAttribute('fill', '#888888');
+        fearHeart.classList.add('slight-beat');
       } else if (fearValue > 45 && fearValue < 60) {
-        heartPath.setAttribute('fill', '#888888'); // 灰色
-        fearHeart.classList.add('violent-beat'); // 劇烈跳動（低頻率）
+        heartPath.setAttribute('fill', '#888888');
+        fearHeart.classList.add('violent-beat');
       } else if (fearValue >= 60) {
-        heartPath.setAttribute('fill', '#888888'); // 灰色
-        fearHeart.classList.add('cracked'); // 停止跳動，顯現黑色裂痕
+        heartPath.setAttribute('fill', '#888888');
+        fearHeart.classList.add('cracked');
       }
     }
 
@@ -430,7 +424,7 @@
       }, 8000));
     });
 
-    // --- 第一階段按鈕 (Skip / Next) ---
+    // --- 第一階段按鈕 ---
     actionBtn1.addEventListener('click', function() {
       if (scene1State === 'playing') {
         s1Timeouts.forEach(clearTimeout);
@@ -462,7 +456,7 @@
       }
     });
 
-    // --- 第二階段按鈕 (Skip / Next) ---
+    // --- 第二階段按鈕 ---
     actionBtn2.addEventListener('click', function() {
       if (scene2State === 'playing') {
         s2Timeouts.forEach(clearTimeout);
@@ -484,7 +478,7 @@
       }
     });
 
-    // --- 第三階段：選項邏輯 ---
+    // --- 第三階段選項 ---
     btnYes.addEventListener('click', function() {
       scene3.style.display = 'none';
       sceneFeedback.style.display = 'block';
@@ -502,14 +496,13 @@
       nextBtn3.classList.add('instant-visible');
     });
 
-    // --- 進入下一階段 (第四階段測試區域) ---
     nextBtn3.addEventListener('click', function() {
       sceneFeedback.style.display = 'none';
       scene4.style.display = 'block';
       document.getElementById('s4-p1').classList.add('instant-visible');
     });
 
-    // --- 手札系統邏輯 ---
+    // --- 手札系統 ---
     notebookBtn.addEventListener('click', function() {
       notebookModal.style.display = 'flex';
     });
@@ -518,7 +511,7 @@
       notebookModal.style.display = 'none';
     });
 
-    // --- 實驗用恐懼值測試按鈕邏輯 ---
+    // --- 測試按鈕 ---
     testFearUp.addEventListener('click', function() {
       fearValue += 10;
       updateFearUI(); 
