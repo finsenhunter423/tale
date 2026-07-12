@@ -261,9 +261,25 @@
     from { opacity: 0; }
     to { opacity: 1; }
   }
+
+  #black-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000000;
+    z-index: 2000;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
 </style>
 </head>
 <body>
+
+  <!-- 黑屏過場用 -->
+  <div id="black-overlay"></div>
 
   <div id="intro-screen">
     <div class="poem-line">Long long ago, a tale was born</div>
@@ -277,7 +293,7 @@
     
     <div id="scene-1">
       <p class="story-text" id="s1-p1">冰冷、潮濕，四周瀰漫著令人不適的氣息。</p>
-      <p class="story-text" id="s1-p2">已然記不清究竟是何時昏了過去，意識回籠之際，只覺頭痛欲裂。映入眼簾的是一片破敗景象，能依稀判斷這裡是一座廢棄的醫院。</p>
+      <p class="story-text" id="s1-p2">已然記不清究竟是何時昏了過去，意識回籠之際，只覺頭痛欲裂。映入眼簾的是一片破敗景象，能大致判斷這裡是一座廢棄的醫院。</p>
       <p class="story-text" id="s1-p3">面前的佈告欄寫著數項公告，內容似乎相當重要，以防萬一，最好仔細閱讀……。</p>
       <button id="action-btn-1" class="btn hidden-element">Skip</button>
     </div>
@@ -315,6 +331,15 @@
       <div id="s4-options" class="options-container hidden-element"></div>
       <p class="story-text" id="s4-feedback" style="display: none;"></p>
       <button id="next-btn-4" class="btn hidden-element" style="display: none;">Next</button>
+    </div>
+
+    <!-- 迷失結局專用場景 -->
+    <div id="scene-lost" style="display: none;">
+      <p class="story-text" id="lost-p1">冰冷、潮濕，四周的空氣瀰漫著令人不適的氣息。</p>
+      <p class="story-text" id="lost-p2">已然記不清究竟是何時昏了過去，意識回籠之際，只覺頭痛欲裂。映入眼簾的是一片破敗景象，能大致判斷這裡是一座廢棄的醫院。</p>
+      <div style="text-align: center;">
+        <button id="lost-next-btn" class="btn hidden-element" style="display: none; margin-top: 20px;">Next</button>
+      </div>
     </div>
 
   </div>
@@ -375,7 +400,6 @@
     </div>
   </div>
 
-  <!-- 新增的提示視窗 -->
   <div id="message-modal">
     <div class="modal-content" style="text-align: center; max-width: 400px; padding: 30px;">
       <p id="message-text" style="font-size: 1.2rem; line-height: 2; letter-spacing: 1.5px; text-align: center; margin-bottom: 20px; color: #d3d3d3; opacity: 1; transform: none; transition: none;"></p>
@@ -394,6 +418,7 @@
 
     let uvTriggered = false;
     let idleTimer = null;
+    let activeModals = []; 
 
     const startBtn = document.getElementById('start-btn');
     const introScreen = document.getElementById('intro-screen');
@@ -404,6 +429,7 @@
     const scene3 = document.getElementById('scene-3');
     const sceneFeedback = document.getElementById('scene-feedback');
     const scene4 = document.getElementById('scene-4');
+    const sceneLost = document.getElementById('scene-lost');
 
     const p1 = document.getElementById('s1-p1');
     const p2 = document.getElementById('s1-p2');
@@ -440,12 +466,13 @@
     const messageText = document.getElementById('message-text');
     const messageCloseBtn = document.getElementById('message-close-btn');
 
+    const blackOverlay = document.getElementById('black-overlay');
+
     let scene1State = 'playing'; 
     let s1Timeouts = []; 
     let scene2State = 'playing';
     let s2Timeouts = [];
 
-    // 顯示提示視窗函式
     function showMessageModal(text) {
       messageText.textContent = text;
       messageModal.style.display = 'flex';
@@ -455,18 +482,141 @@
       messageModal.style.display = 'none';
     });
 
-    // 閒置計時器邏輯
+    // 觸發閒置事件
+    function triggerIdle() {
+      if (idleTimer) clearTimeout(idleTimer);
+
+      // 紀錄並隱藏當前打開的視窗
+      activeModals = [];
+      if (notebookModal.style.display === 'flex') activeModals.push(notebookModal);
+      if (inventoryModal.style.display === 'flex') activeModals.push(inventoryModal);
+      if (confirmModal.style.display === 'flex') activeModals.push(confirmModal);
+      if (itemDetailModal.style.display === 'flex') activeModals.push(itemDetailModal);
+      if (messageModal.style.display === 'flex') activeModals.push(messageModal);
+
+      activeModals.forEach(m => m.style.display = 'none');
+      
+      // 隱藏題目與選項
+      s4Text.style.display = 'none';
+      s4Options.style.display = 'none';
+
+      fearValue += 30;
+      updateFearUI();
+
+      const fearText = "（一陣懼意漫上心頭）";
+      s4Feedback.innerHTML = `沉默裡，令人窒息的恐懼襲來……。<br><br><span style="font-size: 1rem; color: #a9a9a9;">${fearText}</span>`;
+      s4Feedback.style.display = 'block';
+      s4Feedback.className = 'story-text instant-visible';
+
+      nextBtn4.style.display = 'inline-block';
+      nextBtn4.classList.add('instant-visible');
+      nextBtn4.textContent = "Next";
+
+      // 判斷是否超過 60 引發結局
+      if (fearValue >= 60) {
+        nextBtn4.onclick = () => {
+          handleLostEndingTransition();
+        };
+      } else {
+        nextBtn4.onclick = () => {
+          // 恢復原狀
+          s4Feedback.style.display = 'none';
+          nextBtn4.style.display = 'none';
+          nextBtn4.classList.remove('instant-visible');
+          
+          s4Text.style.display = 'block';
+          s4Options.style.display = 'flex';
+          
+          activeModals.forEach(m => m.style.display = 'flex');
+          activeModals = [];
+          
+          startIdleTimer();
+        };
+      }
+    }
+
     function startIdleTimer() {
       if (idleTimer) clearTimeout(idleTimer);
       idleTimer = setTimeout(() => {
+        triggerIdle();
+      }, 40000);
+    }
+
+    // 處理迷失結局黑屏過場
+    function handleLostEndingTransition() {
+      blackOverlay.style.display = 'block';
+      void blackOverlay.offsetWidth; // 觸發重繪
+      blackOverlay.style.opacity = '1';
+
+      setTimeout(() => {
+        // 隱藏一般遊戲介面與UI
+        scene1.style.display = 'none';
+        scene2.style.display = 'none';
+        scene3.style.display = 'none';
+        sceneFeedback.style.display = 'none';
+        scene4.style.display = 'none';
+        document.querySelector('.ui-container').style.display = 'none';
+
+        // 重置迷失結局的文字狀態
+        document.getElementById('lost-p1').classList.remove('visible', 'instant-visible');
+        document.getElementById('lost-p2').classList.remove('visible', 'instant-visible');
+        document.getElementById('lost-next-btn').style.display = 'none';
+        document.getElementById('lost-next-btn').classList.remove('visible', 'instant-visible');
+
+        sceneLost.style.display = 'block';
+
+        // 淡出黑屏
+        blackOverlay.style.opacity = '0';
+        setTimeout(() => {
+          blackOverlay.style.display = 'none';
+          
+          // 開始顯示迷失結局劇情
+          setTimeout(() => { document.getElementById('lost-p1').classList.add('visible'); }, 500);
+          setTimeout(() => { document.getElementById('lost-p2').classList.add('visible'); }, 3000);
+          setTimeout(() => { 
+            document.getElementById('lost-next-btn').style.display = 'inline-block';
+            setTimeout(() => { document.getElementById('lost-next-btn').classList.add('visible'); }, 50);
+          }, 5500);
+        }, 500);
+      }, 1500); // 1.5秒黑屏
+    }
+
+    // 迷失結局重新開始按鈕
+    document.getElementById('lost-next-btn').addEventListener('click', () => {
+        fearValue = 0;
+        sheepIndex = 0;
+        snakeIndex = 0;
+        hasCandy = false;
+        ateCandy = false;
+        hasLens = false;
+        uvTriggered = false;
+        played1_1 = false;
+        nextFixed = "1-8";
+        randomEvents = ["1-2", "1-3", "1-4", "1-6", "1-7"];
+        shuffleArray(randomEvents);
+        
+        updateFearUI();
+
+        // 確保所有可能開啟的視窗關閉
+        activeModals.forEach(m => m.style.display = 'none');
+        activeModals = [];
         notebookModal.style.display = 'none';
         inventoryModal.style.display = 'none';
         confirmModal.style.display = 'none';
         itemDetailModal.style.display = 'none';
         messageModal.style.display = 'none';
-        handleOptionClick(null);
-      }, 40000);
-    }
+        
+        sceneLost.style.display = 'none';
+        document.querySelector('.ui-container').style.display = 'flex'; // 重新顯示UI
+        fearContainer.style.display = 'block';
+        
+        // 恢復背包與手札的顯示狀態（迷失重來仍保留手札按鈕，若不需要可依需求隱藏）
+        notebookBtn.style.display = 'block'; 
+        inventoryBtn.style.display = hasCandy || hasLens ? 'block' : 'none';
+        
+        scene4.style.display = 'block';
+        renderEvent(getNextEventId());
+    });
 
     function updateFearUI() {
       fearHeart.classList.remove('slight-beat', 'violent-beat', 'cracked');
@@ -621,7 +771,6 @@
         updateFearUI();
         inventoryBtn.click();
         
-        // 判斷恐懼值是否有確實下降，如果有則彈出視窗
         if (fearValue < oldFear) {
           showMessageModal("情緒似乎得到了緩和");
         }
@@ -761,8 +910,8 @@
         text: "瞬息之間，原先正在手術臺前的人已來到了面前，面容在黑暗之中無法看清，「你看見了什麼？」",
         options: [
           { label: "「什麼都沒看見。」", effect: () => { fearValue += 15; return { text: "「現在立刻離開，別讓我說第二次。」" }; } },
-          { label: "「……。」", effect: () => { return { text: "「干擾手術的『壞孩子』……該怎麼懲罰呢？」", isEnding: true }; } },
-          { label: "「一場手術。」", effect: () => { return { text: "「不，那可不是一般的手術，倘若好奇……不如，親自來參與吧……。」", isEnding: true }; } }
+          { label: "「……。」", effect: () => { return { text: "「干擾手術的『壞孩子』……該怎麼懲罰呢？」", isEnding: true, isLostEnding: true }; } },
+          { label: "「一場手術。」", effect: () => { return { text: "「不，那可不是一般的手術，倘若好奇……不如，親自來參與吧……。」", isEnding: true, isLostEnding: true }; } }
         ]
       },
       "1-8": {
@@ -842,15 +991,7 @@
       s4Text.style.display = 'none'; 
 
       let oldFear = fearValue;
-      let result;
-
-      if (opt) {
-        result = opt.effect();
-      } else {
-        fearValue += 30;
-        result = { text: "沉默裡，令人窒息的恐懼襲來……。" };
-      }
-
+      let result = opt.effect();
       let newFear = fearValue;
       updateFearUI(); 
 
@@ -863,7 +1004,7 @@
       }
 
       if (fearValue >= 60) {
-        result = { text: "恐懼徹底吞噬了理智，在無盡的黑暗與迷霧中，徹底迷失了方向……。", isEnding: true, transitionText: "（結局：迷失）" };
+        result = { text: "恐懼徹底吞噬了理智，在無盡的黑暗與迷霧中，徹底迷失了方向……。", isEnding: true, transitionText: "（結局：迷失）", isLostEnding: true };
       } else if (fearValue > 50 && !uvTriggered) {
         uvTriggered = true;
         renderEvent("uv");
@@ -894,8 +1035,13 @@
       nextBtn4.classList.add('instant-visible');
       
       if (result.isEnding) {
-          nextBtn4.textContent = "To Be Continued...";
-          nextBtn4.onclick = () => { };
+          if (result.isLostEnding) {
+             nextBtn4.textContent = "Next";
+             nextBtn4.onclick = () => { handleLostEndingTransition(); };
+          } else {
+             nextBtn4.textContent = "To Be Continued...";
+             nextBtn4.onclick = () => { };
+          }
       } else {
           nextBtn4.textContent = "Next";
           nextBtn4.onclick = () => {
