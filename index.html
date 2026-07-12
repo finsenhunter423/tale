@@ -230,6 +230,11 @@
     position: relative;
   }
 
+  /* 確保切換不同長度公告時，視窗不會大幅縮放 */
+  #notebook-modal .modal-content {
+    min-height: 550px;
+  }
+
   .close-modal {
     position: absolute;
     top: 10px;
@@ -275,7 +280,6 @@
     transition: opacity 0.5s ease;
   }
 
-  /* 實驗階段：除錯浮動面板樣式 */
   #debug-panel {
     position: fixed;
     top: 15px;
@@ -362,7 +366,7 @@
 
     <!-- 診療室開場劇情 -->
     <div id="scene-clinic-intro" style="display: none;">
-      <p class="story-text" id="clinic-p1">廢棄的診療室內燈光昏暗，辦公桌上擺放的名牌因為污損，已然看不清楚名字，牆上貼著一張公告。</p>
+      <p class="story-text" id="clinic-p1">廢棄的診療室燈光昏暗，辦公桌上擺放的名牌因為污損，已然看不清楚名字，牆上貼著一張公告。</p>
       <button id="next-btn-clinic-intro" class="btn hidden-element">Next</button>
     </div>
 
@@ -391,6 +395,31 @@
       <div id="sc-options" class="options-container hidden-element"></div>
       <p class="story-text" id="sc-feedback" style="display: none;"></p>
       <button id="next-btn-c" class="btn hidden-element">Next</button>
+    </div>
+
+    <!-- 住院部開場劇情 -->
+    <div id="scene-ward-intro" style="display: none;">
+      <p class="story-text" id="ward-p1">此處曾經是醫院的住院部，如今只剩下一片廢墟，門口的佈告欄似乎寫了一些須知。</p>
+      <button id="next-btn-ward-intro" class="btn hidden-element">Next</button>
+    </div>
+
+    <!-- 住院部公告畫面 -->
+    <div id="scene-ward-rules" style="display: none;">
+      <h2 class="scene-title" id="ward-s2-title">【住院部須知】</h2>
+      <ul class="bullet-list" id="ward-s2-list">
+        <li class="story-text bullet-item ward-s2-item">• 相信「羊群」，審判「怪物」。</li>
+        <li class="story-text bullet-item ward-s2-item">• 「蛇」不應該出現在住院部，如果看見「蛇」的痕跡，應儘速清除。</li>
+        <li class="story-text bullet-item ward-s2-item">• 請不要走入紫外光裡。</li>
+        <li class="story-text bullet-item ward-s2-item">• 如果看見菌絲，請立刻逃跑。</li>
+        <li class="story-text bullet-item ward-s2-item">• 如果聽見哼唱歌曲的聲音，捂上耳朵。</li>
+        <li class="story-text bullet-item ward-s2-item">• 感到害怕是正常的，「羊群」會保護你。</li>
+      </ul>
+      <button id="action-btn-ward-rules" class="btn hidden-element">Skip</button>
+    </div>
+
+    <div id="scene-ward-feedback" style="display: none;">
+      <p class="story-text" id="ward-fb-text"></p>
+      <button id="ward-fb-next" class="btn hidden-element">Next</button>
     </div>
 
     <div id="scene-ward-game" style="display: none;">
@@ -454,9 +483,22 @@
         </ul>
       </div>
 
+      <div id="notebook-ward-content" style="display: none;">
+        <h2 style="font-size: 1.5rem; text-align: center; letter-spacing: 2px; margin-bottom: 30px;">【住院部須知】</h2>
+        <ul class="bullet-list">
+          <li class="bullet-item" style="opacity: 1; transform: none;">• 相信「羊群」，審判「怪物」。</li>
+          <li class="bullet-item" style="opacity: 1; transform: none;">• 「蛇」不應該出現在住院部，如果看見「蛇」的痕跡，應儘速清除。</li>
+          <li class="bullet-item" style="opacity: 1; transform: none;">• 請不要走入紫外光裡。</li>
+          <li class="bullet-item" style="opacity: 1; transform: none;">• 如果看見菌絲，請立刻逃跑。</li>
+          <li class="bullet-item" style="opacity: 1; transform: none;">• 如果聽見哼唱歌曲的聲音，捂上耳朵。</li>
+          <li class="bullet-item" style="opacity: 1; transform: none;">• 感到害怕是正常的，「羊群」會保護你。</li>
+        </ul>
+      </div>
+
       <div id="notebook-tabs" style="display: none; justify-content: center; gap: 20px; margin-top: 30px;">
         <button id="tab-hospital" class="btn" style="margin-top:0; padding: 5px 15px; background-color: #d3d3d3; color: #070707;">醫院公告</button>
-        <button id="tab-clinic" class="btn" style="margin-top:0; padding: 5px 15px;">診療室公告</button>
+        <button id="tab-clinic" class="btn" style="margin-top:0; padding: 5px 15px; display: none;">診療室公告</button>
+        <button id="tab-ward" class="btn" style="margin-top:0; padding: 5px 15px; display: none;">住院部須知</button>
       </div>
 
     </div>
@@ -511,10 +553,9 @@
     let idleTimer = null;
     let activeModals = []; 
 
-    // 新增核心控制變數
     let currentZone = 'lobby'; // 'lobby', 'clinic', 'ward'
-    let hasPassedWard = false; // 是否通過住院部
-    let clinicRandomEvents = []; // 診療室隨機題目池
+    let hasPassedWard = false; 
+    let clinicRandomEvents = []; 
 
     const startBtn = document.getElementById('start-btn');
     const introScreen = document.getElementById('intro-screen');
@@ -548,8 +589,10 @@
 
     const tabHospital = document.getElementById('tab-hospital');
     const tabClinic = document.getElementById('tab-clinic');
+    const tabWard = document.getElementById('tab-ward');
     const nbHospitalContent = document.getElementById('notebook-hospital-content');
     const nbClinicContent = document.getElementById('notebook-clinic-content');
+    const nbWardContent = document.getElementById('notebook-ward-content');
 
     const inventoryBtn = document.getElementById('inventory-btn');
     const inventoryModal = document.getElementById('inventory-modal');
@@ -574,28 +617,32 @@
     let scene2State = 'playing';
     let s2Timeouts = [];
     
-    // 診療室過場狀態
     let clinicIntroTimeouts = [];
     let clinicRulesState = 'playing';
     let clinicRulesTimeouts = [];
 
-    tabHospital.addEventListener('click', () => {
-      nbHospitalContent.style.display = 'block';
-      nbClinicContent.style.display = 'none';
-      tabHospital.style.backgroundColor = '#d3d3d3';
-      tabHospital.style.color = '#070707';
-      tabClinic.style.backgroundColor = 'transparent';
-      tabClinic.style.color = '#a9a9a9';
-    });
+    let wardIntroTimeouts = [];
+    let wardRulesState = 'playing';
+    let wardRulesTimeouts = [];
+    let wardIntroPlayed = false;
 
-    tabClinic.addEventListener('click', () => {
-      nbHospitalContent.style.display = 'none';
-      nbClinicContent.style.display = 'block';
-      tabClinic.style.backgroundColor = '#d3d3d3';
-      tabClinic.style.color = '#070707';
-      tabHospital.style.backgroundColor = 'transparent';
-      tabHospital.style.color = '#a9a9a9';
-    });
+    function switchNotebookTab(activeTab, activeContent) {
+        [tabHospital, tabClinic, tabWard].forEach(t => {
+            t.style.backgroundColor = 'transparent';
+            t.style.color = '#a9a9a9';
+        });
+        activeTab.style.backgroundColor = '#d3d3d3';
+        activeTab.style.color = '#070707';
+
+        [nbHospitalContent, nbClinicContent, nbWardContent].forEach(c => {
+            c.style.display = 'none';
+        });
+        activeContent.style.display = 'block';
+    }
+
+    tabHospital.addEventListener('click', () => switchNotebookTab(tabHospital, nbHospitalContent));
+    tabClinic.addEventListener('click', () => switchNotebookTab(tabClinic, nbClinicContent));
+    tabWard.addEventListener('click', () => switchNotebookTab(tabWard, nbWardContent));
 
     function showMessageModal(text) {
       messageText.textContent = text;
@@ -606,17 +653,27 @@
       messageModal.style.display = 'none';
     });
 
-    // 通用 1.5 秒黑屏過場處理器
+    function transitionToZone(zoneName) {
+      if (zoneName === 'clinic') {
+        currentZone = 'clinic';
+        initClinicEvents();
+        enterClinicScene();
+      } else if (zoneName === 'ward') {
+        currentZone = 'ward';
+        hasPassedWard = true;
+        enterWardScene();
+      }
+    }
+
     function triggerBlackScreenTransition(callback) {
       if (idleTimer) clearTimeout(idleTimer);
       const overlayText = document.getElementById('overlay-text');
-      overlayText.textContent = ''; // 確保一般過場不顯示文字
+      overlayText.textContent = ''; 
       blackOverlay.style.display = 'block';
       void blackOverlay.offsetWidth; 
       blackOverlay.style.opacity = '1';
       overlayText.style.opacity = '0';
 
-      // 0.5秒淡入完畢 + 保持1.5秒全黑 = 2000ms 後再切換與淡出
       setTimeout(() => {
         if (callback) callback();
         blackOverlay.style.opacity = '0';
@@ -643,7 +700,6 @@
       let fbEl = (currentZone === 'lobby') ? s4Feedback : document.getElementById('sc-feedback');
       let btnEl = (currentZone === 'lobby') ? nextBtn4 : document.getElementById('next-btn-c');
 
-      // 記憶觸發超時前，玩家停留在選項畫面還是回饋畫面
       let wasFeedbackVisible = (fbEl.style.display === 'block');
 
       txtEl.style.display = 'none';
@@ -654,21 +710,19 @@
       fearValue += 30;
       updateFearUI();
 
-      // 建立臨時的超時警告元素
       let timeoutMsg = document.createElement('p');
       timeoutMsg.className = 'story-text instant-visible';
       timeoutMsg.innerHTML = '沉默裡，令人窒息的恐懼襲來……。';
       timeoutMsg.style.textAlign = 'left';
       let container = (currentZone === 'lobby') ? scene4 : document.getElementById('scene-clinic-game');
-      container.insertBefore(timeoutMsg, btnEl); // 將提示安插在容器內
+      container.insertBefore(timeoutMsg, btnEl); 
 
       setTimeout(() => {
-        timeoutMsg.remove(); // 移除臨時訊息
+        timeoutMsg.remove(); 
         
         if (fearValue >= 60) {
           handleLostEndingTransition();
         } else {
-          // 根據超時前的狀態還原畫面
           if (wasFeedbackVisible) {
             fbEl.style.display = 'block';
             btnEl.style.display = 'inline-block';
@@ -680,7 +734,7 @@
           activeModals.forEach(m => m.style.display = 'flex');
           activeModals = [];
           
-          startIdleTimer(); // 恢復計時
+          startIdleTimer(); 
         }
       }, 3000);
     }
@@ -711,7 +765,12 @@
         document.getElementById('scene-clinic-rules').style.display = 'none';
         document.getElementById('scene-clinic-feedback').style.display = 'none';
         document.getElementById('scene-clinic-game').style.display = 'none';
+        
+        document.getElementById('scene-ward-intro').style.display = 'none';
+        document.getElementById('scene-ward-rules').style.display = 'none';
+        document.getElementById('scene-ward-feedback').style.display = 'none';
         document.getElementById('scene-ward-game').style.display = 'none';
+        
         document.querySelector('.ui-container').style.display = 'none';
 
         document.getElementById('lost-p1').classList.remove('visible', 'instant-visible');
@@ -725,14 +784,14 @@
         
         setTimeout(() => {
           blackOverlay.style.display = 'none';
-          overlayText.textContent = ''; // 重置文字
+          overlayText.textContent = ''; 
           setTimeout(() => { document.getElementById('lost-p1').classList.add('visible'); }, 500);
           setTimeout(() => { document.getElementById('lost-p2').classList.add('visible'); }, 3000);
           setTimeout(() => { 
             document.getElementById('lost-next-btn').classList.add('visible');
           }, 5500);
         }, 500);
-      }, 2000); // 延長黑屏時間讓玩家看見「……」
+      }, 2000); 
     }
 
     document.getElementById('lost-next-btn').addEventListener('click', () => {
@@ -747,6 +806,7 @@
         recordsNotebook = false; 
         currentZone = 'lobby';
         hasPassedWard = false;
+        wardIntroPlayed = false;
         nextFixed = "1-8";
         randomEvents = ["1-2", "1-3", "1-4", "1-6", "1-7"];
         shuffleArray(randomEvents);
@@ -762,8 +822,9 @@
         messageModal.style.display = 'none';
         
         document.getElementById('notebook-tabs').style.display = 'none'; 
-        nbHospitalContent.style.display = 'block';
-        nbClinicContent.style.display = 'none';
+        tabClinic.style.display = 'none';
+        tabWard.style.display = 'none';
+        switchNotebookTab(tabHospital, nbHospitalContent);
 
         sceneLost.style.display = 'none';
         document.querySelector('.ui-container').style.display = 'flex'; 
@@ -777,7 +838,6 @@
     });
 
     function updateFearUI() {
-      // 同步實驗數據除錯顯示
       document.getElementById('debug-fear').textContent = fearValue;
       document.getElementById('debug-sheep').textContent = sheepIndex;
       document.getElementById('debug-snake').textContent = snakeIndex;
@@ -1029,7 +1089,7 @@
         ]
       },
       "1-5": {
-        text: "一道嚴厲的聲音從背後傳來：「為什麼一個人待在這裡，很危險的。」，回頭看去，卻沒有任何人。",
+        text: "一道嚴厲的聲音從背後傳來：「為什麼一個人待在這裡，很危險的。」<br><br>回頭看去，卻沒有任何人。",
         options: [
           { label: "「你是誰？」", effect: () => {
               if (ateCandy || hasCandy) {
@@ -1047,7 +1107,7 @@
         text: "好幾道聲音窸窣作響，像是一群人在交談，情緒激動。",
         options: [
           { label: "凝神細聽", effect: () => { sheepIndex += 5; return { text: "「罪人……沉沼……。」他們在說的是什麼？" }; } },
-          { label: "無視", effect: () => { return { text: "暗潮湧動的秘密，有時不去理會才是正解。" }; } },
+          { label: "無視", effect: () => { return { text: "或許這些詭異的聲音，會自己停止……。" }; } },
           { label: "捂上耳朵", effect: () => { snakeIndex += 5; return { text: "不該知道的事，非禮勿聽。" }; } }
         ]
       },
@@ -1067,7 +1127,7 @@
         ]
       },
       "1-7-2": {
-        text: "瞬息之間，原先正在手術臺前的人已來到了面前，面容在黑暗之中無法看清，「你看見了什麼？」",
+        text: "瞬息之間，原先正在手術臺前的人已來到了面前，面容在黑暗之中無法看清。<br><br>「你看見了什麼？」",
         options: [
           { label: "「什麼都沒看見。」", effect: () => { fearValue += 15; return { text: "「現在立刻離開，別讓我說第二次。」" }; } },
           { label: "「……。」", effect: () => { return { text: "「干擾手術的『壞孩子』……該怎麼懲罰呢？」", isEnding: true, isLostEnding: true }; } },
@@ -1077,7 +1137,7 @@
       "1-8": {
         text: "透過昏暗的燈光，依稀能見到前方出現了一串腳印，但看上去並不像人類的。",
         options: [
-          { label: "跟隨腳印", effect: () => { sheepIndex += 10; return { triggerZoneTransition: true, targetZone: 'ward', skipFeedback: true }; } },
+          { label: "跟隨腳印", effect: () => { sheepIndex += 10; return { text: "直到腳步與之重疊才發現，眼前的腳印，竟然是羊蹄的形狀……。", triggerZoneTransition: true, targetZone: 'ward' }; } },
           { label: "忽視腳印", effect: () => { return { text: "資訊不足時，不要相信任何事物。" }; } },
           { label: "反向離開", effect: () => { snakeIndex += 10; return { text: "迷霧中的指引，更像是誘人深入的陷阱。" }; } }
         ]
@@ -1110,7 +1170,7 @@
       const ev = eventsData[eventId];
       
       s4Text.style.display = 'block';
-      s4Text.textContent = ev.text;
+      s4Text.innerHTML = ev.text;
       s4Text.className = 'story-text'; 
       void s4Text.offsetWidth; 
       s4Text.classList.add('visible');
@@ -1172,15 +1232,7 @@
           } else if (result.triggerZoneTransition) {
               triggerBlackScreenTransition(() => {
                   scene4.style.display = 'none';
-                  if (result.targetZone === 'clinic') {
-                      currentZone = 'clinic';
-                      initClinicEvents();
-                      enterClinicScene();
-                  } else if (result.targetZone === 'ward') {
-                      document.getElementById('scene-ward-game').style.display = 'block';
-                      currentZone = 'ward';
-                      hasPassedWard = true;
-                  }
+                  transitionToZone(result.targetZone);
               });
               return;
           }
@@ -1217,15 +1269,7 @@
           nextBtn4.onclick = () => {
             triggerBlackScreenTransition(() => {
               scene4.style.display = 'none';
-              if (result.targetZone === 'clinic') {
-                currentZone = 'clinic';
-                initClinicEvents();
-                enterClinicScene();
-              } else if (result.targetZone === 'ward') {
-                document.getElementById('scene-ward-game').style.display = 'block';
-                currentZone = 'ward';
-                hasPassedWard = true;
-              }
+              transitionToZone(result.targetZone);
             });
           };
       } else {
@@ -1262,7 +1306,7 @@
 
     const clinicEventsData = {
       "2-1": {
-        text: "一道溫柔的聲音從背後傳來：「怎麼一個人待在這裡呢？很危險的。」，回頭看去，卻沒有任何人。",
+        text: "一道溫柔的聲音從背後傳來：「怎麼一個人待在這裡呢？很危險的。」<br><br>回頭看去，卻沒有任何人。",
         options: [
           { label: "「你是誰？」", effect: () => { return { text: "「我是亨特醫生……請別害怕，我不會傷害好孩子的……。」", goto: "2-1-1" }; } }
         ]
@@ -1313,7 +1357,7 @@
         ]
       },
       "2-3": {
-        text: "人群的聲音再度響起，這一次變得更加清晰……「褻瀆屍體的罪人！」。同時，一道穿著白袍的模糊身影，出現在了面前。",
+        text: "人群的聲音再度響起，這一次變得更加清晰。<br><br>「褻瀆屍體的罪人！」<br><br>同時，一道穿著白袍的模糊身影，出現在了面前。",
         options: [
           { label: "凝神細聽", effect: () => { sheepIndex += 10; return { text: "「把他沉下去！沉下去！」" }; } },
           { label: "無視", effect: () => { return { text: "雖然並不理解，但那聽上去不是應該知道的事……。" }; } },
@@ -1324,7 +1368,7 @@
         text: "腳腕漫上一股黏膩濕滑的觸感，低頭所見，是幾條觸手般的菌絲，困住了前行的腳步。",
         options: [
           { label: "動手清除", effect: () => { fearValue += 10; return { text: "觸碰到的瞬間，一股異樣的懼意瞬間襲來……。" }; } },
-          { label: "靜觀其變", effect: () => { return { text: "一段時間後菌絲鬆開了箝制，緩緩褪去，只留下腳腕上一道濕痕。" }; } },
+          { label: "靜觀其變", effect: () => { return { text: "一段時間後菌絲鬆開了箝制，只留下腳腕上一道濕痕。" }; } },
           { label: "仔細觀察", effect: () => { snakeIndex += 10; return { text: "菌絲彷彿能夠感知到視線，放輕了纏勒的力度，而後緩緩退開，只在腳腕上留下一道濕痕。" }; } }
         ]
       },
@@ -1409,11 +1453,13 @@
 
           if (recordsNotebook) {
             document.getElementById('notebook-tabs').style.display = 'flex'; 
+            document.getElementById('tab-clinic').style.display = 'inline-block'; 
+
             const sceneFb = document.getElementById('scene-clinic-feedback');
             sceneFb.style.display = 'block';
             
             const clinicFbText = document.getElementById('clinic-fb-text');
-            clinicFbText.innerHTML = '還是記住這些規則為好。';
+            clinicFbText.innerHTML = '全新的規則，也需要紀錄下來。';
             clinicFbText.classList.add('instant-visible');
             
             const fbNext = document.getElementById('clinic-fb-next');
@@ -1446,7 +1492,7 @@
       const nextBtnC = document.getElementById('next-btn-c');
 
       scText.style.display = 'block';
-      scText.textContent = ev.text;
+      scText.innerHTML = ev.text;
       scText.className = 'story-text';
       void scText.offsetWidth;
       scText.classList.add('visible');
@@ -1506,11 +1552,7 @@
           } else if (result.triggerZoneTransition) {
               triggerBlackScreenTransition(() => {
                   document.getElementById('scene-clinic-game').style.display = 'none';
-                  if (result.targetZone === 'ward') {
-                      document.getElementById('scene-ward-game').style.display = 'block';
-                      currentZone = 'ward';
-                      hasPassedWard = true;
-                  }
+                  transitionToZone(result.targetZone);
               });
               return;
           }
@@ -1542,11 +1584,7 @@
         nextBtnC.onclick = () => {
           triggerBlackScreenTransition(() => {
             document.getElementById('scene-clinic-game').style.display = 'none';
-            if (result.targetZone === 'ward') {
-              document.getElementById('scene-ward-game').style.display = 'block';
-              currentZone = 'ward';
-              hasPassedWard = true; 
-            }
+            transitionToZone(result.targetZone);
           });
         };
       } else {
@@ -1559,12 +1597,107 @@
       }
     }
 
+    // ==========================================
+    // 住院部流程控制與渲染
+    // ==========================================
+
+    function enterWardScene() {
+      if (idleTimer) clearTimeout(idleTimer);
+      if (wardIntroPlayed) {
+          document.getElementById('scene-ward-game').style.display = 'block';
+          return;
+      }
+      wardIntroPlayed = true;
+
+      const sceneWardIntro = document.getElementById('scene-ward-intro');
+      const p1 = document.getElementById('ward-p1');
+      const introNextBtn = document.getElementById('next-btn-ward-intro');
+
+      sceneWardIntro.style.display = 'block';
+      p1.classList.remove('visible', 'instant-visible');
+      introNextBtn.classList.remove('visible', 'instant-visible');
+      
+      wardIntroTimeouts = [];
+
+      wardIntroTimeouts.push(setTimeout(() => { p1.classList.add('visible'); }, 50));
+      wardIntroTimeouts.push(setTimeout(() => { introNextBtn.classList.add('visible'); }, 2550));
+
+      introNextBtn.onclick = () => {
+        sceneWardIntro.style.display = 'none';
+        enterWardRulesScene();
+      };
+    }
+
+    function enterWardRulesScene() {
+      if (idleTimer) clearTimeout(idleTimer);
+      const sceneWardRules = document.getElementById('scene-ward-rules');
+      const title = document.getElementById('ward-s2-title');
+      const items = document.querySelectorAll('.ward-s2-item');
+      const actionBtn = document.getElementById('action-btn-ward-rules');
+
+      sceneWardRules.style.display = 'block';
+      title.classList.remove('visible', 'instant-visible');
+      items.forEach(i => i.classList.remove('visible', 'instant-visible'));
+      actionBtn.classList.remove('visible', 'instant-visible');
+
+      wardRulesState = 'playing';
+      actionBtn.textContent = 'Skip';
+      wardRulesTimeouts = [];
+
+      wardRulesTimeouts.push(setTimeout(() => { title.classList.add('visible'); }, 100));
+      wardRulesTimeouts.push(setTimeout(() => { actionBtn.classList.add('visible'); }, 1600));
+
+      items.forEach((item, index) => {
+        wardRulesTimeouts.push(setTimeout(() => {
+          item.classList.add('visible');
+        }, 1600 + (index * 1500))); 
+      });
+
+      wardRulesTimeouts.push(setTimeout(() => { 
+        wardRulesState = 'done';
+        actionBtn.textContent = 'Next';
+      }, 1600 + (items.length * 1500) + 500));
+
+      actionBtn.onclick = () => {
+        if (wardRulesState === 'playing') {
+          wardRulesTimeouts.forEach(clearTimeout);
+          title.classList.add('instant-visible');
+          items.forEach(i => i.classList.add('instant-visible'));
+          actionBtn.classList.add('instant-visible');
+          wardRulesState = 'done';
+          actionBtn.textContent = 'Next';
+        } else {
+          sceneWardRules.style.display = 'none';
+
+          if (recordsNotebook) {
+            document.getElementById('notebook-tabs').style.display = 'flex'; 
+            document.getElementById('tab-ward').style.display = 'inline-block'; 
+
+            const sceneFb = document.getElementById('scene-ward-feedback');
+            sceneFb.style.display = 'block';
+            
+            const wardFbText = document.getElementById('ward-fb-text');
+            wardFbText.innerHTML = '全新的規則，也需要紀錄下來。';
+            wardFbText.classList.add('instant-visible');
+            
+            const fbNext = document.getElementById('ward-fb-next');
+            fbNext.classList.add('instant-visible');
+
+            fbNext.onclick = () => {
+              sceneFb.style.display = 'none';
+              document.getElementById('scene-ward-game').style.display = 'block';
+            };
+          } else {
+            document.getElementById('scene-ward-game').style.display = 'block';
+          }
+        }
+      };
+    }
+
     document.getElementById('go-back-clinic-btn').addEventListener('click', () => {
       triggerBlackScreenTransition(() => {
         document.getElementById('scene-ward-game').style.display = 'none';
-        currentZone = 'clinic';
-        initClinicEvents(); 
-        enterClinicScene(); 
+        transitionToZone('clinic');
       });
     });
 
