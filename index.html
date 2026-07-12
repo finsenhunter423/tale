@@ -230,10 +230,23 @@
     position: relative;
   }
 
-  /* 確保切換不同長度公告時，視窗不會大幅縮放 */
+  /* 確保切換不同長度公告時，視窗不會大幅縮放，並固定底部分頁按鈕 */
   #notebook-modal .modal-content {
     height: 600px;
     min-height: 550px;
+    padding-bottom: 80px; 
+    position: relative;
+  }
+
+  #notebook-tabs {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+    display: none;
+    justify-content: center;
+    gap: 20px;
+    margin: 0;
   }
 
   .close-modal {
@@ -365,13 +378,11 @@
       <button id="next-btn-4" class="btn hidden-element">Next</button>
     </div>
 
-    <!-- 診療室開場劇情 -->
     <div id="scene-clinic-intro" style="display: none;">
       <p class="story-text" id="clinic-p1">廢棄的診療室燈光昏暗，辦公桌上擺放的名牌因為污損，已然看不清楚名字，牆上貼著一張公告。</p>
       <button id="next-btn-clinic-intro" class="btn hidden-element">Next</button>
     </div>
 
-    <!-- 診療室公告畫面 -->
     <div id="scene-clinic-rules" style="display: none;">
       <h2 class="scene-title" id="clinic-s2-title">【診療室公告】</h2>
       <ul class="bullet-list" id="clinic-s2-list">
@@ -398,13 +409,11 @@
       <button id="next-btn-c" class="btn hidden-element">Next</button>
     </div>
 
-    <!-- 住院部開場劇情 -->
     <div id="scene-ward-intro" style="display: none;">
       <p class="story-text" id="ward-p1">此處曾經是醫院的住院部，如今只剩下一片廢墟，門口的佈告欄似乎寫了一些須知。</p>
       <button id="next-btn-ward-intro" class="btn hidden-element">Next</button>
     </div>
 
-    <!-- 住院部公告畫面 -->
     <div id="scene-ward-rules" style="display: none;">
       <h2 class="scene-title" id="ward-s2-title">【住院部須知】</h2>
       <ul class="bullet-list" id="ward-s2-list">
@@ -435,6 +444,13 @@
       <p class="story-text" id="lost-p2">已然記不清究竟是何時昏了過去，意識回籠之際，只覺頭痛欲裂。映入眼簾的是一片破敗景象，能大致判斷這裡是一座廢棄的醫院。</p>
       <div style="text-align: center;">
         <button id="lost-next-btn" class="btn hidden-element" style="margin-top: 20px;">Next</button>
+      </div>
+    </div>
+
+    <div id="scene-experiment" style="display: none;">
+      <p class="story-text" id="exp-p1">闖入手術室的壞孩子，會受到懲罰喔……。</p>
+      <div style="text-align: center;">
+        <button id="exp-retry-btn" class="btn hidden-element" style="margin-top: 20px;">Retry</button>
       </div>
     </div>
 
@@ -496,7 +512,7 @@
         </ul>
       </div>
 
-      <div id="notebook-tabs" style="display: none; justify-content: center; gap: 20px; margin-top: 30px;">
+      <div id="notebook-tabs">
         <button id="tab-hospital" class="btn" style="margin-top:0; padding: 5px 15px; background-color: #d3d3d3; color: #070707;">醫院公告</button>
         <button id="tab-clinic" class="btn" style="margin-top:0; padding: 5px 15px; display: none;">診療室公告</button>
         <button id="tab-ward" class="btn" style="margin-top:0; padding: 5px 15px; display: none;">住院部須知</button>
@@ -554,9 +570,11 @@
     let idleTimer = null;
     let activeModals = []; 
 
-    let currentZone = 'lobby'; // 'lobby', 'clinic', 'ward'
+    let currentZone = 'lobby'; 
     let hasPassedWard = false; 
     let clinicRandomEvents = []; 
+    let currentLobbyEventId = null;
+    let currentClinicEventId = null;
 
     const startBtn = document.getElementById('start-btn');
     const introScreen = document.getElementById('intro-screen');
@@ -721,8 +739,18 @@
       setTimeout(() => {
         timeoutMsg.remove(); 
         
-        if (fearValue >= 60) {
-          handleLostEndingTransition();
+        // 如果恐懼值因超時增加達到50以上，依舊優先觸發 uv 特殊問題
+        if (fearValue >= 50 && !uvTriggered) {
+            uvTriggered = true;
+            if (currentZone === 'lobby') {
+                scene4.style.display = 'block';
+                renderEvent('uv');
+            } else if (currentZone === 'clinic') {
+                document.getElementById('scene-clinic-game').style.display = 'block';
+                renderClinicEvent('uv');
+            }
+        } else if (fearValue >= 60) {
+            handleLostEndingTransition();
         } else {
           if (wasFeedbackVisible) {
             fbEl.style.display = 'block';
@@ -794,8 +822,50 @@
         }, 500);
       }, 2000); 
     }
+    
+    function handleExperimentEndingTransition() {
+      const overlayText = document.getElementById('overlay-text');
+      overlayText.textContent = '……';
+      
+      blackOverlay.style.display = 'block';
+      void blackOverlay.offsetWidth; 
+      blackOverlay.style.opacity = '1';
+      overlayText.style.opacity = '1';
 
-    document.getElementById('lost-next-btn').addEventListener('click', () => {
+      setTimeout(() => {
+        scene1.style.display = 'none';
+        scene2.style.display = 'none';
+        scene3.style.display = 'none';
+        sceneFeedback.style.display = 'none';
+        scene4.style.display = 'none';
+        document.getElementById('scene-clinic-intro').style.display = 'none';
+        document.getElementById('scene-clinic-rules').style.display = 'none';
+        document.getElementById('scene-clinic-feedback').style.display = 'none';
+        document.getElementById('scene-clinic-game').style.display = 'none';
+        document.getElementById('scene-ward-intro').style.display = 'none';
+        document.getElementById('scene-ward-rules').style.display = 'none';
+        document.getElementById('scene-ward-feedback').style.display = 'none';
+        document.getElementById('scene-ward-game').style.display = 'none';
+        document.querySelector('.ui-container').style.display = 'none';
+
+        document.getElementById('exp-p1').classList.remove('visible', 'instant-visible');
+        document.getElementById('exp-retry-btn').classList.remove('visible', 'instant-visible');
+
+        document.getElementById('scene-experiment').style.display = 'block';
+
+        blackOverlay.style.opacity = '0';
+        overlayText.style.opacity = '0';
+        
+        setTimeout(() => {
+          blackOverlay.style.display = 'none';
+          overlayText.textContent = ''; 
+          setTimeout(() => { document.getElementById('exp-p1').classList.add('visible'); }, 500);
+          setTimeout(() => { document.getElementById('exp-retry-btn').classList.add('visible'); }, 3000);
+        }, 500);
+      }, 1500); 
+    }
+
+    function resetGameState() {
         fearValue = 0;
         sheepIndex = 0;
         snakeIndex = 0;
@@ -826,16 +896,27 @@
         tabClinic.style.display = 'none';
         tabWard.style.display = 'none';
         switchNotebookTab(tabHospital, nbHospitalContent);
+        
+        notebookBtn.style.display = 'none'; 
+        inventoryBtn.style.display = 'none';
+    }
 
+    document.getElementById('lost-next-btn').addEventListener('click', () => {
+        resetGameState();
         sceneLost.style.display = 'none';
         document.querySelector('.ui-container').style.display = 'flex'; 
         fearContainer.style.display = 'block';
         
-        notebookBtn.style.display = 'block'; 
-        inventoryBtn.style.display = hasCandy || hasLens ? 'block' : 'none';
-        
         scene4.style.display = 'block';
         renderEvent(getNextEventId());
+    });
+    
+    document.getElementById('exp-retry-btn').addEventListener('click', () => {
+        resetGameState();
+        document.getElementById('scene-experiment').style.display = 'none';
+        gameScreen.style.display = 'none';
+        introScreen.style.display = 'block'; 
+        fearContainer.style.display = 'none'; 
     });
 
     function updateFearUI() {
@@ -942,6 +1023,7 @@
       feedbackText.innerHTML = '謹慎，永遠是最穩妥的選擇。';
       feedbackText.classList.add('instant-visible');
       
+      document.getElementById('notebook-tabs').style.display = 'flex';
       notebookBtn.style.display = 'block';
       nextBtn3.classList.add('instant-visible');
     });
@@ -1041,6 +1123,15 @@
       return null;
     }
 
+    const uvEventData = {
+      text: "強烈的恐懼湧上，使身體不自覺戰慄……此時，前方亮起了一道溫暖的紫色光芒。",
+      options: [
+        { label: "跟上光芒", effect: () => { fearValue = 0; snakeIndex += 15; return { text: "在治癒之光的照耀下，彷彿再也沒有什麼能夠讓人害怕了……。" }; } },
+        { label: "停留原地", effect: () => { return { text: "猶豫之際，那道光已然消失，只留下無盡的黑暗。" }; } },
+        { label: "轉身逃離", effect: () => { fearValue = Math.max(0, fearValue - 15); sheepIndex += 15; return { text: "一道急切的聲音響起：「不要走入那道光，快快遠離那道光……。」" }; } }
+      ]
+    };
+
     const eventsData = {
       "1-1": {
         text: "醫院大門緊閉，門鎖上蒙著一層厚重的塵埃。",
@@ -1131,8 +1222,8 @@
         text: "瞬息之間，原先正在手術臺前的人已來到了面前，面容在黑暗之中無法看清。<br><br>「你看見了什麼？」",
         options: [
           { label: "「什麼都沒看見。」", effect: () => { fearValue += 15; return { text: "「現在立刻離開，別讓我說第二次。」" }; } },
-          { label: "「……。」", effect: () => { return { text: "「干擾手術的『壞孩子』……該怎麼懲罰呢？」", isEnding: true, isLostEnding: true }; } },
-          { label: "「一場手術。」", effect: () => { return { text: "「不，那可不是一般的手術，倘若好奇……不如，親自來參與吧……。」", isEnding: true, isLostEnding: true }; } }
+          { label: "「……。」", effect: () => { return { text: "「干擾手術的『壞孩子』……該怎麼懲罰呢？」", isExperimentEnding: true }; } },
+          { label: "「一場手術。」", effect: () => { return { text: "「不，那可不是一般的手術，倘若好奇……不如，親自來參與吧……。」", isExperimentEnding: true }; } }
         ]
       },
       "1-8": {
@@ -1150,14 +1241,7 @@
           { label: "住院部", effect: () => { return { triggerZoneTransition: true, targetZone: 'ward', skipFeedback: true }; } }
         ]
       },
-      "uv": {
-        text: "強烈的恐懼湧上，使身體不自覺戰慄……此時，前方亮起了一道溫暖的紫色光芒。",
-        options: [
-          { label: "跟上光芒", effect: () => { fearValue = 0; snakeIndex += 15; return { text: "在治癒之光的照耀下，彷彿再也沒有什麼能夠讓人害怕了……。" }; } },
-          { label: "停留原地", effect: () => { return { text: "猶豫之際，那道光已然消失，只留下無盡的黑暗。" }; } },
-          { label: "轉身逃離", effect: () => { fearValue -= 15; sheepIndex += 15; return { text: "一道急切的聲音響起：「不要走入那道光，快快遠離那道光……。」" }; } }
-        ]
-      }
+      "uv": uvEventData
     };
 
     const s4Text = document.getElementById('s4-text');
@@ -1166,6 +1250,7 @@
     const nextBtn4 = document.getElementById('next-btn-4');
 
     function renderEvent(eventId) {
+      currentLobbyEventId = eventId;
       if (idleTimer) clearTimeout(idleTimer);
       if (!eventId) return; 
       const ev = eventsData[eventId];
@@ -1195,7 +1280,12 @@
           btn.onclick = () => handleOptionClick(opt);
           s4Options.appendChild(btn);
         });
-        startIdleTimer();
+        
+        if (eventId === "uv") {
+            if (idleTimer) clearTimeout(idleTimer);
+        } else {
+            startIdleTimer();
+        }
       }
     }
 
@@ -1212,18 +1302,27 @@
 
       let fearDiff = newFear - oldFear;
       let fearText = "";
-      if (fearDiff > 0) {
-        fearText = "（一陣懼意漫上心頭）";
-      } else if (fearDiff < 0) {
-        fearText = "（情緒似乎得到了緩和）";
-      }
+      if (fearDiff > 0) fearText = "（一陣懼意漫上心頭）";
+      else if (fearDiff < 0) fearText = "（情緒似乎得到了緩和）";
 
-      if (fearValue >= 60) {
-        result = { text: "恐懼徹底吞噬了理智，在無盡的黑暗與迷霧中，徹底迷失了方向……。", isEnding: true, transitionText: "（結局：迷失）", isLostEnding: true };
-      } else if (fearValue > 50 && !uvTriggered) {
-        uvTriggered = true;
-        renderEvent("uv");
-        return; 
+      // 優先判定 UV 事件
+      if (fearValue >= 50 && !uvTriggered) {
+          uvTriggered = true;
+          result.goto = "uv";
+          result.isEnding = false;
+          result.isLostEnding = false;
+          result.isExperimentEnding = false;
+          result.triggerZoneTransition = false;
+      }
+      
+      let isForcedLostNext = false;
+      if (fearValue >= 60 && uvTriggered) {
+          if (currentLobbyEventId === "uv") {
+              isForcedLostNext = true;
+          } else if (result.goto !== "uv") {
+              result = { text: "恐懼徹底吞噬了理智，在無盡的黑暗與迷霧中，徹底迷失了方向……。", isEnding: true, transitionText: "（結局：迷失）", isLostEnding: true };
+              fearText = "";
+          }
       }
 
       if (result.skipFeedback) {
@@ -1240,13 +1339,8 @@
       }
 
       let finalFeedbackHtml = result.text;
-      
-      if (fearText) {
-         finalFeedbackHtml += `<br><br><span style="font-size: 1rem; color: #a9a9a9;">${fearText}</span>`;
-      }
-      if (result.transitionText) {
-         finalFeedbackHtml += `<br><br><span style="font-size: 1rem; color: #a9a9a9;">${result.transitionText}</span>`;
-      }
+      if (fearText) finalFeedbackHtml += `<br><br><span style="font-size: 1rem; color: #a9a9a9;">${fearText}</span>`;
+      if (result.transitionText) finalFeedbackHtml += `<br><br><span style="font-size: 1rem; color: #a9a9a9;">${result.transitionText}</span>`;
       
       s4Feedback.innerHTML = finalFeedbackHtml;
       s4Feedback.style.display = 'block';
@@ -1257,7 +1351,12 @@
       nextBtn4.style.display = 'inline-block';
       nextBtn4.classList.add('instant-visible');
       
-      if (result.isEnding) {
+      if (result.isExperimentEnding) {
+          nextBtn4.style.display = 'none';
+          setTimeout(() => {
+              handleExperimentEndingTransition();
+          }, 3000);
+      } else if (result.isEnding) {
           if (result.isLostEnding) {
              nextBtn4.textContent = "Next";
              nextBtn4.onclick = () => { handleLostEndingTransition(); };
@@ -1276,10 +1375,14 @@
       } else {
           nextBtn4.textContent = "Next";
           nextBtn4.onclick = () => {
-              const nextId = result.goto ? result.goto : getNextEventId();
-              if (nextId) renderEvent(nextId);
+              if (isForcedLostNext) {
+                  handleLostEndingTransition();
+              } else {
+                  const nextId = result.goto ? result.goto : getNextEventId();
+                  if (nextId) renderEvent(nextId);
+              }
           };
-          startIdleTimer();
+          if (!isForcedLostNext && result.goto !== "uv") startIdleTimer();
       }
     }
 
@@ -1385,7 +1488,8 @@
         options: [
           { label: "沉入黑暗", effect: () => { return { text: "四周歸於寂靜，回歸最終的詰問……", isEnding: true, transitionText: "（進入結局詰問）" }; } }
         ]
-      }
+      },
+      "uv": uvEventData
     };
 
     // ==========================================
@@ -1462,7 +1566,7 @@
             sceneFb.style.display = 'block';
             
             const clinicFbText = document.getElementById('clinic-fb-text');
-            clinicFbText.innerHTML = '還是記住這些內容為好。';
+            clinicFbText.innerHTML = '還是記住這些規則為好。';
             clinicFbText.classList.add('instant-visible');
             
             const fbNext = document.getElementById('clinic-fb-next');
@@ -1485,6 +1589,7 @@
     }
 
     function renderClinicEvent(eventId) {
+      currentClinicEventId = eventId;
       if (idleTimer) clearTimeout(idleTimer);
       if (!eventId) return;
 
@@ -1519,7 +1624,12 @@
           btn.onclick = () => handleClinicOptionClick(opt);
           scOptions.appendChild(btn);
         });
-        startIdleTimer();
+        
+        if (eventId === "uv") {
+            if (idleTimer) clearTimeout(idleTimer);
+        } else {
+            startIdleTimer();
+        }
       }
     }
 
@@ -1544,21 +1654,36 @@
       if (fearDiff > 0) fearText = "（一陣懼意漫上心頭）";
       else if (fearDiff < 0) fearText = "（情緒似乎得到了緩和）";
 
-      if (fearValue >= 60) {
-        result = { text: "恐懼徹底吞噬了理智，在無盡的黑暗與迷霧中，徹底迷失了方向……。", isEnding: true, transitionText: "（結局：迷失）", isLostEnding: true };
+      if (fearValue >= 50 && !uvTriggered) {
+          uvTriggered = true;
+          result.goto = "uv";
+          result.isEnding = false;
+          result.isLostEnding = false;
+          result.isExperimentEnding = false;
+          result.triggerZoneTransition = false;
+      }
+      
+      let isForcedLostNext = false;
+      if (fearValue >= 60 && uvTriggered) {
+          if (currentClinicEventId === "uv") {
+              isForcedLostNext = true;
+          } else if (result.goto !== "uv") {
+              result = { text: "恐懼徹底吞噬了理智，在無盡的黑暗與迷霧中，徹底迷失了方向……。", isEnding: true, transitionText: "（結局：迷失）", isLostEnding: true };
+              fearText = "";
+          }
       }
 
       if (result.skipFeedback) {
-          if (result.goto) {
-              renderClinicEvent(result.goto);
-              return;
-          } else if (result.triggerZoneTransition) {
-              triggerBlackScreenTransition(() => {
-                  document.getElementById('scene-clinic-game').style.display = 'none';
-                  transitionToZone(result.targetZone);
-              });
-              return;
-          }
+        if (result.goto) {
+          renderClinicEvent(result.goto);
+          return;
+        } else if (result.triggerZoneTransition) {
+          triggerBlackScreenTransition(() => {
+              document.getElementById('scene-clinic-game').style.display = 'none';
+              transitionToZone(result.targetZone);
+          });
+          return;
+        }
       }
 
       let finalFeedbackHtml = result.text;
@@ -1573,8 +1698,13 @@
 
       nextBtnC.style.display = 'inline-block';
       nextBtnC.classList.add('instant-visible');
-
-      if (result.isEnding) {
+      
+      if (result.isExperimentEnding) {
+          nextBtnC.style.display = 'none';
+          setTimeout(() => {
+              handleExperimentEndingTransition();
+          }, 3000);
+      } else if (result.isEnding) {
         if (result.isLostEnding) {
           nextBtnC.textContent = "Next";
           nextBtnC.onclick = () => { handleLostEndingTransition(); };
@@ -1593,10 +1723,14 @@
       } else {
         nextBtnC.textContent = "Next";
         nextBtnC.onclick = () => {
-          const nextId = result.goto ? result.goto : getNextClinicEventId();
-          if (nextId) renderClinicEvent(nextId);
+          if (isForcedLostNext) {
+              handleLostEndingTransition();
+          } else {
+              const nextId = result.goto ? result.goto : getNextClinicEventId();
+              if (nextId) renderClinicEvent(nextId);
+          }
         };
-        startIdleTimer();
+        if (!isForcedLostNext && result.goto !== "uv") startIdleTimer();
       }
     }
 
