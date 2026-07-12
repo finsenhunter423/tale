@@ -362,7 +362,19 @@
 
     <div id="scene-clinic-intro" style="display: none;">
       <p class="story-text" id="clinic-p1">廢棄的診療室內燈光昏暗，辦公桌上擺放的名牌因為污損，已然看不清楚名字，牆上貼著一張公告。</p>
-      <button id="clinic-intro-next" class="btn hidden-element">Next</button>
+      
+      <h2 class="scene-title hidden-element" id="clinic-s2-title" style="margin-top: 40px;">【診療室公告】</h2>
+      <ul class="bullet-list" id="clinic-s2-list">
+        <li class="story-text bullet-item clinic-s2-item hidden-element">• 請不要逃離紫外光，它能消除一切恐懼。</li>
+        <li class="story-text bullet-item clinic-s2-item hidden-element">• 請不要害怕「蛇」，它不會傷害你。</li>
+        <li class="story-text bullet-item clinic-s2-item hidden-element">• 請不要聆聽騷動聲的內容，並立刻找「醫生」求助。</li>
+        <li class="story-text bullet-item clinic-s2-item hidden-element">• 請不要吃太多糖果，那不是好孩子該做的。</li>
+        <li class="story-text bullet-item clinic-s2-item hidden-element">• 請不要擔心，「醫生」會保護好孩子。</li>
+        <li class="story-text bullet-item clinic-s2-item hidden-element">• 請不要迴避哼唱歌曲的聲音，那是安全的訊號。</li>
+        <li class="story-text bullet-item clinic-s2-item hidden-element">• 請不要清除菌絲，它並不會傷害人，靜待消失即可。</li>
+      </ul>
+
+      <button id="action-btn-clinic" class="btn hidden-element">Skip</button>
     </div>
 
     <div id="scene-clinic-feedback" style="display: none;">
@@ -557,6 +569,10 @@
     let s1Timeouts = []; 
     let scene2State = 'playing';
     let s2Timeouts = [];
+    
+    // 診療室過場狀態
+    let clinicIntroState = 'playing';
+    let clinicTimeouts = [];
 
     tabHospital.addEventListener('click', () => {
       nbHospitalContent.style.display = 'block';
@@ -1026,7 +1042,7 @@
       "1-6": {
         text: "好幾道聲音窸窣作響，像是一群人在交談，情緒激動。",
         options: [
-          { label: "凝神細聽", effect: () => { sheepIndex += 5; return { text: "「罪人……沉沼…… Russo……。」他們在說的是什麼？" }; } },
+          { label: "凝神細聽", effect: () => { sheepIndex += 5; return { text: "「罪人……沉沼……。」他們在說的是什麼？" }; } },
           { label: "無視", effect: () => { return { text: "暗潮湧動的秘密，有時不去理會才是正解。" }; } },
           { label: "捂上耳朵", effect: () => { snakeIndex += 5; return { text: "不該知道的事，非禮勿聽。" }; } }
         ]
@@ -1057,7 +1073,7 @@
       "1-8": {
         text: "透過昏暗的燈光，依稀能見到前方出現了一串腳印，但看上去並不像人類的。",
         options: [
-          { label: "跟隨腳印", effect: () => { sheepIndex += 10; return { text: "直到腳步與之重疊才發現，眼前的腳印，竟然是羊蹄的形狀……。", triggerZoneTransition: true, targetZone: 'ward' }; } },
+          { label: "跟隨腳印", effect: () => { sheepIndex += 10; return { triggerZoneTransition: true, targetZone: 'ward', skipFeedback: true }; } },
           { label: "忽視腳印", effect: () => { return { text: "資訊不足時，不要相信任何事物。" }; } },
           { label: "反向離開", effect: () => { snakeIndex += 10; return { text: "迷霧中的指引，更像是誘人深入的陷阱。" }; } }
         ]
@@ -1065,8 +1081,8 @@
       "1-9": {
         text: "映入眼簾的是一條長廊，末端似乎通往……。",
         options: [
-          { label: "診療室", effect: () => { return { text: "（前往診療室）", triggerZoneTransition: true, targetZone: 'clinic' }; } },
-          { label: "住院部", effect: () => { return { text: "（前往住院部）", triggerZoneTransition: true, targetZone: 'ward' }; } }
+          { label: "診療室", effect: () => { return { triggerZoneTransition: true, targetZone: 'clinic', skipFeedback: true }; } },
+          { label: "住院部", effect: () => { return { triggerZoneTransition: true, targetZone: 'ward', skipFeedback: true }; } }
         ]
       },
       "uv": {
@@ -1145,9 +1161,25 @@
         return; 
       }
 
-      if (result.skipFeedback && result.goto) {
-          renderEvent(result.goto);
-          return;
+      if (result.skipFeedback) {
+          if (result.goto) {
+              renderEvent(result.goto);
+              return;
+          } else if (result.triggerZoneTransition) {
+              triggerBlackScreenTransition(() => {
+                  scene4.style.display = 'none';
+                  if (result.targetZone === 'clinic') {
+                      currentZone = 'clinic';
+                      initClinicEvents();
+                      enterClinicScene();
+                  } else if (result.targetZone === 'ward') {
+                      document.getElementById('scene-ward-game').style.display = 'block';
+                      currentZone = 'ward';
+                      hasPassedWard = true;
+                  }
+              });
+              return;
+          }
       }
 
       let finalFeedbackHtml = result.text;
@@ -1177,7 +1209,7 @@
              nextBtn4.onclick = () => { };
           }
       } else if (result.triggerZoneTransition) {
-          // 通過選項切換區域
+          // 通過選項切換區域（有回饋文字的情況）
           nextBtn4.textContent = "Next";
           nextBtn4.onclick = () => {
             triggerBlackScreenTransition(() => {
@@ -1230,8 +1262,7 @@
       "2-1": {
         text: "一道溫柔的聲音從背後傳來：「怎麼一個人待在這裡呢？很危險的。」，回頭看去，卻沒有任何人。",
         options: [
-          { label: "「你是誰？」", effect: () => { return { text: "「我是亨特醫生……請別害怕，我不會傷害好孩子的……。」", goto: "2-1-1" }; } },
-          { label: "立刻離開", effect: () => { return { text: "這個名字……似乎在哪裡聽過？" }; } }
+          { label: "「你是誰？」", effect: () => { return { text: "「我是亨特醫生……請別害怕，我不會傷害好孩子的……。」", goto: "2-1-1" }; } }
         ]
       },
       "2-1-1": {
@@ -1257,6 +1288,10 @@
                 fearValue += 10;
                 return { text: "「小心，不聽話的壞孩子，會被『怪物』盯上呢……？」" };
               }
+            }
+          },
+          { label: "轉身逃跑", effect: () => {
+              return { text: "亨特……這個名字，似乎在哪裡聽過？" }; 
             }
           },
           { label: "「……。」", effect: () => {
@@ -1325,39 +1360,68 @@
     function enterClinicScene() {
       const sceneClinicIntro = document.getElementById('scene-clinic-intro');
       const p1 = document.getElementById('clinic-p1');
-      const nextBtn = document.getElementById('clinic-intro-next');
+      const title = document.getElementById('clinic-s2-title');
+      const items = document.querySelectorAll('.clinic-s2-item');
+      const actionBtn = document.getElementById('action-btn-clinic');
 
       sceneClinicIntro.style.display = 'block';
       p1.classList.remove('visible', 'instant-visible');
-      nextBtn.classList.remove('visible', 'instant-visible');
+      title.classList.remove('visible', 'instant-visible');
+      items.forEach(i => i.classList.remove('visible', 'instant-visible'));
+      actionBtn.classList.remove('visible', 'instant-visible');
       
-      setTimeout(() => { p1.classList.add('visible'); }, 50);
-      setTimeout(() => { nextBtn.classList.add('visible'); }, 2500);
+      clinicIntroState = 'playing';
+      actionBtn.textContent = 'Skip';
+      clinicTimeouts = [];
 
-      // 診療室開頭，依據大廳是否紀錄手札判定流向
-      nextBtn.onclick = () => {
-        sceneClinicIntro.style.display = 'none';
+      clinicTimeouts.push(setTimeout(() => { p1.classList.add('visible'); }, 50));
+      clinicTimeouts.push(setTimeout(() => { actionBtn.classList.add('visible'); }, 1000));
+      clinicTimeouts.push(setTimeout(() => { title.classList.add('visible'); }, 1500));
+      
+      items.forEach((item, index) => {
+        clinicTimeouts.push(setTimeout(() => {
+          item.classList.add('visible');
+        }, 2500 + (index * 1000))); 
+      });
 
-        if (recordsNotebook) {
-          // 直接解鎖手札標籤並給予回饋
-          document.getElementById('notebook-tabs').style.display = 'flex'; 
-          const sceneFb = document.getElementById('scene-clinic-feedback');
-          sceneFb.style.display = 'block';
-          
-          const clinicFbText = document.getElementById('clinic-fb-text');
-          clinicFbText.innerHTML = '還是記住這些規則為好。';
-          clinicFbText.classList.add('instant-visible');
-          
-          const fbNext = document.getElementById('clinic-fb-next');
-          fbNext.classList.add('instant-visible');
+      clinicTimeouts.push(setTimeout(() => { 
+        clinicIntroState = 'done';
+        actionBtn.textContent = 'Next';
+      }, 2500 + (items.length * 1000) + 500));
 
-          fbNext.onclick = () => {
-            sceneFb.style.display = 'none';
-            startClinicGameplay();
-          };
+      actionBtn.onclick = () => {
+        if (clinicIntroState === 'playing') {
+          clinicTimeouts.forEach(clearTimeout);
+          p1.classList.add('instant-visible');
+          title.classList.add('instant-visible');
+          items.forEach(i => i.classList.add('instant-visible'));
+          actionBtn.classList.add('instant-visible');
+          clinicIntroState = 'done';
+          actionBtn.textContent = 'Next';
         } else {
-          // 未紀錄，直接開始
-          startClinicGameplay();
+          sceneClinicIntro.style.display = 'none';
+
+          if (recordsNotebook) {
+            // 直接解鎖手札標籤並給予回饋
+            document.getElementById('notebook-tabs').style.display = 'flex'; 
+            const sceneFb = document.getElementById('scene-clinic-feedback');
+            sceneFb.style.display = 'block';
+            
+            const clinicFbText = document.getElementById('clinic-fb-text');
+            clinicFbText.innerHTML = '還是記住這些規則為好。';
+            clinicFbText.classList.add('instant-visible');
+            
+            const fbNext = document.getElementById('clinic-fb-next');
+            fbNext.classList.add('instant-visible');
+
+            fbNext.onclick = () => {
+              sceneFb.style.display = 'none';
+              startClinicGameplay();
+            };
+          } else {
+            // 未紀錄，直接開始
+            startClinicGameplay();
+          }
         }
       };
     }
@@ -1432,9 +1496,21 @@
         result = { text: "恐懼徹底吞噬了理智，在無盡的黑暗與迷霧中，徹底迷失了方向……。", isEnding: true, transitionText: "（結局：迷失）", isLostEnding: true };
       }
 
-      if (result.skipFeedback && result.goto) {
-        renderClinicEvent(result.goto);
-        return;
+      if (result.skipFeedback) {
+          if (result.goto) {
+              renderClinicEvent(result.goto);
+              return;
+          } else if (result.triggerZoneTransition) {
+              triggerBlackScreenTransition(() => {
+                  document.getElementById('scene-clinic-game').style.display = 'none';
+                  if (result.targetZone === 'ward') {
+                      document.getElementById('scene-ward-game').style.display = 'block';
+                      currentZone = 'ward';
+                      hasPassedWard = true;
+                  }
+              });
+              return;
+          }
       }
 
       let finalFeedbackHtml = result.text;
