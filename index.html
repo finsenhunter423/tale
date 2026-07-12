@@ -232,6 +232,7 @@
 
   /* 確保切換不同長度公告時，視窗不會大幅縮放 */
   #notebook-modal .modal-content {
+    height: 600px;
     min-height: 550px;
   }
 
@@ -1078,7 +1079,7 @@
               sheepIndex += 5; 
               ateCandy = true; 
               randomEvents.push("1-5"); shuffleArray(randomEvents);
-              return { text: "甜蜜的味道，暫時安撫了內心的不安。" }; 
+              return { text: "甜蜜的味道，暫安撫了內心的不安。" }; 
             } 
           },
           { label: "置之不理", effect: () => { 
@@ -1361,13 +1362,13 @@
         options: [
           { label: "凝神細聽", effect: () => { sheepIndex += 10; return { text: "「把他沉下去！沉下去！」" }; } },
           { label: "無視", effect: () => { return { text: "雖然並不理解，但那聽上去不是應該知道的事……。" }; } },
-          { label: "尋求幫助", effect: () => { fearValue -= 5; sheepIndex -= 10; return { text: "「別擔心，會沒事的……。」「醫生」輕輕地低語。" }; } }
+          { label: "尋求幫助", effect: () => { fearValue -= 5; sheepIndex -= 10; return { text: "「別擔心，會沒事的……。」<br><br>「醫生」輕輕地低語。" }; } }
         ]
       },
       "2-4": {
         text: "腳腕漫上一股黏膩濕滑的觸感，低頭所見，是幾條觸手般的菌絲，困住了前行的腳步。",
         options: [
-          { label: "動手清除", effect: () => { fearValue += 10; return { text: "觸碰到的瞬間，一股異樣的懼意瞬間襲來……。" }; } },
+          { label: "動手清除", effect: () => { fearValue += 10; return { text: "觸碰到的瞬間，一股異樣的戰慄瞬間襲來……。" }; } },
           { label: "靜觀其變", effect: () => { return { text: "一段時間後菌絲鬆開了箝制，只留下腳腕上一道濕痕。" }; } },
           { label: "仔細觀察", effect: () => { snakeIndex += 10; return { text: "菌絲彷彿能夠感知到視線，放輕了纏勒的力度，而後緩緩退開，只在腳腕上留下一道濕痕。" }; } }
         ]
@@ -1392,6 +1393,7 @@
     // ==========================================
 
     function enterClinicScene() {
+      if (idleTimer) clearTimeout(idleTimer);
       const sceneClinicIntro = document.getElementById('scene-clinic-intro');
       const p1 = document.getElementById('clinic-p1');
       const introNextBtn = document.getElementById('next-btn-clinic-intro');
@@ -1412,6 +1414,7 @@
     }
 
     function enterClinicRulesScene() {
+      if (idleTimer) clearTimeout(idleTimer);
       const sceneClinicRules = document.getElementById('scene-clinic-rules');
       const title = document.getElementById('clinic-s2-title');
       const items = document.querySelectorAll('.clinic-s2-item');
@@ -1459,7 +1462,7 @@
             sceneFb.style.display = 'block';
             
             const clinicFbText = document.getElementById('clinic-fb-text');
-            clinicFbText.innerHTML = '全新的規則，也需要紀錄下來。';
+            clinicFbText.innerHTML = '還是記住這些內容為好。';
             clinicFbText.classList.add('instant-visible');
             
             const fbNext = document.getElementById('clinic-fb-next');
