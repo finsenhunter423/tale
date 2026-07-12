@@ -297,7 +297,6 @@
 </head>
 <body>
 
-  <!-- 實驗階段數值顯示面板 -->
   <div id="debug-panel">
     【實驗階段數據】 
     恐懼值: <span id="debug-fear" class="debug-val">0</span> | 
@@ -305,8 +304,9 @@
     蛇指數: <span id="debug-snake" class="debug-val">0</span>
   </div>
 
-  <!-- 黑屏過場用 -->
-  <div id="black-overlay"></div>
+  <div id="black-overlay">
+    <div id="overlay-text" style="color: #d3d3d3; font-size: 1.5rem; letter-spacing: 2px; text-align: center; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0; transition: opacity 0.5s ease;"></div>
+  </div>
 
   <div id="intro-screen">
     <div class="poem-line">Long long ago, a tale was born</div>
@@ -318,7 +318,6 @@
 
   <div id="game-screen">
     
-    <!-- 第一階段：醫院大廳 -->
     <div id="scene-1">
       <p class="story-text" id="s1-p1">冰冷、潮濕，四周瀰漫著令人不適的氣息。</p>
       <p class="story-text" id="s1-p2">已然記不清究竟是何時昏了過去，意識回籠之際，只覺頭痛欲裂。映入眼簾的是一片破敗景象，能大致判斷這裡是一座廢棄的醫院。</p>
@@ -326,7 +325,6 @@
       <button id="action-btn-1" class="btn hidden-element">Skip</button>
     </div>
 
-    <!-- 第二階段：醫院公告 -->
     <div id="scene-2" style="display: none;">
       <h2 class="scene-title" id="s2-title">【聖心醫院公告】</h2>
       <ul class="bullet-list">
@@ -362,34 +360,16 @@
       <button id="next-btn-4" class="btn hidden-element">Next</button>
     </div>
 
-    <!-- 診療室開場 -->
     <div id="scene-clinic-intro" style="display: none;">
       <p class="story-text" id="clinic-p1">廢棄的診療室內燈光昏暗，辦公桌上擺放的名牌因為污損，已然看不清楚名字，牆上貼著一張公告。</p>
       <button id="clinic-intro-next" class="btn hidden-element">Next</button>
     </div>
 
-    <!-- 診療室公告 -->
-    <div id="scene-clinic-rules" style="display: none;">
-      <h2 class="scene-title" id="clinic-r-title">【診療室公告】</h2>
-      <ul class="bullet-list">
-        <li class="story-text bullet-item cr-item">• 請不要逃離紫外光，它能消除一切恐懼。</li>
-        <li class="story-text bullet-item cr-item">• 請不要害怕「蛇」，它不會傷害你。</li>
-        <li class="story-text bullet-item cr-item">• 請不要聆聽騷動聲的內容，並立刻找「醫生」求助。</li>
-        <li class="story-text bullet-item cr-item">• 請不要吃太多糖果，那不是好孩子該做的。</li>
-        <li class="story-text bullet-item cr-item">• 請不要擔心，「醫生」會保護好孩子。</li>
-        <li class="story-text bullet-item cr-item">• 請不要迴避哼唱歌曲的聲音，那是安全的訊號。</li>
-        <li class="story-text bullet-item cr-item">• 請不要清除菌絲，它並不會傷害人，靜待消失即可。</li>
-      </ul>
-      <button id="clinic-rules-next" class="btn hidden-element">Skip</button>
-    </div>
-
-    <!-- 診療室手札反饋 -->
     <div id="scene-clinic-feedback" style="display: none;">
-      <p class="story-text" id="clinic-fb-text">已記下新的規則。</p>
+      <p class="story-text" id="clinic-fb-text"></p>
       <button id="clinic-fb-next" class="btn hidden-element">Next</button>
     </div>
 
-    <!-- 診療室遊戲主進程 -->
     <div id="scene-clinic-game" style="display: none;">
       <p class="story-text" id="sc-text"></p>
       <div id="sc-options" class="options-container hidden-element"></div>
@@ -397,7 +377,6 @@
       <button id="next-btn-c" class="btn hidden-element">Next</button>
     </div>
 
-    <!-- 住院部測試專用場景 -->
     <div id="scene-ward-game" style="display: none;">
       <p class="story-text visible" style="text-align: center;">【住院部】<br><br>這裡是一片寂靜的住院部病房。環境相對安全，你暫時得到了庇護。</p>
       <div class="options-container visible" style="margin-top: 20px;">
@@ -405,7 +384,6 @@
       </div>
     </div>
 
-    <!-- 迷失結局專用場景 -->
     <div id="scene-lost" style="display: none;">
       <p class="story-text" id="lost-p1">冰冷、潮濕，四周的空氣瀰漫著令人不適的氣息。</p>
       <p class="story-text" id="lost-p2">已然記不清究竟是何時昏了過去，意識回籠之際，只覺頭痛欲裂。映入眼簾的是一片破敗景象，能大致判斷這裡是一座廢棄的醫院。</p>
@@ -429,12 +407,10 @@
     <button id="inventory-btn" class="btn ui-btn" style="display: none; margin-top: 15px;">隨身物品</button>
   </div>
 
-  <!-- 手札視窗 -->
   <div id="notebook-modal">
     <div class="modal-content">
       <span class="close-modal" id="close-notebook">&times;</span>
       
-      <!-- 醫院公告內容 -->
       <div id="notebook-hospital-content">
         <h2 style="font-size: 1.5rem; text-align: center; letter-spacing: 2px; margin-bottom: 30px;">【聖心醫院公告】</h2>
         <ul class="bullet-list">
@@ -449,7 +425,6 @@
         </ul>
       </div>
 
-      <!-- 診療室公告內容 -->
       <div id="notebook-clinic-content" style="display: none;">
         <h2 style="font-size: 1.5rem; text-align: center; letter-spacing: 2px; margin-bottom: 30px;">【診療室公告】</h2>
         <ul class="bullet-list">
@@ -463,7 +438,6 @@
         </ul>
       </div>
 
-      <!-- 手札分頁標籤 -->
       <div id="notebook-tabs" style="display: none; justify-content: center; gap: 20px; margin-top: 30px;">
         <button id="tab-hospital" class="btn" style="margin-top:0; padding: 5px 15px; background-color: #d3d3d3; color: #070707;">醫院公告</button>
         <button id="tab-clinic" class="btn" style="margin-top:0; padding: 5px 15px;">診療室公告</button>
@@ -481,7 +455,6 @@
     </div>
   </div>
 
-  <!-- 吃下糖果選擇視窗 -->
   <div id="confirm-modal">
     <div class="modal-content" style="text-align: left; max-width: 400px; padding: 30px;">
       <p style="font-size: 1.2rem; line-height: 2; letter-spacing: 1.5px; margin-bottom: 20px; color: #d3d3d3; text-align: center;" id="confirm-text">
@@ -494,7 +467,6 @@
     </div>
   </div>
 
-  <!-- 透鏡描述視窗 -->
   <div id="item-detail-modal">
     <div class="modal-content" style="text-align: center; max-width: 400px; padding: 30px;">
       <span class="close-modal" id="close-item-detail">&times;</span>
@@ -502,7 +474,6 @@
     </div>
   </div>
 
-  <!-- 系統訊息視窗 -->
   <div id="message-modal">
     <div class="modal-content" style="text-align: center; max-width: 400px; padding: 30px;">
       <span class="close-modal" id="close-message-btn">&times;</span>
@@ -587,9 +558,6 @@
     let scene2State = 'playing';
     let s2Timeouts = [];
 
-    let clinicRulesState = 'playing';
-    let clinicTimeouts = [];
-
     tabHospital.addEventListener('click', () => {
       nbHospitalContent.style.display = 'block';
       nbClinicContent.style.display = 'none';
@@ -620,9 +588,12 @@
     // 通用 1.5 秒黑屏過場處理器
     function triggerBlackScreenTransition(callback) {
       if (idleTimer) clearTimeout(idleTimer);
+      const overlayText = document.getElementById('overlay-text');
+      overlayText.textContent = ''; // 確保一般過場不顯示文字
       blackOverlay.style.display = 'block';
       void blackOverlay.offsetWidth; 
       blackOverlay.style.opacity = '1';
+      overlayText.style.opacity = '0';
 
       // 0.5秒淡入完畢 + 保持1.5秒全黑 = 2000ms 後再切換與淡出
       setTimeout(() => {
@@ -651,31 +622,44 @@
       let fbEl = (currentZone === 'lobby') ? s4Feedback : document.getElementById('sc-feedback');
       let btnEl = (currentZone === 'lobby') ? nextBtn4 : document.getElementById('next-btn-c');
 
+      // 記憶觸發超時前，玩家停留在選項畫面還是回饋畫面
+      let wasFeedbackVisible = (fbEl.style.display === 'block');
+
       txtEl.style.display = 'none';
       optEl.style.display = 'none';
+      fbEl.style.display = 'none';
+      btnEl.style.display = 'none';
 
       fearValue += 30;
       updateFearUI();
 
-      fbEl.innerHTML = `沉默裡，令人窒息的恐懼襲來……。`;
-      fbEl.style.display = 'block';
-      fbEl.className = 'story-text instant-visible';
-
-      btnEl.style.display = 'none';
-      btnEl.classList.remove('instant-visible');
+      // 建立臨時的超時警告元素
+      let timeoutMsg = document.createElement('p');
+      timeoutMsg.className = 'story-text instant-visible';
+      timeoutMsg.innerHTML = '沉默裡，令人窒息的恐懼襲來……。';
+      timeoutMsg.style.textAlign = 'left';
+      let container = (currentZone === 'lobby') ? scene4 : document.getElementById('scene-clinic-game');
+      container.insertBefore(timeoutMsg, btnEl); // 將提示安插在容器內
 
       setTimeout(() => {
+        timeoutMsg.remove(); // 移除臨時訊息
+        
         if (fearValue >= 60) {
           handleLostEndingTransition();
         } else {
-          fbEl.style.display = 'none';
-          txtEl.style.display = 'block';
-          optEl.style.display = 'flex';
+          // 根據超時前的狀態還原畫面
+          if (wasFeedbackVisible) {
+            fbEl.style.display = 'block';
+            btnEl.style.display = 'inline-block';
+          } else {
+            txtEl.style.display = 'block';
+            optEl.style.display = 'flex';
+          }
           
           activeModals.forEach(m => m.style.display = 'flex');
           activeModals = [];
           
-          startIdleTimer();
+          startIdleTimer(); // 恢復計時
         }
       }, 3000);
     }
@@ -688,9 +672,13 @@
     }
 
     function handleLostEndingTransition() {
+      const overlayText = document.getElementById('overlay-text');
+      overlayText.textContent = '……';
+      
       blackOverlay.style.display = 'block';
       void blackOverlay.offsetWidth; 
       blackOverlay.style.opacity = '1';
+      overlayText.style.opacity = '1';
 
       setTimeout(() => {
         scene1.style.display = 'none';
@@ -699,7 +687,6 @@
         sceneFeedback.style.display = 'none';
         scene4.style.display = 'none';
         document.getElementById('scene-clinic-intro').style.display = 'none';
-        document.getElementById('scene-clinic-rules').style.display = 'none';
         document.getElementById('scene-clinic-feedback').style.display = 'none';
         document.getElementById('scene-clinic-game').style.display = 'none';
         document.getElementById('scene-ward-game').style.display = 'none';
@@ -712,15 +699,18 @@
         sceneLost.style.display = 'block';
 
         blackOverlay.style.opacity = '0';
+        overlayText.style.opacity = '0';
+        
         setTimeout(() => {
           blackOverlay.style.display = 'none';
+          overlayText.textContent = ''; // 重置文字
           setTimeout(() => { document.getElementById('lost-p1').classList.add('visible'); }, 500);
           setTimeout(() => { document.getElementById('lost-p2').classList.add('visible'); }, 3000);
           setTimeout(() => { 
             document.getElementById('lost-next-btn').classList.add('visible');
           }, 5500);
         }, 500);
-      }, 1500); 
+      }, 2000); // 延長黑屏時間讓玩家看見「……」
     }
 
     document.getElementById('lost-next-btn').addEventListener('click', () => {
@@ -866,7 +856,8 @@
       recordsNotebook = true;
       scene3.style.display = 'none';
       sceneFeedback.style.display = 'block';
-      feedbackText.innerHTML = '謹慎，永遠是最穩妥的選擇。<br><br><span style="font-size: 1rem; color: #a9a9a9;">（獲得提示，可打開手札查看）</span>';
+      // 移除括號提示，直接顯示手札圖示
+      feedbackText.innerHTML = '謹慎，永遠是最穩妥的選擇。';
       feedbackText.classList.add('instant-visible');
       
       notebookBtn.style.display = 'block';
@@ -1028,7 +1019,8 @@
               }
             }
           },
-          { label: "離開大廳", effect: () => { fearValue += 10; return { text: "在廢棄的醫院裡的，會是什麼人？" }; } }
+          // 修正為「立刻離開」
+          { label: "立刻離開", effect: () => { fearValue += 10; return { text: "在廢棄的醫院裡的，會是什麼人？" }; } }
         ]
       },
       "1-6": {
@@ -1065,7 +1057,7 @@
       "1-8": {
         text: "透過昏暗的燈光，依稀能見到前方出現了一串腳印，但看上去並不像人類的。",
         options: [
-          { label: "跟隨腳印", effect: () => { sheepIndex += 10; return { text: "直到腳步與之重疊才發現，眼前的腳印，竟然是羊蹄的形狀……。", isEnding: true, transitionText: "（進入住院部）" }; } },
+          { label: "跟隨腳印", effect: () => { sheepIndex += 10; return { text: "直到腳步與之重疊才發現，眼前的腳印，竟然是羊蹄的形狀……。", triggerZoneTransition: true, targetZone: 'ward' }; } },
           { label: "忽視腳印", effect: () => { return { text: "資訊不足時，不要相信任何事物。" }; } },
           { label: "反向離開", effect: () => { snakeIndex += 10; return { text: "迷霧中的指引，更像是誘人深入的陷阱。" }; } }
         ]
@@ -1073,8 +1065,8 @@
       "1-9": {
         text: "映入眼簾的是一條長廊，末端似乎通往……。",
         options: [
-          { label: "診療室", effect: () => { return { customAction: "enterClinic" }; } },
-          { label: "住院部", effect: () => { return { text: "（進入住院部）", isEnding: true }; } }
+          { label: "診療室", effect: () => { return { text: "（前往診療室）", triggerZoneTransition: true, targetZone: 'clinic' }; } },
+          { label: "住院部", effect: () => { return { text: "（前往住院部）", triggerZoneTransition: true, targetZone: 'ward' }; } }
         ]
       },
       "uv": {
@@ -1137,17 +1129,6 @@
       let newFear = fearValue;
       updateFearUI(); 
 
-      // 大廳切換到診療室：插入 1.5 秒黑屏
-      if (result.customAction === "enterClinic") {
-        scene4.style.display = 'none';
-        triggerBlackScreenTransition(() => {
-          currentZone = 'clinic';
-          initClinicEvents();
-          enterClinicScene();
-        });
-        return;
-      }
-
       let fearDiff = newFear - oldFear;
       let fearText = "";
       if (fearDiff > 0) {
@@ -1195,6 +1176,23 @@
              nextBtn4.textContent = "To Be Continued...";
              nextBtn4.onclick = () => { };
           }
+      } else if (result.triggerZoneTransition) {
+          // 通過選項切換區域
+          nextBtn4.textContent = "Next";
+          nextBtn4.onclick = () => {
+            triggerBlackScreenTransition(() => {
+              scene4.style.display = 'none';
+              if (result.targetZone === 'clinic') {
+                currentZone = 'clinic';
+                initClinicEvents();
+                enterClinicScene();
+              } else if (result.targetZone === 'ward') {
+                document.getElementById('scene-ward-game').style.display = 'block';
+                currentZone = 'ward';
+                hasPassedWard = true;
+              }
+            });
+          };
       } else {
           nextBtn4.textContent = "Next";
           nextBtn4.onclick = () => {
@@ -1308,8 +1306,8 @@
       "2-5-a": {
         text: "周圍的空氣忽然變得潮濕，伴隨黑暗，形成了極其沉重的壓迫感，令人窒息……。",
         options: [
-          { label: "停留原地", effect: () => { fearValue += 10; return { text: "越發濃烈的恐懼，並不是嘗試保持冷靜便能控制的。", triggerZoneTransition: true, transitionText: "（進入住院部）" }; } },
-          { label: "立刻逃離", effect: () => { return { text: "直覺，往往是正確的。", triggerZoneTransition: true, transitionText: "（進入住院部）" }; } }
+          { label: "停留原地", effect: () => { fearValue += 10; return { text: "越發濃烈的恐懼，並不是嘗試保持冷靜便能控制的。", triggerZoneTransition: true, targetZone: 'ward' }; } },
+          { label: "立刻逃離", effect: () => { return { text: "直覺，往往是正確的。", triggerZoneTransition: true, targetZone: 'ward' }; } }
         ]
       },
       "2-5-b": {
@@ -1336,69 +1334,30 @@
       setTimeout(() => { p1.classList.add('visible'); }, 50);
       setTimeout(() => { nextBtn.classList.add('visible'); }, 2500);
 
+      // 診療室開頭，依據大廳是否紀錄手札判定流向
       nextBtn.onclick = () => {
         sceneClinicIntro.style.display = 'none';
-        enterClinicRules();
-      };
-    }
 
-    function enterClinicRules() {
-      const sceneRules = document.getElementById('scene-clinic-rules');
-      const title = document.getElementById('clinic-r-title');
-      const nextBtn = document.getElementById('clinic-rules-next');
-      const items = document.querySelectorAll('.cr-item');
-
-      sceneRules.style.display = 'block';
-      clinicRulesState = 'playing';
-      nextBtn.textContent = 'Skip';
-      
-      clinicTimeouts.forEach(clearTimeout);
-      clinicTimeouts = [];
-      title.classList.remove('visible', 'instant-visible');
-      items.forEach(item => item.classList.remove('visible', 'instant-visible'));
-      nextBtn.classList.remove('visible', 'instant-visible');
-
-      clinicTimeouts.push(setTimeout(() => { title.classList.add('visible'); }, 100));
-      clinicTimeouts.push(setTimeout(() => { nextBtn.classList.add('visible'); }, 1600));
-
-      items.forEach((item, index) => {
-        clinicTimeouts.push(setTimeout(() => {
-          item.classList.add('visible');
-        }, 1600 + (index * 1500)));
-      });
-
-      clinicTimeouts.push(setTimeout(() => {
-        clinicRulesState = 'done';
-        nextBtn.textContent = 'Next';
-      }, 1600 + (items.length * 1500) + 500));
-
-      nextBtn.onclick = () => {
-        if (clinicRulesState === 'playing') {
-          clinicTimeouts.forEach(clearTimeout);
-          title.classList.add('instant-visible');
-          items.forEach(item => item.classList.add('instant-visible'));
-          nextBtn.classList.add('instant-visible');
-          clinicRulesState = 'done';
-          nextBtn.textContent = 'Next';
-        } else {
-          sceneRules.style.display = 'none';
+        if (recordsNotebook) {
+          // 直接解鎖手札標籤並給予回饋
+          document.getElementById('notebook-tabs').style.display = 'flex'; 
+          const sceneFb = document.getElementById('scene-clinic-feedback');
+          sceneFb.style.display = 'block';
           
-          if (recordsNotebook) {
-            document.getElementById('notebook-tabs').style.display = 'flex'; 
-            const sceneFb = document.getElementById('scene-clinic-feedback');
-            sceneFb.style.display = 'block';
-            document.getElementById('clinic-fb-text').classList.add('instant-visible');
-            
-            const fbNext = document.getElementById('clinic-fb-next');
-            fbNext.classList.add('instant-visible');
+          const clinicFbText = document.getElementById('clinic-fb-text');
+          clinicFbText.innerHTML = '還是記住這些規則為好。';
+          clinicFbText.classList.add('instant-visible');
+          
+          const fbNext = document.getElementById('clinic-fb-next');
+          fbNext.classList.add('instant-visible');
 
-            fbNext.onclick = () => {
-              sceneFb.style.display = 'none';
-              startClinicGameplay();
-            };
-          } else {
+          fbNext.onclick = () => {
+            sceneFb.style.display = 'none';
             startClinicGameplay();
-          }
+          };
+        } else {
+          // 未紀錄，直接開始
+          startClinicGameplay();
         }
       };
     }
@@ -1500,14 +1459,15 @@
           nextBtnC.onclick = () => { };
         }
       } else if (result.triggerZoneTransition) {
-        // 診療室 → 住院部：插入 1.5 秒黑屏
         nextBtnC.textContent = "Next";
         nextBtnC.onclick = () => {
           triggerBlackScreenTransition(() => {
             document.getElementById('scene-clinic-game').style.display = 'none';
-            document.getElementById('scene-ward-game').style.display = 'block';
-            currentZone = 'ward';
-            hasPassedWard = true; // 設定為已通過住院部
+            if (result.targetZone === 'ward') {
+              document.getElementById('scene-ward-game').style.display = 'block';
+              currentZone = 'ward';
+              hasPassedWard = true; 
+            }
           });
         };
       } else {
@@ -1525,8 +1485,8 @@
       triggerBlackScreenTransition(() => {
         document.getElementById('scene-ward-game').style.display = 'none';
         currentZone = 'clinic';
-        initClinicEvents(); // 重構隨機題庫
-        enterClinicScene(); // 從頭進入診療室流程
+        initClinicEvents(); 
+        enterClinicScene(); 
       });
     });
 
