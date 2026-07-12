@@ -198,7 +198,7 @@
     animation: violentBeat 0.8s infinite ease-in-out;
   }
 
-  #notebook-modal, #inventory-modal, #confirm-modal, #item-detail-modal {
+  #notebook-modal, #inventory-modal, #confirm-modal, #item-detail-modal, #message-modal {
     display: none;
     position: fixed;
     top: 0;
@@ -213,6 +213,10 @@
 
   #confirm-modal, #item-detail-modal {
     z-index: 1000;
+  }
+
+  #message-modal {
+    z-index: 1005;
   }
 
   .modal-content {
@@ -371,6 +375,14 @@
     </div>
   </div>
 
+  <!-- 新增的提示視窗 -->
+  <div id="message-modal">
+    <div class="modal-content" style="text-align: center; max-width: 400px; padding: 30px;">
+      <p id="message-text" style="font-size: 1.2rem; line-height: 2; letter-spacing: 1.5px; text-align: center; margin-bottom: 20px; color: #d3d3d3; opacity: 1; transform: none; transition: none;"></p>
+      <button id="message-close-btn" class="btn" style="margin-top: 0;">確認</button>
+    </div>
+  </div>
+
   <script>
     let fearValue = 0; 
     let sheepIndex = 0;
@@ -424,10 +436,24 @@
     const itemDetailModal = document.getElementById('item-detail-modal');
     const closeItemDetail = document.getElementById('close-item-detail');
 
+    const messageModal = document.getElementById('message-modal');
+    const messageText = document.getElementById('message-text');
+    const messageCloseBtn = document.getElementById('message-close-btn');
+
     let scene1State = 'playing'; 
     let s1Timeouts = []; 
     let scene2State = 'playing';
     let s2Timeouts = [];
+
+    // 顯示提示視窗函式
+    function showMessageModal(text) {
+      messageText.textContent = text;
+      messageModal.style.display = 'flex';
+    }
+
+    messageCloseBtn.addEventListener('click', () => {
+      messageModal.style.display = 'none';
+    });
 
     // 閒置計時器邏輯
     function startIdleTimer() {
@@ -437,6 +463,7 @@
         inventoryModal.style.display = 'none';
         confirmModal.style.display = 'none';
         itemDetailModal.style.display = 'none';
+        messageModal.style.display = 'none';
         handleOptionClick(null);
       }, 40000);
     }
@@ -589,9 +616,15 @@
       if (hasCandy) {
         hasCandy = false;
         ateCandy = true;
+        let oldFear = fearValue;
         fearValue = Math.max(0, fearValue - 10);
         updateFearUI();
         inventoryBtn.click();
+        
+        // 判斷恐懼值是否有確實下降，如果有則彈出視窗
+        if (fearValue < oldFear) {
+          showMessageModal("情緒似乎得到了緩和");
+        }
       }
     });
 
@@ -824,9 +857,9 @@
       let fearDiff = newFear - oldFear;
       let fearText = "";
       if (fearDiff > 0) {
-        fearText = "（恐懼值上升）";
+        fearText = "（一陣懼意漫上心頭）";
       } else if (fearDiff < 0) {
-        fearText = "（恐懼值下降）";
+        fearText = "（情緒似乎得到了緩和）";
       }
 
       if (fearValue >= 60) {
