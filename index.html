@@ -360,21 +360,25 @@
       <button id="next-btn-4" class="btn hidden-element">Next</button>
     </div>
 
+    <!-- 診療室開場劇情 -->
     <div id="scene-clinic-intro" style="display: none;">
       <p class="story-text" id="clinic-p1">廢棄的診療室內燈光昏暗，辦公桌上擺放的名牌因為污損，已然看不清楚名字，牆上貼著一張公告。</p>
-      
-      <h2 class="scene-title hidden-element" id="clinic-s2-title" style="margin-top: 40px;">【診療室公告】</h2>
-      <ul class="bullet-list" id="clinic-s2-list">
-        <li class="story-text bullet-item clinic-s2-item hidden-element">• 請不要逃離紫外光，它能消除一切恐懼。</li>
-        <li class="story-text bullet-item clinic-s2-item hidden-element">• 請不要害怕「蛇」，它不會傷害你。</li>
-        <li class="story-text bullet-item clinic-s2-item hidden-element">• 請不要聆聽騷動聲的內容，並立刻找「醫生」求助。</li>
-        <li class="story-text bullet-item clinic-s2-item hidden-element">• 請不要吃太多糖果，那不是好孩子該做的。</li>
-        <li class="story-text bullet-item clinic-s2-item hidden-element">• 請不要擔心，「醫生」會保護好孩子。</li>
-        <li class="story-text bullet-item clinic-s2-item hidden-element">• 請不要迴避哼唱歌曲的聲音，那是安全的訊號。</li>
-        <li class="story-text bullet-item clinic-s2-item hidden-element">• 請不要清除菌絲，它並不會傷害人，靜待消失即可。</li>
-      </ul>
+      <button id="next-btn-clinic-intro" class="btn hidden-element">Next</button>
+    </div>
 
-      <button id="action-btn-clinic" class="btn hidden-element">Skip</button>
+    <!-- 診療室公告畫面 -->
+    <div id="scene-clinic-rules" style="display: none;">
+      <h2 class="scene-title" id="clinic-s2-title">【診療室公告】</h2>
+      <ul class="bullet-list" id="clinic-s2-list">
+        <li class="story-text bullet-item clinic-s2-item">• 請不要逃離紫外光，它能消除一切恐懼。</li>
+        <li class="story-text bullet-item clinic-s2-item">• 請不要害怕「蛇」，它不會傷害你。</li>
+        <li class="story-text bullet-item clinic-s2-item">• 請不要聆聽騷動聲的內容，並立刻找「醫生」求助。</li>
+        <li class="story-text bullet-item clinic-s2-item">• 請不要吃太多糖果，那不是好孩子該做的。</li>
+        <li class="story-text bullet-item clinic-s2-item">• 請不要擔心，「醫生」會保護好孩子。</li>
+        <li class="story-text bullet-item clinic-s2-item">• 請不要迴避哼唱歌曲的聲音，那是安全的訊號。</li>
+        <li class="story-text bullet-item clinic-s2-item">• 請不要清除菌絲，它並不會傷害人，靜待消失即可。</li>
+      </ul>
+      <button id="action-btn-clinic-rules" class="btn hidden-element">Skip</button>
     </div>
 
     <div id="scene-clinic-feedback" style="display: none;">
@@ -571,8 +575,9 @@
     let s2Timeouts = [];
     
     // 診療室過場狀態
-    let clinicIntroState = 'playing';
-    let clinicTimeouts = [];
+    let clinicIntroTimeouts = [];
+    let clinicRulesState = 'playing';
+    let clinicRulesTimeouts = [];
 
     tabHospital.addEventListener('click', () => {
       nbHospitalContent.style.display = 'block';
@@ -703,6 +708,7 @@
         sceneFeedback.style.display = 'none';
         scene4.style.display = 'none';
         document.getElementById('scene-clinic-intro').style.display = 'none';
+        document.getElementById('scene-clinic-rules').style.display = 'none';
         document.getElementById('scene-clinic-feedback').style.display = 'none';
         document.getElementById('scene-clinic-game').style.display = 'none';
         document.getElementById('scene-ward-game').style.display = 'none';
@@ -872,7 +878,6 @@
       recordsNotebook = true;
       scene3.style.display = 'none';
       sceneFeedback.style.display = 'block';
-      // 移除括號提示，直接顯示手札圖示
       feedbackText.innerHTML = '謹慎，永遠是最穩妥的選擇。';
       feedbackText.classList.add('instant-visible');
       
@@ -924,7 +929,7 @@
       if (hasCandy) {
         hasCandy = false;
         ateCandy = true;
-        fearValue = Math.max(0, fearValue - 10);
+        fearValue -= 10;
         updateFearUI();
         inventoryBtn.click(); 
         
@@ -1009,7 +1014,7 @@
             } 
           },
           { label: "吃下糖果", effect: () => { 
-              fearValue = Math.max(0, fearValue - 15); 
+              fearValue -= 15; 
               sheepIndex += 5; 
               ateCandy = true; 
               randomEvents.push("1-5"); shuffleArray(randomEvents);
@@ -1035,7 +1040,6 @@
               }
             }
           },
-          // 修正為「立刻離開」
           { label: "立刻離開", effect: () => { fearValue += 10; return { text: "在廢棄的醫院裡的，會是什麼人？" }; } }
         ]
       },
@@ -1090,7 +1094,7 @@
         options: [
           { label: "跟上光芒", effect: () => { fearValue = 0; snakeIndex += 15; return { text: "在治癒之光的照耀下，彷彿再也沒有什麼能夠讓人害怕了……。" }; } },
           { label: "停留原地", effect: () => { return { text: "猶豫之際，那道光已然消失，只留下無盡的黑暗。" }; } },
-          { label: "轉身逃離", effect: () => { fearValue = Math.max(0, fearValue - 15); sheepIndex += 15; return { text: "一道急切的聲音響起：「不要走入那道光，快快遠離那道光……。」" }; } }
+          { label: "轉身逃離", effect: () => { fearValue -= 15; sheepIndex += 15; return { text: "一道急切的聲音響起：「不要走入那道光，快快遠離那道光……。」" }; } }
         ]
       }
     };
@@ -1209,7 +1213,6 @@
              nextBtn4.onclick = () => { };
           }
       } else if (result.triggerZoneTransition) {
-          // 通過選項切換區域（有回饋文字的情況）
           nextBtn4.textContent = "Next";
           nextBtn4.onclick = () => {
             triggerBlackScreenTransition(() => {
@@ -1254,7 +1257,6 @@
       if (clinicRandomEvents.length > 0) {
         return clinicRandomEvents.pop();
       }
-      // 隨機池消耗光後，依照條件觸發 2-5-a 或 2-5-b 固定結局題
       return !hasPassedWard ? "2-5-a" : "2-5-b";
     }
 
@@ -1269,20 +1271,19 @@
         text: "「那麼……你會是『好孩子』嗎？」",
         options: [
           { label: "「是。」", effect: () => {
-              // 糖果選置之不理（此處判定條件：隨身無糖果且未曾吃過糖果）
               if (!hasCandy && !ateCandy) {
-                fearValue = Math.max(0, fearValue - 15);
+                fearValue -= 15;
                 snakeIndex += 10;
                 return { text: "「真乖，好孩子……可以得到獎勵……。」" };
               } else {
-                // 已吃糖果或隨身有糖果
                 return { text: "「說謊，可不是好孩子應該有的行為呢……。」", goto: "2-1-2" };
               }
             }
           },
           { label: "「不是。」", effect: () => {
               if (!hasCandy && !ateCandy) {
-                fearValue = Math.max(0, fearValue - 5);
+                fearValue -= 5;
+                snakeIndex += 5;
                 return { text: "「別擔心，『醫生』會幫助聽話的好孩子……。」" };
               } else {
                 fearValue += 10;
@@ -1292,17 +1293,6 @@
           },
           { label: "轉身逃跑", effect: () => {
               return { text: "亨特……這個名字，似乎在哪裡聽過？" }; 
-            }
-          },
-          { label: "「……。」", effect: () => {
-              if (hasCandy || ateCandy) {
-                fearValue += 15;
-                return { text: "「你在害怕嗎……嗯，我都知道呢……。」" };
-              } else {
-                fearValue = Math.max(0, fearValue - 10);
-                snakeIndex += 5;
-                return { text: "「你在害怕嗎……嗯，我都知道呢……。」" };
-              }
             }
           }
         ]
@@ -1317,7 +1307,7 @@
       "2-2": {
         text: "診療椅上，一條蛇盤踞著，那雙異瞳似乎能夠看穿人的內心……？",
         options: [
-          { label: "主動靠近", effect: () => { fearValue = Math.max(0, fearValue - 5); snakeIndex += 10; return { text: "想要更加靠近時，蛇的身影卻消失在了黑暗裡，好似從未存在過。" }; } },
+          { label: "主動靠近", effect: () => { fearValue -= 5; snakeIndex += 10; return { text: "想要更加靠近時，蛇的身影卻消失在了黑暗裡，好似從未存在過。" }; } },
           { label: "靜觀其變", effect: () => { return { text: "那究竟是幻覺，抑或是真實？" }; } },
           { label: "轉身逃離", effect: () => { fearValue += 5; snakeIndex -= 10; return { text: "謹記，遠離會帶來危險的一切事物。" }; } }
         ]
@@ -1327,7 +1317,7 @@
         options: [
           { label: "凝神細聽", effect: () => { sheepIndex += 10; return { text: "「把他沉下去！沉下去！」" }; } },
           { label: "無視", effect: () => { return { text: "雖然並不理解，但那聽上去不是應該知道的事……。" }; } },
-          { label: "尋求幫助", effect: () => { fearValue = Math.max(0, fearValue - 5); sheepIndex -= 10; return { text: "「別擔心，會沒事的……。」「醫生」輕輕地低語。" }; } }
+          { label: "尋求幫助", effect: () => { fearValue -= 5; sheepIndex -= 10; return { text: "「別擔心，會沒事的……。」「醫生」輕輕地低語。" }; } }
         ]
       },
       "2-4": {
@@ -1360,49 +1350,64 @@
     function enterClinicScene() {
       const sceneClinicIntro = document.getElementById('scene-clinic-intro');
       const p1 = document.getElementById('clinic-p1');
-      const title = document.getElementById('clinic-s2-title');
-      const items = document.querySelectorAll('.clinic-s2-item');
-      const actionBtn = document.getElementById('action-btn-clinic');
+      const introNextBtn = document.getElementById('next-btn-clinic-intro');
 
       sceneClinicIntro.style.display = 'block';
       p1.classList.remove('visible', 'instant-visible');
+      introNextBtn.classList.remove('visible', 'instant-visible');
+      
+      clinicIntroTimeouts = [];
+
+      clinicIntroTimeouts.push(setTimeout(() => { p1.classList.add('visible'); }, 50));
+      clinicIntroTimeouts.push(setTimeout(() => { introNextBtn.classList.add('visible'); }, 2550));
+
+      introNextBtn.onclick = () => {
+        sceneClinicIntro.style.display = 'none';
+        enterClinicRulesScene();
+      };
+    }
+
+    function enterClinicRulesScene() {
+      const sceneClinicRules = document.getElementById('scene-clinic-rules');
+      const title = document.getElementById('clinic-s2-title');
+      const items = document.querySelectorAll('.clinic-s2-item');
+      const actionBtn = document.getElementById('action-btn-clinic-rules');
+
+      sceneClinicRules.style.display = 'block';
       title.classList.remove('visible', 'instant-visible');
       items.forEach(i => i.classList.remove('visible', 'instant-visible'));
       actionBtn.classList.remove('visible', 'instant-visible');
-      
-      clinicIntroState = 'playing';
-      actionBtn.textContent = 'Skip';
-      clinicTimeouts = [];
 
-      clinicTimeouts.push(setTimeout(() => { p1.classList.add('visible'); }, 50));
-      clinicTimeouts.push(setTimeout(() => { actionBtn.classList.add('visible'); }, 1000));
-      clinicTimeouts.push(setTimeout(() => { title.classList.add('visible'); }, 1500));
-      
+      clinicRulesState = 'playing';
+      actionBtn.textContent = 'Skip';
+      clinicRulesTimeouts = [];
+
+      clinicRulesTimeouts.push(setTimeout(() => { title.classList.add('visible'); }, 100));
+      clinicRulesTimeouts.push(setTimeout(() => { actionBtn.classList.add('visible'); }, 1600));
+
       items.forEach((item, index) => {
-        clinicTimeouts.push(setTimeout(() => {
+        clinicRulesTimeouts.push(setTimeout(() => {
           item.classList.add('visible');
-        }, 2500 + (index * 1000))); 
+        }, 1600 + (index * 1500))); 
       });
 
-      clinicTimeouts.push(setTimeout(() => { 
-        clinicIntroState = 'done';
+      clinicRulesTimeouts.push(setTimeout(() => { 
+        clinicRulesState = 'done';
         actionBtn.textContent = 'Next';
-      }, 2500 + (items.length * 1000) + 500));
+      }, 1600 + (items.length * 1500) + 500));
 
       actionBtn.onclick = () => {
-        if (clinicIntroState === 'playing') {
-          clinicTimeouts.forEach(clearTimeout);
-          p1.classList.add('instant-visible');
+        if (clinicRulesState === 'playing') {
+          clinicRulesTimeouts.forEach(clearTimeout);
           title.classList.add('instant-visible');
           items.forEach(i => i.classList.add('instant-visible'));
           actionBtn.classList.add('instant-visible');
-          clinicIntroState = 'done';
+          clinicRulesState = 'done';
           actionBtn.textContent = 'Next';
         } else {
-          sceneClinicIntro.style.display = 'none';
+          sceneClinicRules.style.display = 'none';
 
           if (recordsNotebook) {
-            // 直接解鎖手札標籤並給予回饋
             document.getElementById('notebook-tabs').style.display = 'flex'; 
             const sceneFb = document.getElementById('scene-clinic-feedback');
             sceneFb.style.display = 'block';
@@ -1419,7 +1424,6 @@
               startClinicGameplay();
             };
           } else {
-            // 未紀錄，直接開始
             startClinicGameplay();
           }
         }
@@ -1466,7 +1470,6 @@
           btn.onclick = () => handleClinicOptionClick(opt);
           scOptions.appendChild(btn);
         });
-        // 診療室正式劇情開始，啟動倒數計時器
         startIdleTimer();
       }
     }
@@ -1556,7 +1559,6 @@
       }
     }
 
-    // 住院部 → 診療室：插入 1.5 秒黑屏並重啟診療室流程 (以便測試 2-5-b)
     document.getElementById('go-back-clinic-btn').addEventListener('click', () => {
       triggerBlackScreenTransition(() => {
         document.getElementById('scene-ward-game').style.display = 'none';
