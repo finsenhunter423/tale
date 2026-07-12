@@ -198,8 +198,7 @@
     animation: violentBeat 0.8s infinite ease-in-out;
   }
 
-  /* 共用 Modal 樣式 */
-  #notebook-modal, #inventory-modal, #confirm-modal, #message-modal, #item-detail-modal {
+  #notebook-modal, #inventory-modal, #confirm-modal, #item-detail-modal {
     display: none;
     position: fixed;
     top: 0;
@@ -214,10 +213,6 @@
 
   #confirm-modal, #item-detail-modal {
     z-index: 1000;
-  }
-
-  #message-modal {
-    z-index: 1005; 
   }
 
   .modal-content {
@@ -359,7 +354,6 @@
     </div>
   </div>
 
-  <!-- 修復：移除了 story-text 類別，直接以靜態樣式控制文字顯示 -->
   <div id="confirm-modal">
     <div class="modal-content" style="text-align: center; max-width: 400px; padding: 30px;">
       <p style="font-size: 1.2rem; line-height: 2; letter-spacing: 1.5px; text-align: center; margin-bottom: 20px; color: #d3d3d3;" id="confirm-text">是否吃下糖果？</p>
@@ -370,18 +364,10 @@
     </div>
   </div>
 
-  <!-- 新增：蛇鱗專用無選項視窗 -->
   <div id="item-detail-modal">
     <div class="modal-content" style="text-align: center; max-width: 400px; padding: 30px;">
-      <p style="font-size: 1.2rem; line-height: 2; letter-spacing: 1.5px; text-align: center; margin-bottom: 20px; color: #d3d3d3;">一片隱隱閃爍著光彩的鱗片，擁有它，似乎能和某個存在產生共鳴？</p>
+      <p style="font-size: 1.2rem; line-height: 2; letter-spacing: 1.5px; text-align: center; margin-bottom: 20px; color: #d3d3d3;">一片折射出璀璨光彩的凸透鏡，擁有它，似乎能和某個存在產生共鳴？</p>
       <button id="close-item-detail" class="btn" style="margin-top: 0;">關閉</button>
-    </div>
-  </div>
-
-  <div id="message-modal">
-    <div class="modal-content" style="text-align: center; max-width: 400px; padding: 30px;">
-      <p class="story-text" id="message-text" style="text-align: center; margin-bottom: 20px; color: #d3d3d3;"></p>
-      <button id="message-close-btn" class="btn" style="margin-top: 0;">確認</button>
     </div>
   </div>
 
@@ -392,10 +378,10 @@
     
     let hasCandy = false;
     let ateCandy = false;
-    let hasSnakeScale = false; // 新增蛇鱗變數，供後續劇情控制
+    let hasLens = false; 
 
     let uvTriggered = false;
-    let choiceTimer = null;
+    let idleTimer = null;
 
     const startBtn = document.getElementById('start-btn');
     const introScreen = document.getElementById('intro-screen');
@@ -438,25 +424,21 @@
     const itemDetailModal = document.getElementById('item-detail-modal');
     const closeItemDetail = document.getElementById('close-item-detail');
 
-    const messageModal = document.getElementById('message-modal');
-    const messageText = document.getElementById('message-text');
-    const messageCloseBtn = document.getElementById('message-close-btn');
-
     let scene1State = 'playing'; 
     let s1Timeouts = []; 
     let scene2State = 'playing';
     let s2Timeouts = [];
 
-    function showMessageModal(text) {
-      return new Promise(resolve => {
-        messageText.textContent = text;
-        messageModal.style.display = 'flex';
-        
-        messageCloseBtn.onclick = () => {
-          messageModal.style.display = 'none';
-          resolve();
-        };
-      });
+    // 閒置計時器邏輯
+    function startIdleTimer() {
+      if (idleTimer) clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        notebookModal.style.display = 'none';
+        inventoryModal.style.display = 'none';
+        confirmModal.style.display = 'none';
+        itemDetailModal.style.display = 'none';
+        handleOptionClick(null);
+      }, 40000);
     }
 
     function updateFearUI() {
@@ -576,11 +558,10 @@
     notebookBtn.addEventListener('click', () => { notebookModal.style.display = 'flex'; });
     closeNotebook.addEventListener('click', () => { notebookModal.style.display = 'none'; });
 
-    // 修改：隨身物品清單渲染邏輯
     inventoryBtn.addEventListener('click', function() {
       inventoryList.innerHTML = '';
       
-      if (!hasCandy && !hasSnakeScale) {
+      if (!hasCandy && !hasLens) {
         inventoryList.innerHTML = '<p class="story-text" style="text-align: center; opacity: 1; transform: none;">空無一物</p>';
       } else {
         if (hasCandy) {
@@ -590,12 +571,12 @@
           candyItem.onclick = () => { confirmModal.style.display = 'flex'; };
           inventoryList.appendChild(candyItem);
         }
-        if (hasSnakeScale) {
-          const scaleItem = document.createElement('div');
-          scaleItem.className = 'inventory-item';
-          scaleItem.textContent = '蛇鱗';
-          scaleItem.onclick = () => { itemDetailModal.style.display = 'flex'; };
-          inventoryList.appendChild(scaleItem);
+        if (hasLens) {
+          const lensItem = document.createElement('div');
+          lensItem.className = 'inventory-item';
+          lensItem.textContent = '透鏡';
+          lensItem.onclick = () => { itemDetailModal.style.display = 'flex'; };
+          inventoryList.appendChild(lensItem);
         }
       }
       inventoryModal.style.display = 'flex';
@@ -603,21 +584,14 @@
 
     closeInventory.addEventListener('click', () => { inventoryModal.style.display = 'none'; });
 
-    confirmYes.addEventListener('click', async () => {
+    confirmYes.addEventListener('click', () => {
       confirmModal.style.display = 'none';
       if (hasCandy) {
         hasCandy = false;
         ateCandy = true;
-        let oldFear = fearValue;
         fearValue = Math.max(0, fearValue - 10);
         updateFearUI();
-        
-        // 重新整理隨身物品清單視覺
         inventoryBtn.click();
-        
-        if (fearValue < oldFear) {
-          await showMessageModal("情緒似乎得到了緩和");
-        }
       }
     });
 
@@ -789,9 +763,8 @@
     const nextBtn4 = document.getElementById('next-btn-4');
 
     function renderEvent(eventId) {
-      if (choiceTimer) {
-        clearTimeout(choiceTimer);
-        choiceTimer = null;
+      if (idleTimer) {
+        clearTimeout(idleTimer);
       }
       
       if (!eventId) return; 
@@ -822,17 +795,14 @@
           btn.onclick = () => handleOptionClick(opt);
           s4Options.appendChild(btn);
         });
-
-        choiceTimer = setTimeout(() => {
-          handleOptionClick(null);
-        }, 40000);
+        
+        startIdleTimer();
       }
     }
 
-    async function handleOptionClick(opt) {
-      if (choiceTimer) {
-        clearTimeout(choiceTimer);
-        choiceTimer = null;
+    function handleOptionClick(opt) {
+      if (idleTimer) {
+        clearTimeout(idleTimer);
       }
 
       s4Options.style.display = 'none'; 
@@ -851,10 +821,12 @@
       let newFear = fearValue;
       updateFearUI(); 
 
-      if (newFear > oldFear) {
-        await showMessageModal("一陣懼意漫上心頭");
-      } else if (newFear < oldFear) {
-        await showMessageModal("情緒似乎得到了緩和");
+      let fearDiff = newFear - oldFear;
+      let fearText = "";
+      if (fearDiff > 0) {
+        fearText = "（恐懼值上升）";
+      } else if (fearDiff < 0) {
+        fearText = "（恐懼值下降）";
       }
 
       if (fearValue >= 60) {
@@ -871,9 +843,14 @@
       }
 
       let finalFeedbackHtml = result.text;
+      
+      if (fearText) {
+         finalFeedbackHtml += `<br><br><span style="font-size: 1rem; color: #a9a9a9;">${fearText}</span>`;
+      }
       if (result.transitionText) {
          finalFeedbackHtml += `<br><br><span style="font-size: 1rem; color: #a9a9a9;">${result.transitionText}</span>`;
       }
+      
       s4Feedback.innerHTML = finalFeedbackHtml;
       s4Feedback.style.display = 'block';
       s4Feedback.className = 'story-text';
@@ -892,6 +869,7 @@
               const nextId = result.goto ? result.goto : getNextEventId();
               if (nextId) renderEvent(nextId);
           };
+          startIdleTimer();
       }
     }
 
