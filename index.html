@@ -278,7 +278,6 @@
 </head>
 <body>
 
-  <!-- 黑屏過場用 -->
   <div id="black-overlay"></div>
 
   <div id="intro-screen">
@@ -333,12 +332,11 @@
       <button id="next-btn-4" class="btn hidden-element" style="display: none;">Next</button>
     </div>
 
-    <!-- 迷失結局專用場景 -->
     <div id="scene-lost" style="display: none;">
       <p class="story-text" id="lost-p1">冰冷、潮濕，四周的空氣瀰漫著令人不適的氣息。</p>
       <p class="story-text" id="lost-p2">已然記不清究竟是何時昏了過去，意識回籠之際，只覺頭痛欲裂。映入眼簾的是一片破敗景象，能大致判斷這裡是一座廢棄的醫院。</p>
       <div style="text-align: center;">
-        <button id="lost-next-btn" class="btn hidden-element" style="display: none; margin-top: 20px;">Next</button>
+        <button id="lost-next-btn" class="btn hidden-element" style="margin-top: 20px;">Next</button>
       </div>
     </div>
 
@@ -384,8 +382,10 @@
   </div>
 
   <div id="confirm-modal">
-    <div class="modal-content" style="text-align: center; max-width: 400px; padding: 30px;">
-      <p style="font-size: 1.2rem; line-height: 2; letter-spacing: 1.5px; text-align: center; margin-bottom: 20px; color: #d3d3d3;" id="confirm-text">是否吃下糖果？</p>
+    <div class="modal-content" style="text-align: left; max-width: 400px; padding: 30px;">
+      <p style="font-size: 1.2rem; line-height: 2; letter-spacing: 1.5px; margin-bottom: 20px; color: #d3d3d3;" id="confirm-text">
+        • 糖果<br>散發香甜氣息的糖果，是否吃下？
+      </p>
       <div class="options-container">
         <button id="confirm-yes" class="btn" style="margin-top: 0;">是</button>
         <button id="confirm-no" class="btn" style="margin-top: 0;">否</button>
@@ -395,15 +395,15 @@
 
   <div id="item-detail-modal">
     <div class="modal-content" style="text-align: center; max-width: 400px; padding: 30px;">
-      <p style="font-size: 1.2rem; line-height: 2; letter-spacing: 1.5px; text-align: center; margin-bottom: 20px; color: #d3d3d3;">一片折射出璀璨光彩的凸透鏡，擁有它，似乎能和某個存在產生共鳴？</p>
-      <button id="close-item-detail" class="btn" style="margin-top: 0;">關閉</button>
+      <span class="close-modal" id="close-item-detail">&times;</span>
+      <p style="font-size: 1.2rem; line-height: 2; letter-spacing: 1.5px; text-align: center; margin-top: 20px; color: #d3d3d3;">一片折射出璀璨光彩的凸透鏡，擁有它，似乎能和某個存在產生共鳴？</p>
     </div>
   </div>
 
   <div id="message-modal">
     <div class="modal-content" style="text-align: center; max-width: 400px; padding: 30px;">
-      <p id="message-text" style="font-size: 1.2rem; line-height: 2; letter-spacing: 1.5px; text-align: center; margin-bottom: 20px; color: #d3d3d3; opacity: 1; transform: none; transition: none;"></p>
-      <button id="message-close-btn" class="btn" style="margin-top: 0;">確認</button>
+      <span class="close-modal" id="close-message-btn">&times;</span>
+      <p id="message-text" style="font-size: 1.2rem; line-height: 2; letter-spacing: 1.5px; text-align: center; margin-top: 20px; color: #d3d3d3; opacity: 1; transform: none; transition: none;"></p>
     </div>
   </div>
 
@@ -464,7 +464,7 @@
 
     const messageModal = document.getElementById('message-modal');
     const messageText = document.getElementById('message-text');
-    const messageCloseBtn = document.getElementById('message-close-btn');
+    const closeMessageBtn = document.getElementById('close-message-btn');
 
     const blackOverlay = document.getElementById('black-overlay');
 
@@ -478,7 +478,7 @@
       messageModal.style.display = 'flex';
     }
 
-    messageCloseBtn.addEventListener('click', () => {
+    closeMessageBtn.addEventListener('click', () => {
       messageModal.style.display = 'none';
     });
 
@@ -560,7 +560,6 @@
         // 重置迷失結局的文字狀態
         document.getElementById('lost-p1').classList.remove('visible', 'instant-visible');
         document.getElementById('lost-p2').classList.remove('visible', 'instant-visible');
-        document.getElementById('lost-next-btn').style.display = 'none';
         document.getElementById('lost-next-btn').classList.remove('visible', 'instant-visible');
 
         sceneLost.style.display = 'block';
@@ -574,8 +573,7 @@
           setTimeout(() => { document.getElementById('lost-p1').classList.add('visible'); }, 500);
           setTimeout(() => { document.getElementById('lost-p2').classList.add('visible'); }, 3000);
           setTimeout(() => { 
-            document.getElementById('lost-next-btn').style.display = 'inline-block';
-            setTimeout(() => { document.getElementById('lost-next-btn').classList.add('visible'); }, 50);
+            document.getElementById('lost-next-btn').classList.add('visible');
           }, 5500);
         }, 500);
       }, 1500); // 1.5秒黑屏
@@ -610,7 +608,7 @@
         document.querySelector('.ui-container').style.display = 'flex'; // 重新顯示UI
         fearContainer.style.display = 'block';
         
-        // 恢復背包與手札的顯示狀態（迷失重來仍保留手札按鈕，若不需要可依需求隱藏）
+        // 恢復背包與手札的顯示狀態
         notebookBtn.style.display = 'block'; 
         inventoryBtn.style.display = hasCandy || hasLens ? 'block' : 'none';
         
@@ -769,7 +767,7 @@
         let oldFear = fearValue;
         fearValue = Math.max(0, fearValue - 10);
         updateFearUI();
-        inventoryBtn.click();
+        inventoryBtn.click(); // 重整物品列表
         
         if (fearValue < oldFear) {
           showMessageModal("情緒似乎得到了緩和");
