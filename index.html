@@ -322,14 +322,42 @@
 
     <div id="scene-feedback" style="display: none;">
       <p class="story-text" id="feedback-text"></p>
-      <button id="next-btn-3" class="btn hidden-element" style="display: none;">Next</button>
+      <button id="next-btn-3" class="btn hidden-element">Next</button>
     </div>
 
     <div id="scene-4" style="display: none;">
       <p class="story-text" id="s4-text"></p>
       <div id="s4-options" class="options-container hidden-element"></div>
       <p class="story-text" id="s4-feedback" style="display: none;"></p>
-      <button id="next-btn-4" class="btn hidden-element" style="display: none;">Next</button>
+      <button id="next-btn-4" class="btn hidden-element">Next</button>
+    </div>
+
+    <div id="scene-clinic-intro" style="display: none;">
+      <p class="story-text" id="clinic-p1">廢棄的診療室內燈光昏暗，辦公桌上擺放的名牌因為污損，已然看不清楚名字，牆上貼著一張公告。</p>
+      <button id="clinic-intro-next" class="btn hidden-element">Next</button>
+    </div>
+
+    <div id="scene-clinic-rules" style="display: none;">
+      <h2 class="scene-title" id="clinic-r-title">【診療室公告】</h2>
+      <ul class="bullet-list">
+        <li class="story-text bullet-item cr-item">• 請不要逃離紫外光，它能消除一切恐懼。</li>
+        <li class="story-text bullet-item cr-item">• 請不要害怕「蛇」，它不會傷害你。</li>
+        <li class="story-text bullet-item cr-item">• 請不要聆聽騷動聲的內容，並立刻找「醫生」求助。</li>
+        <li class="story-text bullet-item cr-item">• 請不要吃太多糖果，那不是好孩子該做的。</li>
+        <li class="story-text bullet-item cr-item">• 請不要擔心，「醫生」會保護好孩子。</li>
+        <li class="story-text bullet-item cr-item">• 請不要迴避哼唱歌曲的聲音，那是安全的訊號。</li>
+        <li class="story-text bullet-item cr-item">• 請不要清除菌絲，它並不會傷害人，靜待消失即可。</li>
+      </ul>
+      <button id="clinic-rules-next" class="btn hidden-element">Next</button>
+    </div>
+
+    <div id="scene-clinic-feedback" style="display: none;">
+      <p class="story-text" id="clinic-fb-text">已記下新的規則。<br><br><span style="font-size: 1rem; color: #a9a9a9;">（可於手札切換查看）</span></p>
+      <button id="clinic-fb-next" class="btn hidden-element">Next</button>
+    </div>
+
+    <div id="scene-clinic-game" style="display: none;">
+      <p class="story-text instant-visible">（診療室的探索即將展開... 待續）</p>
     </div>
 
     <div id="scene-lost" style="display: none;">
@@ -358,17 +386,39 @@
   <div id="notebook-modal">
     <div class="modal-content">
       <span class="close-modal" id="close-notebook">&times;</span>
-      <h2 style="font-size: 1.5rem; text-align: center; letter-spacing: 2px; margin-bottom: 30px;">【聖心醫院公告】</h2>
-      <ul class="bullet-list">
-        <li class="bullet-item" style="opacity: 1; transform: none;">• 手術室嚴格禁止進入，若有人問你看見了什麼，回答「什麼都沒看見」。</li>
-        <li class="bullet-item" style="opacity: 1; transform: none;">• 住院部是安全的，你能夠在那裡得到庇護。</li>
-        <li class="bullet-item" style="opacity: 1; transform: none;">• 糖果是屬於「好孩子」的，只有「好孩子」能夠取走。</li>
-        <li class="bullet-item" style="opacity: 1; transform: none;">• 「壞孩子」的牙齒會被「怪物」拔掉。</li>
-        <li class="bullet-item" style="opacity: 1; transform: none;">• 「蛇」是危險的，請務必迴避。</li>
-        <li class="bullet-item" style="opacity: 1; transform: none;">• 如果聽見「羊群」的聲音，那是正常的，請不要迴避。</li>
-        <li class="bullet-item" style="opacity: 1; transform: none;">• 「羊群」的腳印通向「安全」的地方。</li>
-        <li class="bullet-item" style="opacity: 1; transform: none;">• 本院不存在名為「芬森·亨特」的醫生，如果遇見自稱「亨特醫生」的人，請立刻離開現場。</li>
-      </ul>
+      
+      <div id="notebook-tabs" style="display: none; justify-content: center; gap: 20px; margin-bottom: 30px;">
+        <button id="tab-hospital" class="btn" style="margin-top:0; padding: 5px 15px; background-color: #d3d3d3; color: #070707;">醫院公告</button>
+        <button id="tab-clinic" class="btn" style="margin-top:0; padding: 5px 15px;">診療室公告</button>
+      </div>
+
+      <div id="notebook-hospital-content">
+        <h2 style="font-size: 1.5rem; text-align: center; letter-spacing: 2px; margin-bottom: 30px;">【聖心醫院公告】</h2>
+        <ul class="bullet-list">
+          <li class="bullet-item" style="opacity: 1; transform: none;">• 手術室嚴格禁止進入，若有人問你看見了什麼，回答「什麼都沒看見」。</li>
+          <li class="bullet-item" style="opacity: 1; transform: none;">• 住院部是安全的，你能夠在那裡得到庇護。</li>
+          <li class="bullet-item" style="opacity: 1; transform: none;">• 糖果是屬於「好孩子」的，只有「好孩子」能夠取走。</li>
+          <li class="bullet-item" style="opacity: 1; transform: none;">• 「壞孩子」的牙齒會被「怪物」拔掉。</li>
+          <li class="bullet-item" style="opacity: 1; transform: none;">• 「蛇」是危險的，請務必迴避。</li>
+          <li class="bullet-item" style="opacity: 1; transform: none;">• 如果聽見「羊群」的聲音，那是正常的，請不要迴避。</li>
+          <li class="bullet-item" style="opacity: 1; transform: none;">• 「羊群」的腳印通向「安全」的地方。</li>
+          <li class="bullet-item" style="opacity: 1; transform: none;">• 本院不存在名為「芬森·亨特」的醫生，如果遇見自稱「亨特醫生」的人，請立刻離開現場。</li>
+        </ul>
+      </div>
+
+      <div id="notebook-clinic-content" style="display: none;">
+        <h2 style="font-size: 1.5rem; text-align: center; letter-spacing: 2px; margin-bottom: 30px;">【診療室公告】</h2>
+        <ul class="bullet-list">
+          <li class="bullet-item" style="opacity: 1; transform: none;">• 請不要逃離紫外光，它能消除一切恐懼。</li>
+          <li class="bullet-item" style="opacity: 1; transform: none;">• 請不要害怕「蛇」，它不會傷害你。</li>
+          <li class="bullet-item" style="opacity: 1; transform: none;">• 請不要聆聽騷動聲的內容，並立刻找「醫生」求助。</li>
+          <li class="bullet-item" style="opacity: 1; transform: none;">• 請不要吃太多糖果，那不是好孩子該做的。</li>
+          <li class="bullet-item" style="opacity: 1; transform: none;">• 請不要擔心，「醫生」會保護好孩子。</li>
+          <li class="bullet-item" style="opacity: 1; transform: none;">• 請不要迴避哼唱歌曲的聲音，那是安全的訊號。</li>
+          <li class="bullet-item" style="opacity: 1; transform: none;">• 請不要清除菌絲，它並不會傷害人，靜待消失即可。</li>
+        </ul>
+      </div>
+
     </div>
   </div>
 
@@ -383,8 +433,8 @@
 
   <div id="confirm-modal">
     <div class="modal-content" style="text-align: left; max-width: 400px; padding: 30px;">
-      <p style="font-size: 1.2rem; line-height: 2; letter-spacing: 1.5px; margin-bottom: 20px; color: #d3d3d3;" id="confirm-text">
-        • 糖果<br>散發香甜氣息的糖果，是否吃下？
+      <p style="font-size: 1.2rem; line-height: 2; letter-spacing: 1.5px; margin-bottom: 20px; color: #d3d3d3; text-align: center;" id="confirm-text">
+        散發香甜氣息的糖果，是否吃下？
       </p>
       <div class="options-container">
         <button id="confirm-yes" class="btn" style="margin-top: 0;">是</button>
@@ -415,6 +465,7 @@
     let hasCandy = false;
     let ateCandy = false;
     let hasLens = false; 
+    let recordsNotebook = false; // 是否紀錄手札的判定
 
     let uvTriggered = false;
     let idleTimer = null;
@@ -450,6 +501,12 @@
     const notebookModal = document.getElementById('notebook-modal');
     const closeNotebook = document.getElementById('close-notebook');
 
+    // 手札分頁控制
+    const tabHospital = document.getElementById('tab-hospital');
+    const tabClinic = document.getElementById('tab-clinic');
+    const nbHospitalContent = document.getElementById('notebook-hospital-content');
+    const nbClinicContent = document.getElementById('notebook-clinic-content');
+
     const inventoryBtn = document.getElementById('inventory-btn');
     const inventoryModal = document.getElementById('inventory-modal');
     const closeInventory = document.getElementById('close-inventory');
@@ -473,6 +530,25 @@
     let scene2State = 'playing';
     let s2Timeouts = [];
 
+    // 分頁切換功能
+    tabHospital.addEventListener('click', () => {
+      nbHospitalContent.style.display = 'block';
+      nbClinicContent.style.display = 'none';
+      tabHospital.style.backgroundColor = '#d3d3d3';
+      tabHospital.style.color = '#070707';
+      tabClinic.style.backgroundColor = 'transparent';
+      tabClinic.style.color = '#a9a9a9';
+    });
+
+    tabClinic.addEventListener('click', () => {
+      nbHospitalContent.style.display = 'none';
+      nbClinicContent.style.display = 'block';
+      tabClinic.style.backgroundColor = '#d3d3d3';
+      tabClinic.style.color = '#070707';
+      tabHospital.style.backgroundColor = 'transparent';
+      tabHospital.style.color = '#a9a9a9';
+    });
+
     function showMessageModal(text) {
       messageText.textContent = text;
       messageModal.style.display = 'flex';
@@ -486,7 +562,6 @@
     function triggerIdle() {
       if (idleTimer) clearTimeout(idleTimer);
 
-      // 紀錄並隱藏當前打開的視窗
       activeModals = [];
       if (notebookModal.style.display === 'flex') activeModals.push(notebookModal);
       if (inventoryModal.style.display === 'flex') activeModals.push(inventoryModal);
@@ -496,34 +571,26 @@
 
       activeModals.forEach(m => m.style.display = 'none');
       
-      // 隱藏題目與選項
       s4Text.style.display = 'none';
       s4Options.style.display = 'none';
 
       fearValue += 30;
       updateFearUI();
 
-      const fearText = "（一陣懼意漫上心頭）";
-      s4Feedback.innerHTML = `沉默裡，令人窒息的恐懼襲來……。<br><br><span style="font-size: 1rem; color: #a9a9a9;">${fearText}</span>`;
+      s4Feedback.innerHTML = `沉默裡，令人窒息的恐懼襲來……。`;
       s4Feedback.style.display = 'block';
       s4Feedback.className = 'story-text instant-visible';
 
-      nextBtn4.style.display = 'inline-block';
-      nextBtn4.classList.add('instant-visible');
-      nextBtn4.textContent = "Next";
+      // 隱藏Next按鈕，防止玩家卡介面
+      nextBtn4.style.display = 'none';
+      nextBtn4.classList.remove('instant-visible');
 
-      // 判斷是否超過 60 引發結局
-      if (fearValue >= 60) {
-        nextBtn4.onclick = () => {
+      // 3秒後自動關閉此畫面
+      setTimeout(() => {
+        if (fearValue >= 60) {
           handleLostEndingTransition();
-        };
-      } else {
-        nextBtn4.onclick = () => {
-          // 恢復原狀
+        } else {
           s4Feedback.style.display = 'none';
-          nextBtn4.style.display = 'none';
-          nextBtn4.classList.remove('instant-visible');
-          
           s4Text.style.display = 'block';
           s4Options.style.display = 'flex';
           
@@ -531,8 +598,8 @@
           activeModals = [];
           
           startIdleTimer();
-        };
-      }
+        }
+      }, 3000);
     }
 
     function startIdleTimer() {
@@ -542,44 +609,41 @@
       }, 40000);
     }
 
-    // 處理迷失結局黑屏過場
     function handleLostEndingTransition() {
       blackOverlay.style.display = 'block';
-      void blackOverlay.offsetWidth; // 觸發重繪
+      void blackOverlay.offsetWidth; 
       blackOverlay.style.opacity = '1';
 
       setTimeout(() => {
-        // 隱藏一般遊戲介面與UI
         scene1.style.display = 'none';
         scene2.style.display = 'none';
         scene3.style.display = 'none';
         sceneFeedback.style.display = 'none';
         scene4.style.display = 'none';
+        document.getElementById('scene-clinic-intro').style.display = 'none';
+        document.getElementById('scene-clinic-rules').style.display = 'none';
+        document.getElementById('scene-clinic-feedback').style.display = 'none';
+        document.getElementById('scene-clinic-game').style.display = 'none';
         document.querySelector('.ui-container').style.display = 'none';
 
-        // 重置迷失結局的文字狀態
         document.getElementById('lost-p1').classList.remove('visible', 'instant-visible');
         document.getElementById('lost-p2').classList.remove('visible', 'instant-visible');
         document.getElementById('lost-next-btn').classList.remove('visible', 'instant-visible');
 
         sceneLost.style.display = 'block';
 
-        // 淡出黑屏
         blackOverlay.style.opacity = '0';
         setTimeout(() => {
           blackOverlay.style.display = 'none';
-          
-          // 開始顯示迷失結局劇情
           setTimeout(() => { document.getElementById('lost-p1').classList.add('visible'); }, 500);
           setTimeout(() => { document.getElementById('lost-p2').classList.add('visible'); }, 3000);
           setTimeout(() => { 
             document.getElementById('lost-next-btn').classList.add('visible');
           }, 5500);
         }, 500);
-      }, 1500); // 1.5秒黑屏
+      }, 1500); 
     }
 
-    // 迷失結局重新開始按鈕
     document.getElementById('lost-next-btn').addEventListener('click', () => {
         fearValue = 0;
         sheepIndex = 0;
@@ -589,13 +653,13 @@
         hasLens = false;
         uvTriggered = false;
         played1_1 = false;
+        recordsNotebook = false; // 重置手札狀態
         nextFixed = "1-8";
         randomEvents = ["1-2", "1-3", "1-4", "1-6", "1-7"];
         shuffleArray(randomEvents);
         
         updateFearUI();
 
-        // 確保所有可能開啟的視窗關閉
         activeModals.forEach(m => m.style.display = 'none');
         activeModals = [];
         notebookModal.style.display = 'none';
@@ -604,11 +668,14 @@
         itemDetailModal.style.display = 'none';
         messageModal.style.display = 'none';
         
+        document.getElementById('notebook-tabs').style.display = 'none'; // 隱藏分頁
+        nbHospitalContent.style.display = 'block';
+        nbClinicContent.style.display = 'none';
+
         sceneLost.style.display = 'none';
-        document.querySelector('.ui-container').style.display = 'flex'; // 重新顯示UI
+        document.querySelector('.ui-container').style.display = 'flex'; 
         fearContainer.style.display = 'block';
         
-        // 恢復背包與手札的顯示狀態
         notebookBtn.style.display = 'block'; 
         inventoryBtn.style.display = hasCandy || hasLens ? 'block' : 'none';
         
@@ -710,23 +777,23 @@
     });
 
     btnYes.addEventListener('click', function() {
+      recordsNotebook = true;
       scene3.style.display = 'none';
       sceneFeedback.style.display = 'block';
       feedbackText.innerHTML = '謹慎，永遠是最穩妥的選擇。<br><br><span style="font-size: 1rem; color: #a9a9a9;">（獲得提示，可打開手札查看）</span>';
       feedbackText.classList.add('instant-visible');
       
       notebookBtn.style.display = 'block';
-      nextBtn3.style.display = 'inline-block';
       nextBtn3.classList.add('instant-visible');
     });
 
     btnNo.addEventListener('click', function() {
+      recordsNotebook = false;
       scene3.style.display = 'none';
       sceneFeedback.style.display = 'block';
       feedbackText.innerHTML = '信任記憶，也未嘗不是壞事。';
       feedbackText.classList.add('instant-visible');
       
-      nextBtn3.style.display = 'inline-block';
       nextBtn3.classList.add('instant-visible');
     });
 
@@ -764,14 +831,11 @@
       if (hasCandy) {
         hasCandy = false;
         ateCandy = true;
-        let oldFear = fearValue;
         fearValue = Math.max(0, fearValue - 10);
         updateFearUI();
         inventoryBtn.click(); // 重整物品列表
         
-        if (fearValue < oldFear) {
-          showMessageModal("情緒似乎得到了緩和");
-        }
+        showMessageModal("情緒似乎得到了緩和"); // 無條件顯示
       }
     });
 
@@ -784,7 +848,7 @@
     });
 
     // ==========================================
-    // 第四階段：醫院大廳動態事件腳本系統
+    // 動態事件腳本系統
     // ==========================================
     
     let played1_1 = false;
@@ -923,7 +987,7 @@
       "1-9": {
         text: "映入眼簾的是一條長廊，末端似乎通往……。",
         options: [
-          { label: "診療室", effect: () => { return { text: "（進入診療室）", isEnding: true }; } },
+          { label: "診療室", effect: () => { return { customAction: "enterClinic" }; } },
           { label: "住院部", effect: () => { return { text: "（進入住院部）", isEnding: true }; } }
         ]
       },
@@ -993,6 +1057,13 @@
       let newFear = fearValue;
       updateFearUI(); 
 
+      // 檢查是否觸發診療室轉場
+      if (result.customAction === "enterClinic") {
+        scene4.style.display = 'none';
+        enterClinicScene();
+        return;
+      }
+
       let fearDiff = newFear - oldFear;
       let fearText = "";
       if (fearDiff > 0) {
@@ -1055,6 +1126,78 @@
       scene4.style.display = 'block';
       renderEvent(getNextEventId());
     });
+
+    // ==========================================
+    // 診療室流程函數
+    // ==========================================
+
+    function enterClinicScene() {
+      const sceneClinicIntro = document.getElementById('scene-clinic-intro');
+      const p1 = document.getElementById('clinic-p1');
+      const nextBtn = document.getElementById('clinic-intro-next');
+
+      sceneClinicIntro.style.display = 'block';
+      p1.classList.add('visible');
+      
+      setTimeout(() => {
+        nextBtn.classList.add('visible');
+      }, 2500);
+
+      nextBtn.onclick = () => {
+        sceneClinicIntro.style.display = 'none';
+        enterClinicRules();
+      };
+    }
+
+    function enterClinicRules() {
+      const sceneRules = document.getElementById('scene-clinic-rules');
+      const title = document.getElementById('clinic-r-title');
+      const nextBtn = document.getElementById('clinic-rules-next');
+      const items = document.querySelectorAll('.cr-item');
+
+      sceneRules.style.display = 'block';
+      
+      let t = [];
+      t.push(setTimeout(() => { title.classList.add('visible'); }, 100));
+      
+      items.forEach((item, index) => {
+        t.push(setTimeout(() => {
+          item.classList.add('visible');
+        }, 1600 + (index * 1500)));
+      });
+
+      t.push(setTimeout(() => {
+        nextBtn.classList.add('visible');
+      }, 1600 + (items.length * 1500) + 500));
+
+      nextBtn.onclick = () => {
+        sceneRules.style.display = 'none';
+        
+        // 如果玩家在大廳選擇了記錄手札
+        if (recordsNotebook) {
+          document.getElementById('notebook-tabs').style.display = 'flex'; // 開啟手札的標籤切換功能
+          
+          const sceneFb = document.getElementById('scene-clinic-feedback');
+          sceneFb.style.display = 'block';
+          document.getElementById('clinic-fb-text').classList.add('instant-visible');
+          
+          const fbNext = document.getElementById('clinic-fb-next');
+          fbNext.classList.add('instant-visible');
+
+          fbNext.onclick = () => {
+            sceneFb.style.display = 'none';
+            startClinicGameplay();
+          };
+        } else {
+          startClinicGameplay();
+        }
+      };
+    }
+
+    function startClinicGameplay() {
+       document.getElementById('scene-clinic-game').style.display = 'block';
+       // 在此處加入後續診療室事件的呼叫
+    }
 
   </script>
 
