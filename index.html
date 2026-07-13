@@ -456,7 +456,7 @@
     </div>
 
     <div id="scene-experiment" style="display: none;">
-      <p class="story-text" id="exp-p1">闖入手術室的壞孩子，終將成為「奇蹟」誕生的養料……。</p>
+      <p class="story-text" id="exp-p1" style="color: red;">闖入手術室的壞孩子，終將成為「奇蹟」誕生的養料……。</p>
       <div style="text-align: center;">
         <button id="exp-retry-btn" class="btn hidden-element" style="margin-top: 20px;">Retry</button>
       </div>
@@ -793,17 +793,55 @@
       if (choice === "stay") {
         setTimeout(() => {
             const uvOverlay = document.getElementById('scene-uv-overlay');
-            uvOverlay.style.opacity = '0';
-            setTimeout(() => {
-                uvOverlay.style.display = 'none';
-                if (fearValue >= 60) {
-                    handleLostEndingTransition();
-                } else {
+            if (fearValue >= 60) {
+                // 三秒劇情文字消失後
+                uvOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    uvOverlay.style.display = 'none';
+                    
+                    // 多加一個0.5秒全黑畫面
+                    blackOverlay.style.display = 'block';
+                    blackOverlay.style.opacity = '1';
+                    document.getElementById('overlay-text').style.opacity = '0';
+                    document.getElementById('overlay-text').textContent = '';
+                    
+                    setTimeout(() => {
+                        // 再進有「……」的1.5秒過場黑畫面
+                        document.getElementById('overlay-text').textContent = '……';
+                        document.getElementById('overlay-text').style.opacity = '1';
+                        
+                        setTimeout(() => {
+                            hideAllScenes();
+                            document.getElementById('lost-p1').classList.remove('visible', 'instant-visible');
+                            document.getElementById('lost-p2').classList.remove('visible', 'instant-visible');
+                            document.getElementById('lost-next-btn').classList.remove('visible', 'instant-visible');
+
+                            sceneLost.style.display = 'block';
+
+                            blackOverlay.style.opacity = '0';
+                            document.getElementById('overlay-text').style.opacity = '0';
+                            
+                            setTimeout(() => {
+                                blackOverlay.style.display = 'none';
+                                document.getElementById('overlay-text').textContent = ''; 
+                                setTimeout(() => { document.getElementById('lost-p1').classList.add('visible'); }, 500);
+                                setTimeout(() => { document.getElementById('lost-p2').classList.add('visible'); }, 3000);
+                                setTimeout(() => { 
+                                  document.getElementById('lost-next-btn').classList.add('visible');
+                                }, 5500);
+                            }, 500);
+                        }, 1500);
+                    }, 500);
+                }, 500);
+            } else {
+                uvOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    uvOverlay.style.display = 'none';
                     savedModals.forEach(m => m.style.display = 'flex');
                     activeModals = savedModals;
                     resumeCallback();
-                }
-            }, 500);
+                }, 500);
+            }
         }, 3000);
       } else {
         // "跟上光芒" 或 "轉身逃離": 3秒自動還原
@@ -1014,12 +1052,55 @@
         scene1.style.display = 'block'; 
     }
 
+    // 修改迷失結局重置邏輯
     document.getElementById('lost-next-btn').addEventListener('click', () => {
-        resetGameState();
+        fearValue = 0;
+        sheepIndex = 0;
+        snakeIndex = 0;
+        updateFearUI();
+
+        uvTriggered = false;
+        played1_1 = false;
+        currentZone = 'lobby';
+        hasPassedWard = false;
+        wardIntroPlayed = false;
+        nextFixed = "1-8";
+        randomEvents = ["1-2", "1-3", "1-4", "1-6", "1-7"];
+        shuffleArray(randomEvents);
+
+        if (idleTimer) clearTimeout(idleTimer);
+        activeModals.forEach(m => m.style.display = 'none');
+        activeModals = [];
+        [notebookModal, inventoryModal, confirmModal, itemDetailModal, messageModal].forEach(m => m.style.display = 'none');
+
         sceneLost.style.display = 'none';
-        gameScreen.style.display = 'none'; 
-        introScreen.style.display = 'block';
-        fearContainer.style.display = 'none';
+
+        // 進入醫院公告場面 (scene-2)
+        scene2.style.display = 'block';
+
+        s2Timeouts.forEach(clearTimeout);
+        s2Timeouts = [];
+        document.getElementById('s2-title').classList.remove('visible', 'instant-visible');
+        document.querySelectorAll('.s2-item').forEach(i => i.classList.remove('visible', 'instant-visible'));
+        actionBtn2.classList.remove('visible', 'instant-visible');
+        actionBtn2.textContent = 'Skip';
+
+        scene2State = 'playing';
+
+        s2Timeouts.push(setTimeout(() => { document.getElementById('s2-title').classList.add('visible'); }, 100));
+        s2Timeouts.push(setTimeout(() => { actionBtn2.classList.add('visible'); }, 1600));
+
+        const s2Items = document.querySelectorAll('.s2-item');
+        s2Items.forEach((item, index) => {
+          s2Timeouts.push(setTimeout(() => {
+            item.classList.add('visible');
+          }, 1600 + (index * 1500)));
+        });
+
+        s2Timeouts.push(setTimeout(() => {
+          scene2State = 'done';
+          actionBtn2.textContent = 'Next';
+        }, 1600 + (s2Items.length * 1500) + 500));
     });
     
     document.getElementById('exp-retry-btn').addEventListener('click', () => {
