@@ -230,7 +230,6 @@
     position: relative;
   }
 
-  /* 確保切換不同長度公告時，視窗不會大幅縮放，並固定底部分頁按鈕 */
   #notebook-modal .modal-content {
     height: 600px;
     min-height: 550px;
@@ -777,6 +776,7 @@
       uvFeedback.innerHTML = fbText;
       uvFeedback.style.display = 'block';
       uvFeedback.className = 'story-text instant-visible';
+      uvNextBtn.style.display = 'none';
 
       let finalize = () => {
         const uvOverlay = document.getElementById('scene-uv-overlay');
@@ -791,21 +791,20 @@
       };
 
       if (choice === "stay") {
-        if (fearValue >= 60) {
-          uvFeedback.innerHTML += "<br><br><span style='font-size: 1rem; color: #a9a9a9;'>恐懼徹底吞噬了理智，在無盡的黑暗與迷霧中，徹底迷失了方向……。</span>";
-          uvNextBtn.style.display = 'inline-block';
-          uvNextBtn.className = 'btn instant-visible';
-          uvNextBtn.textContent = "Next";
-          uvNextBtn.onclick = () => {
-             document.getElementById('scene-uv-overlay').style.display = 'none';
-             handleLostEndingTransition();
-          };
-        } else {
-          uvNextBtn.style.display = 'inline-block';
-          uvNextBtn.className = 'btn instant-visible';
-          uvNextBtn.textContent = "Next";
-          uvNextBtn.onclick = finalize;
-        }
+        setTimeout(() => {
+            const uvOverlay = document.getElementById('scene-uv-overlay');
+            uvOverlay.style.opacity = '0';
+            setTimeout(() => {
+                uvOverlay.style.display = 'none';
+                if (fearValue >= 60) {
+                    handleLostEndingTransition();
+                } else {
+                    savedModals.forEach(m => m.style.display = 'flex');
+                    activeModals = savedModals;
+                    resumeCallback();
+                }
+            }, 500);
+        }, 3000);
       } else {
         // "跟上光芒" 或 "轉身逃離": 3秒自動還原
         setTimeout(finalize, 3000);
@@ -935,7 +934,7 @@
     
     function handleExperimentEndingTransition() {
       const overlayText = document.getElementById('overlay-text');
-      overlayText.textContent = '……';
+      overlayText.textContent = '';
       
       blackOverlay.style.display = 'block';
       void blackOverlay.offsetWidth; 
@@ -1018,10 +1017,9 @@
     document.getElementById('lost-next-btn').addEventListener('click', () => {
         resetGameState();
         sceneLost.style.display = 'none';
-        document.querySelector('.ui-container').style.display = 'flex'; 
-        fearContainer.style.display = 'block';
-        scene4.style.display = 'block';
-        renderEvent(getNextEventId());
+        gameScreen.style.display = 'none'; 
+        introScreen.style.display = 'block';
+        fearContainer.style.display = 'none';
     });
     
     document.getElementById('exp-retry-btn').addEventListener('click', () => {
@@ -1061,6 +1059,8 @@
       gameScreen.style.display = 'block';
       gameScreen.style.animation = 'fadeIn 1.5s ease-in-out';
       
+      document.querySelector('.ui-container').style.display = 'flex';
+
       fearContainer.style.display = 'block';
       updateFearUI();
 
@@ -1331,7 +1331,7 @@
         ]
       },
       "1-8": {
-        text: "透過昏暗的燈光，依稀能見到前方出現了一串腳印，但看上去並不像人類的。",
+        text: "透過昏暗的燈光，依依能見到前方出現了一串腳印，但看上去並不像人類的。",
         options: [
           { label: "跟隨腳印", effect: () => { sheepIndex += 10; return { text: "直到腳步與之重疊才發現，眼前的腳印，竟然是羊蹄的形狀……。", triggerZoneTransition: true, targetZone: 'ward' }; } },
           { label: "忽視腳印", effect: () => { return { text: "資訊不足時，不要相信任何事物。" }; } },
@@ -1398,15 +1398,15 @@
       updateFearUI(); 
 
       let resumeLogic = () => {
+          if (fearValue >= 60) {
+              handleLostEndingTransition();
+              return;
+          }
+
           let fearDiff = newFear - oldFear;
           let fearText = "";
           if (fearDiff > 0) fearText = "（一陣懼意漫上心頭）";
           else if (fearDiff < 0) fearText = "（情緒似乎得到了緩和）";
-
-          if (fearValue >= 60) {
-              result = { text: "恐懼徹底吞噬了理智，在無盡的黑暗與迷霧中，徹底迷失了方向……。", isEnding: true, transitionText: "（結局：迷失）", isLostEnding: true };
-              fearText = "";
-          }
 
           if (result.skipFeedback) {
               if (result.goto) {
@@ -1445,13 +1445,8 @@
                   handleExperimentEndingTransition();
               }, 3000);
           } else if (result.isEnding) {
-              if (result.isLostEnding) {
-                 nextBtn4.textContent = "Next";
-                 nextBtn4.onclick = () => { handleLostEndingTransition(); };
-              } else {
-                 nextBtn4.textContent = "To Be Continued...";
-                 nextBtn4.onclick = () => { };
-              }
+              nextBtn4.textContent = "To Be Continued...";
+              nextBtn4.onclick = () => { };
           } else if (result.triggerZoneTransition) {
               nextBtn4.textContent = "Next";
               nextBtn4.onclick = () => {
@@ -1735,15 +1730,15 @@
       updateFearUI();
 
       let resumeLogic = () => {
+          if (fearValue >= 60) {
+              handleLostEndingTransition();
+              return;
+          }
+
           let fearDiff = newFear - oldFear;
           let fearText = "";
           if (fearDiff > 0) fearText = "（一陣懼意漫上心頭）";
           else if (fearDiff < 0) fearText = "（情緒似乎得到了緩和）";
-
-          if (fearValue >= 60) {
-              result = { text: "恐懼徹底吞噬了理智，在無盡的黑暗與迷霧中，徹底迷失了方向……。", isEnding: true, transitionText: "（結局：迷失）", isLostEnding: true };
-              fearText = "";
-          }
 
           if (result.skipFeedback) {
             if (result.goto) {
@@ -1781,13 +1776,8 @@
                   handleExperimentEndingTransition();
               }, 3000);
           } else if (result.isEnding) {
-            if (result.isLostEnding) {
-              nextBtnC.textContent = "Next";
-              nextBtnC.onclick = () => { handleLostEndingTransition(); };
-            } else {
               nextBtnC.textContent = "To Be Continued...";
               nextBtnC.onclick = () => { };
-            }
           } else if (result.triggerZoneTransition) {
             nextBtnC.textContent = "Next";
             nextBtnC.onclick = () => {
