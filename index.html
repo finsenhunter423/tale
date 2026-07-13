@@ -305,6 +305,7 @@
     font-size: 0.95rem;
     color: #cbd5e1;
     pointer-events: none;
+    display: none;
   }
 
   #debug-timer-panel {
@@ -319,6 +320,7 @@
     font-size: 0.95rem;
     color: #cbd5e1;
     pointer-events: none;
+    display: none;
   }
 
   .debug-val {
@@ -2567,14 +2569,14 @@
               swFeedback.style.display = 'block';
               swFeedback.className = 'story-text instant-visible';
               nextBtnW.style.display = 'none';
-              
+
               setTimeout(() => {
                   const overlayText = document.getElementById('overlay-text');
-                  overlayText.textContent = ''; 
+                  overlayText.textContent = '';
                   blackOverlay.style.display = 'block';
-                  void blackOverlay.offsetWidth; 
+                  void blackOverlay.offsetWidth;
                   blackOverlay.style.opacity = '1';
-                  
+
                   setTimeout(() => {
                       document.getElementById('scene-ward-game').style.display = 'none';
                       transitionToZone(result.targetZone);
@@ -2606,7 +2608,7 @@
           }
 
           let finalFeedbackHtml = result.text;
-          if (fearText) {
+          if (fearText && !result.isExperimentEnding && !result.isMonsterEnding) {
               finalFeedbackHtml += `<br><br><span style="font-size: 1rem; color: #a9a9a9;">${fearText}</span>`;
           }
           if (result.transitionText) {
@@ -2623,8 +2625,18 @@
               nextBtnW.style.display = 'inline-block';
               nextBtnW.classList.add('instant-visible');
           }
-          
-          if (result.triggerZoneTransition) {
+
+          if (result.isExperimentEnding) {
+              nextBtnW.style.display = 'none';
+              setTimeout(() => {
+                  handleExperimentEndingTransition();
+              }, 3000);
+          } else if (result.isMonsterEnding) {
+              nextBtnW.style.display = 'none';
+              setTimeout(() => {
+                  handleMonsterEndingTransition();
+              }, 3000);
+          } else if (result.triggerZoneTransition) {
             nextBtnW.textContent = "Next";
             nextBtnW.onclick = () => {
               triggerBlackScreenTransition(() => {
