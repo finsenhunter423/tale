@@ -354,6 +354,23 @@
       height: 75vh;
       max-height: 85vh;
       box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 20px;
+    }
+    #notebook-hospital-content,
+    #notebook-clinic-content,
+    #notebook-ward-content {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    #notebook-tabs {
+      position: relative;
+      bottom: auto;
+      left: auto;
+      padding-top: 10px;
+      width: 100%;
     }
   }
 </style>
@@ -1047,6 +1064,7 @@
 
       setTimeout(() => {
         hideAllScenes();
+        document.querySelector('.ui-container').style.display = 'none';
         
         fearValue = 0;
         sheepIndex = 0;
@@ -1060,9 +1078,16 @@
         nextFixed = "1-8";
         currentZone = 'lobby';
 
-        document.querySelector('.ui-container').style.display = 'flex';
-        scene4.style.display = 'block';
-        renderEvent(getNextEventId());
+        const sceneLost = document.getElementById('scene-lost');
+        const lp1 = document.getElementById('lost-p1');
+        const lp2 = document.getElementById('lost-p2');
+        const lostNextBtn = document.getElementById('lost-next-btn');
+
+        lp1.classList.remove('visible', 'instant-visible');
+        lp2.classList.remove('visible', 'instant-visible');
+        lostNextBtn.classList.remove('visible', 'instant-visible');
+
+        sceneLost.style.display = 'block';
 
         blackOverlay.style.opacity = '0';
         overlayText.style.opacity = '0';
@@ -1070,6 +1095,9 @@
         setTimeout(() => {
           blackOverlay.style.display = 'none';
           overlayText.textContent = ''; 
+          setTimeout(() => { lp1.classList.add('visible'); }, 50);
+          setTimeout(() => { lp2.classList.add('visible'); }, 2000);
+          setTimeout(() => { lostNextBtn.classList.add('visible'); }, 4000);
         }, 500);
       }, 1500); 
     }
@@ -1190,7 +1218,12 @@
     }
 
     document.getElementById('lost-next-btn').addEventListener('click', () => {
-        resetGameState();
+        triggerBlackScreenTransition(() => {
+            document.getElementById('scene-lost').style.display = 'none';
+            document.querySelector('.ui-container').style.display = 'flex';
+            scene4.style.display = 'block';
+            renderEvent(getNextEventId());
+        });
     });
     
     document.getElementById('exp-retry-btn').addEventListener('click', () => {
@@ -1514,7 +1547,7 @@
       "1-8": {
         text: "透過昏暗的燈光，依依能見到前方出現了一串腳印，但看上去並不像人類的。",
         options: [
-          { label: "跟隨腳印", effect: () => { sheepIndex += 10; return { text: "直到腳步與之重疊才發現，眼前的腳印，竟然是羊蹄的形狀……。", triggerZoneTransition: true, targetZone: 'ward' }; } },
+          { label: "跟隨腳印", effect: () => { sheepIndex += 10; return { text: "直到腳步與重疊才發現，眼前的腳印，竟然是羊蹄的形狀……。", triggerZoneTransition: true, targetZone: 'ward' }; } },
           { label: "忽視腳印", effect: () => { return { text: "資訊不足時，不要相信任何事物。" }; } },
           { label: "反向離開", effect: () => { snakeIndex += 10; return { text: "迷霧中的指引，更像是誘人深入的陷阱。" }; } }
         ]
@@ -1745,7 +1778,7 @@
         ]
       },
       "2-5-a": {
-        text: "周圍的空氣忽然變得潮濕，伴隨黑暗，形成了極其沉重的壓迫感，令人窒息……。",
+        text: "原先尚且存在的微弱燈光乍然熄滅，只留下無盡黑暗。伴隨刺骨寒冷，形成了沉重的壓迫感，令人窒息……。",
         options: [
           { label: "停留原地", effect: () => { fearValue += 10; return { text: "越發濃烈的恐懼，並不是嘗試保持冷靜便能控制的。<br><br>慌不擇路之下，竟來到了醫院的住院部……。", triggerZoneTransition: true, targetZone: 'ward', isSpecialAutoTransition: true }; } },
           { label: "立刻逃離", effect: () => { return { text: "慌不擇路之下，竟來到了醫院的住院部……。", triggerZoneTransition: true, targetZone: 'ward', isSpecialAutoTransition: true }; } }
@@ -2153,7 +2186,7 @@
         ]
       },
       "3-5-a": {
-        text: "周圍的空氣忽然變得潮濕，伴隨黑暗，形成了極其沉重的壓迫感，令人窒息……。",
+        text: "原先尚且存在的微弱燈光乍然熄滅，只留下無盡黑暗。伴隨刺骨寒冷，形成了沉重的壓迫感，令人窒息……。",
         options: [
           {
             label: "停留原地",
