@@ -306,9 +306,43 @@
     color: #cbd5e1;
     pointer-events: none;
   }
+
+  #debug-timer-panel {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.75);
+    padding: 12px;
+    border: 1px dashed #a9a9a9;
+    font-family: monospace;
+    z-index: 3000;
+    font-size: 0.95rem;
+    color: #cbd5e1;
+    pointer-events: none;
+  }
+
   .debug-val {
     color: #f1f5f9;
     font-weight: bold;
+  }
+
+  /* 手機介面捲動機制 */
+  @media (max-width: 768px) {
+    body {
+      height: auto;
+      min-height: 100vh;
+      overflow-y: auto;
+      align-items: flex-start;
+      padding-top: 5vh;
+      padding-bottom: 120px;
+    }
+    #game-screen {
+      height: auto;
+      overflow: visible;
+    }
+    .modal-content {
+      max-height: 85vh;
+    }
   }
 </style>
 </head>
@@ -319,6 +353,10 @@
     恐懼值: <span id="debug-fear" class="debug-val">0</span> | 
     羊群指數: <span id="debug-sheep" class="debug-val">0</span> | 
     蛇指數: <span id="debug-snake" class="debug-val">0</span>
+  </div>
+
+  <div id="debug-timer-panel">
+    閒置倒數: <span id="debug-timer-val" class="debug-val">40</span>s
   </div>
 
   <div id="black-overlay">
@@ -355,7 +393,7 @@
       <h2 class="scene-title" id="s2-title">【聖心醫院公告】</h2>
       <ul class="bullet-list">
         <li class="story-text bullet-item s2-item">• 手術室嚴格禁止進入，若有人問你看見了什麼，回答「什麼都沒看見」。</li>
-        <li class="story-text bullet-item s2-item">• 住院部是安全的，你能夠在那裡得到庇護。</li>
+        <li class="story-text bullet-item s2-item">• 住院部是安全的，診療室是危險的。</li>
         <li class="story-text bullet-item s2-item">• 糖果是屬於「好孩子」的，只有「好孩子」能夠取走。</li>
         <li class="story-text bullet-item s2-item">• 「壞孩子」的牙齒會被「怪物」拔掉。</li>
         <li class="story-text bullet-item s2-item">• 「蛇」是危險的，請務必迴避。</li>
@@ -456,9 +494,18 @@
     </div>
 
     <div id="scene-experiment" style="display: none;">
+      <h2 class="scene-title" id="exp-title" style="color: red; margin-bottom: 20px;">【實驗】</h2>
       <p class="story-text" id="exp-p1" style="color: red;">闖入手術室的壞孩子，終將成為「奇蹟」誕生的養料……。</p>
       <div style="text-align: center;">
         <button id="exp-retry-btn" class="btn hidden-element" style="margin-top: 20px;">Retry</button>
+      </div>
+    </div>
+
+    <div id="scene-monster" style="display: none;">
+      <h2 class="scene-title" id="monster-title" style="color: red; margin-bottom: 20px;">【怪物】</h2>
+      <p class="story-text" id="monster-p1" style="color: red;">伴隨哼唱歌謠的聲音，意識逐漸變得模糊，冰冷的器械探入口腔，一陣劇痛淹沒了呼吸……。</p>
+      <div style="text-align: center;">
+        <button id="monster-retry-btn" class="btn hidden-element" style="margin-top: 20px;">Retry</button>
       </div>
     </div>
 
@@ -485,7 +532,7 @@
         <h2 style="font-size: 1.5rem; text-align: center; letter-spacing: 2px; margin-bottom: 30px;">【聖心醫院公告】</h2>
         <ul class="bullet-list">
           <li class="bullet-item" style="opacity: 1; transform: none;">• 手術室嚴格禁止進入，若有人問你看見了什麼，回答「什麼都沒看見」。</li>
-          <li class="bullet-item" style="opacity: 1; transform: none;">• 住院部是安全的，你能夠在那裡得到庇護。</li>
+          <li class="bullet-item" style="opacity: 1; transform: none;">• 住院部是安全的，診療室是危險的。</li>
           <li class="bullet-item" style="opacity: 1; transform: none;">• 糖果是屬於「好孩子」的，只有「好孩子」能夠取走。</li>
           <li class="bullet-item" style="opacity: 1; transform: none;">• 「壞孩子」的牙齒會被「怪物」拔掉。</li>
           <li class="bullet-item" style="opacity: 1; transform: none;">• 「蛇」是危險的，請務必迴避。</li>
@@ -576,6 +623,8 @@
 
     let uvTriggered = false;
     let idleTimer = null;
+    let idleInterval = null;
+    let idleTimeLeft = 40;
     let activeModals = []; 
 
     let currentZone = 'lobby'; 
@@ -593,6 +642,7 @@
     const scene4 = document.getElementById('scene-4');
     const sceneLost = document.getElementById('scene-lost');
     const sceneExperiment = document.getElementById('scene-experiment');
+    const sceneMonster = document.getElementById('scene-monster');
 
     const p1 = document.getElementById('s1-p1');
     const p2 = document.getElementById('s1-p2');
@@ -691,8 +741,13 @@
       }
     }
 
+    function stopIdleTimer() {
+        if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
+        if (idleInterval) { clearInterval(idleInterval); idleInterval = null; }
+    }
+
     function triggerBlackScreenTransition(callback) {
-      if (idleTimer) clearTimeout(idleTimer);
+      stopIdleTimer();
       const overlayText = document.getElementById('overlay-text');
       overlayText.textContent = ''; 
       blackOverlay.style.display = 'block';
@@ -709,9 +764,27 @@
       }, 2000);
     }
 
+    function triggerUVBlackScreen(resumeCallback) {
+        stopIdleTimer();
+        const overlayText = document.getElementById('overlay-text');
+        overlayText.textContent = '';
+        blackOverlay.style.display = 'block';
+        void blackOverlay.offsetWidth;
+        blackOverlay.style.opacity = '1';
+        overlayText.style.opacity = '0';
+
+        setTimeout(() => {
+            blackOverlay.style.opacity = '0';
+            setTimeout(() => {
+                blackOverlay.style.display = 'none';
+                showUVOverlay(resumeCallback);
+            }, 500);
+        }, 1500);
+    }
+
     // 處理 UV 強制事件介面
     function showUVOverlay(resumeCallback) {
-      if (idleTimer) clearTimeout(idleTimer);
+      stopIdleTimer();
       
       let savedModals = activeModals.slice();
       activeModals.forEach(m => m.style.display = 'none');
@@ -812,6 +885,7 @@
                         
                         setTimeout(() => {
                             hideAllScenes();
+                            document.querySelector('.ui-container').style.display = 'flex';
                             document.getElementById('lost-p1').classList.remove('visible', 'instant-visible');
                             document.getElementById('lost-p2').classList.remove('visible', 'instant-visible');
                             document.getElementById('lost-next-btn').classList.remove('visible', 'instant-visible');
@@ -850,7 +924,7 @@
     }
 
     function triggerIdle() {
-      if (idleTimer) clearTimeout(idleTimer);
+      stopIdleTimer();
 
       activeModals = [];
       if (notebookModal.style.display === 'flex') activeModals.push(notebookModal);
@@ -905,7 +979,7 @@
 
         if (fearValue >= 50 && !uvTriggered) {
             uvTriggered = true;
-            showUVOverlay(resumeIdle);
+            triggerUVBlackScreen(resumeIdle);
         } else {
             resumeIdle();
         }
@@ -913,7 +987,18 @@
     }
 
     function startIdleTimer() {
-      if (idleTimer) clearTimeout(idleTimer);
+      stopIdleTimer();
+      idleTimeLeft = 40;
+      document.getElementById('debug-timer-val').textContent = idleTimeLeft;
+      
+      idleInterval = setInterval(() => {
+          idleTimeLeft--;
+          document.getElementById('debug-timer-val').textContent = idleTimeLeft;
+          if (idleTimeLeft <= 0) {
+              clearInterval(idleInterval);
+          }
+      }, 1000);
+      
       idleTimer = setTimeout(() => {
         triggerIdle();
       }, 40000);
@@ -933,8 +1018,9 @@
         document.getElementById('scene-ward-rules').style.display = 'none';
         document.getElementById('scene-ward-feedback').style.display = 'none';
         document.getElementById('scene-ward-game').style.display = 'none';
-        document.getElementById('scene-experiment').style.display = 'none';
-        document.getElementById('scene-lost').style.display = 'none';
+        sceneExperiment.style.display = 'none';
+        sceneMonster.style.display = 'none';
+        sceneLost.style.display = 'none';
         document.querySelector('.ui-container').style.display = 'none';
     }
 
@@ -949,6 +1035,7 @@
 
       setTimeout(() => {
         hideAllScenes();
+        document.querySelector('.ui-container').style.display = 'flex';
         document.getElementById('lost-p1').classList.remove('visible', 'instant-visible');
         document.getElementById('lost-p2').classList.remove('visible', 'instant-visible');
         document.getElementById('lost-next-btn').classList.remove('visible', 'instant-visible');
@@ -981,6 +1068,7 @@
 
       setTimeout(() => {
         hideAllScenes();
+        document.getElementById('exp-title').classList.remove('visible', 'instant-visible');
         document.getElementById('exp-p1').classList.remove('visible', 'instant-visible');
         document.getElementById('exp-retry-btn').classList.remove('visible', 'instant-visible');
 
@@ -992,8 +1080,39 @@
         setTimeout(() => {
           blackOverlay.style.display = 'none';
           overlayText.textContent = ''; 
+          setTimeout(() => { document.getElementById('exp-title').classList.add('visible'); }, 50);
           setTimeout(() => { document.getElementById('exp-p1').classList.add('visible'); }, 500);
           setTimeout(() => { document.getElementById('exp-retry-btn').classList.add('visible'); }, 3000);
+        }, 500);
+      }, 1500); 
+    }
+
+    function handleMonsterEndingTransition() {
+      const overlayText = document.getElementById('overlay-text');
+      overlayText.textContent = '';
+      
+      blackOverlay.style.display = 'block';
+      void blackOverlay.offsetWidth; 
+      blackOverlay.style.opacity = '1';
+      overlayText.style.opacity = '1';
+
+      setTimeout(() => {
+        hideAllScenes();
+        document.getElementById('monster-title').classList.remove('visible', 'instant-visible');
+        document.getElementById('monster-p1').classList.remove('visible', 'instant-visible');
+        document.getElementById('monster-retry-btn').classList.remove('visible', 'instant-visible');
+
+        sceneMonster.style.display = 'block';
+
+        blackOverlay.style.opacity = '0';
+        overlayText.style.opacity = '0';
+        
+        setTimeout(() => {
+          blackOverlay.style.display = 'none';
+          overlayText.textContent = ''; 
+          setTimeout(() => { document.getElementById('monster-title').classList.add('visible'); }, 50);
+          setTimeout(() => { document.getElementById('monster-p1').classList.add('visible'); }, 500);
+          setTimeout(() => { document.getElementById('monster-retry-btn').classList.add('visible'); }, 3000);
         }, 500);
       }, 1500); 
     }
@@ -1017,7 +1136,7 @@
         
         updateFearUI();
 
-        if (idleTimer) clearTimeout(idleTimer);
+        stopIdleTimer();
         activeModals.forEach(m => m.style.display = 'none');
         activeModals = [];
         [notebookModal, inventoryModal, confirmModal, itemDetailModal, messageModal].forEach(m => m.style.display = 'none');
@@ -1052,7 +1171,6 @@
         scene1.style.display = 'block'; 
     }
 
-    // 修改迷失結局重置邏輯
     document.getElementById('lost-next-btn').addEventListener('click', () => {
         fearValue = 0;
         sheepIndex = 0;
@@ -1060,52 +1178,30 @@
         updateFearUI();
 
         uvTriggered = false;
-        played1_1 = false;
-        currentZone = 'lobby';
-        hasPassedWard = false;
-        wardIntroPlayed = false;
-        nextFixed = "1-8";
-        randomEvents = ["1-2", "1-3", "1-4", "1-6", "1-7"];
-        shuffleArray(randomEvents);
 
-        if (idleTimer) clearTimeout(idleTimer);
+        stopIdleTimer();
         activeModals.forEach(m => m.style.display = 'none');
         activeModals = [];
         [notebookModal, inventoryModal, confirmModal, itemDetailModal, messageModal].forEach(m => m.style.display = 'none');
 
         sceneLost.style.display = 'none';
 
-        // 進入醫院公告場面 (scene-2)
-        scene2.style.display = 'block';
-
-        s2Timeouts.forEach(clearTimeout);
-        s2Timeouts = [];
-        document.getElementById('s2-title').classList.remove('visible', 'instant-visible');
-        document.querySelectorAll('.s2-item').forEach(i => i.classList.remove('visible', 'instant-visible'));
-        actionBtn2.classList.remove('visible', 'instant-visible');
-        actionBtn2.textContent = 'Skip';
-
-        scene2State = 'playing';
-
-        s2Timeouts.push(setTimeout(() => { document.getElementById('s2-title').classList.add('visible'); }, 100));
-        s2Timeouts.push(setTimeout(() => { actionBtn2.classList.add('visible'); }, 1600));
-
-        const s2Items = document.querySelectorAll('.s2-item');
-        s2Items.forEach((item, index) => {
-          s2Timeouts.push(setTimeout(() => {
-            item.classList.add('visible');
-          }, 1600 + (index * 1500)));
-        });
-
-        s2Timeouts.push(setTimeout(() => {
-          scene2State = 'done';
-          actionBtn2.textContent = 'Next';
-        }, 1600 + (s2Items.length * 1500) + 500));
+        currentZone = 'lobby';
+        scene4.style.display = 'block';
+        renderEvent(getNextEventId());
     });
     
     document.getElementById('exp-retry-btn').addEventListener('click', () => {
         resetGameState();
         sceneExperiment.style.display = 'none';
+        gameScreen.style.display = 'none';
+        introScreen.style.display = 'block'; 
+        fearContainer.style.display = 'none'; 
+    });
+
+    document.getElementById('monster-retry-btn').addEventListener('click', () => {
+        resetGameState();
+        sceneMonster.style.display = 'none';
         gameScreen.style.display = 'none';
         introScreen.style.display = 'block'; 
         fearContainer.style.display = 'none'; 
@@ -1434,7 +1530,7 @@
     const nextBtn4 = document.getElementById('next-btn-4');
 
     function renderEvent(eventId) {
-      if (idleTimer) clearTimeout(idleTimer);
+      stopIdleTimer();
       if (!eventId) return; 
       const ev = eventsData[eventId];
       
@@ -1468,7 +1564,7 @@
     }
 
     function handleOptionClick(opt) {
-      if (idleTimer) clearTimeout(idleTimer);
+      stopIdleTimer();
 
       s4Options.style.display = 'none'; 
       s4Text.style.display = 'none'; 
@@ -1548,7 +1644,7 @@
 
       if (fearValue >= 50 && !uvTriggered) {
           uvTriggered = true;
-          showUVOverlay(resumeLogic);
+          triggerUVBlackScreen(resumeLogic);
       } else {
           resumeLogic();
       }
@@ -1616,7 +1712,7 @@
       "2-1-2": {
         text: "「請誠實的回答我，你是不是『好孩子』……？」",
         options: [
-          { label: "「……是。」", effect: () => { return { text: "對方沒有再說話，下一個瞬間，一道身影出現在面前，隱約可看見身後的菌絲正蠢蠢欲動……", isEnding: true, transitionText: "（提前進入結局「怪物」）" }; } },
+          { label: "「……是。」", effect: () => { return { text: "對方沒有再說話，下個瞬間，一道身影出現在面前，隱約可見無數菌絲自其背後漫出……。", isMonsterEnding: true }; } },
           { label: "「……不是。」", effect: () => { fearValue += 15; return { text: "「小心，不聽話的壞孩子，會被『怪物』盯上呢……。」" }; } }
         ]
       },
@@ -1664,7 +1760,7 @@
     // ==========================================
 
     function enterClinicScene() {
-      if (idleTimer) clearTimeout(idleTimer);
+      stopIdleTimer();
       const sceneClinicIntro = document.getElementById('scene-clinic-intro');
       const p1 = document.getElementById('clinic-p1');
       const introNextBtn = document.getElementById('next-btn-clinic-intro');
@@ -1685,7 +1781,7 @@
     }
 
     function enterClinicRulesScene() {
-      if (idleTimer) clearTimeout(idleTimer);
+      stopIdleTimer();
       const sceneClinicRules = document.getElementById('scene-clinic-rules');
       const title = document.getElementById('clinic-s2-title');
       const items = document.querySelectorAll('.clinic-s2-item');
@@ -1756,7 +1852,7 @@
     }
 
     function renderClinicEvent(eventId) {
-      if (idleTimer) clearTimeout(idleTimer);
+      stopIdleTimer();
       if (!eventId) return;
 
       const ev = clinicEventsData[eventId];
@@ -1795,7 +1891,7 @@
     }
 
     function handleClinicOptionClick(opt) {
-      if (idleTimer) clearTimeout(idleTimer);
+      stopIdleTimer();
 
       const scText = document.getElementById('sc-text');
       const scOptions = document.getElementById('sc-options');
@@ -1835,7 +1931,7 @@
           }
 
           let finalFeedbackHtml = result.text;
-          if (fearText && !result.isExperimentEnding) {
+          if (fearText && !result.isExperimentEnding && !result.isMonsterEnding) {
               finalFeedbackHtml += `<br><br><span style="font-size: 1rem; color: #a9a9a9;">${fearText}</span>`;
           }
           if (result.transitionText) {
@@ -1855,6 +1951,11 @@
               nextBtnC.style.display = 'none';
               setTimeout(() => {
                   handleExperimentEndingTransition();
+              }, 3000);
+          } else if (result.isMonsterEnding) {
+              nextBtnC.style.display = 'none';
+              setTimeout(() => {
+                  handleMonsterEndingTransition();
               }, 3000);
           } else if (result.isEnding) {
               nextBtnC.textContent = "To Be Continued...";
@@ -1879,7 +1980,7 @@
 
       if (fearValue >= 50 && !uvTriggered) {
           uvTriggered = true;
-          showUVOverlay(resumeLogic);
+          triggerUVBlackScreen(resumeLogic);
       } else {
           resumeLogic();
       }
@@ -1890,7 +1991,7 @@
     // ==========================================
 
     function enterWardScene() {
-      if (idleTimer) clearTimeout(idleTimer);
+      stopIdleTimer();
       if (wardIntroPlayed) {
           document.getElementById('scene-ward-game').style.display = 'block';
           return;
@@ -1917,7 +2018,7 @@
     }
 
     function enterWardRulesScene() {
-      if (idleTimer) clearTimeout(idleTimer);
+      stopIdleTimer();
       const sceneWardRules = document.getElementById('scene-ward-rules');
       const title = document.getElementById('ward-s2-title');
       const items = document.querySelectorAll('.ward-s2-item');
