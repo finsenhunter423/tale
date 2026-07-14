@@ -560,7 +560,7 @@
 
     <div id="scene-experiment" style="display: none;">
       <h2 class="scene-title" id="exp-title" style="color: #bd1f1f; margin-bottom: 20px;">【實驗】</h2>
-      <p class="story-text" id="exp-p1" style="color: #bd1f1f;">闖入手術室的壞孩子，終將成為「奇蹟」誕生的養料……。</p>
+      <p class="story-text" id="exp-p1" style="color: #bd1f1f; text-align: left;">闖入手術室的壞孩子，終將成為「奇蹟」誕生的養料……。</p>
       <div style="text-align: center;">
         <button id="exp-retry-btn" class="btn hidden-element" style="margin-top: 20px;">Retry</button>
       </div>
@@ -568,7 +568,7 @@
 
     <div id="scene-monster" style="display: none;">
       <h2 class="scene-title" id="monster-title" style="color: #bd1f1f; margin-bottom: 20px;">【怪物】</h2>
-      <p class="story-text" id="monster-p1" style="color: #bd1f1f;">伴隨哼唱歌謠的聲音，意識逐漸變得模糊，冰冷的器械探入口腔，一陣劇痛淹沒了呼吸……。</p>
+      <p class="story-text" id="monster-p1" style="color: #bd1f1f; text-align: left;">伴隨哼唱歌謠的聲音，意識逐漸變得模糊，冰冷的器械探入口腔，一陣劇痛淹沒了呼吸……。</p>
       <div style="text-align: center;">
         <button id="monster-retry-btn" class="btn hidden-element" style="margin-top: 20px;">Retry</button>
       </div>
@@ -581,7 +581,7 @@
 
     <div id="scene-final-ending" style="display: none; text-align: center;">
       <h2 class="scene-title" id="ending-title" style="margin-bottom: 20px;"></h2>
-      <p class="story-text" id="ending-text" style="text-align: center; margin-bottom: 40px;"></p>
+      <p class="story-text" id="ending-text" style="text-align: left; margin-bottom: 40px;"></p>
       <button id="ending-retry-btn" class="btn hidden-element" style="margin-top: 20px;">Retry</button>
     </div>
 
@@ -1288,11 +1288,11 @@
         let text = '';
 
         if (q1Answer === '「羊群」' && q2Answer === '「蛇」' && q3Answer === '怪物') {
-            title = '【沉沼】';
+            title = '【罪孽】';
             text = '踩著羊群的腳印站在岸邊，被沉入沼澤的，究竟是罪人，又或者蒙冤的替罪者……？';
         } else if (q1Answer === '「羊群」' && q2Answer === '「蛇」' && q3Answer === '「蛇」') {
-            title = '【罪孽】';
-            text = '窒息瞬間湧上，最後一眼所看見的，是「羊群」扭曲的臉龐，仍在囂叫著對「怪物」的審判……';
+            title = '【沉沼】';
+            text = '窒息瞬間湧上，彷彿置身泥潭。沒入黑暗之際，「羊群」依然咆哮著對「怪物」的審判……。';
         } else if (q1Answer === '「羊群」' && q2Answer === '「羊群」' && (q3Answer === '怪物' || q3Answer === '「蛇」')) {
             title = '【群羊】';
             text = '喉間發出了群眾的嘶吼，當面目被扭曲，事實似乎也不再重要。';
@@ -1308,7 +1308,7 @@
             text = '在紫外光的照耀中，一切恐懼都得到了「治癒」……。';
         } else if (q1Answer === '「蛇」' && q2Answer === '「羊群」' && q3Answer === '醫者' && hasLens) {
             title = '【救贖】';
-            text = '當「存在」的希望再一次眷顧，從沼澤裡走出的，會是曾經的他嗎……？';
+            text = '透鏡折射出溫暖的光芒，當「存在」的希望再一次眷顧，從沼澤裡現身的，會是曾經的他嗎……？';
         } else {
             title = '【未知的結局】';
             text = '你的選擇引導向了一個未知的深淵……。';
@@ -1334,8 +1334,8 @@
         btnEl.classList.remove('visible', 'instant-visible');
 
         setTimeout(() => { textEl.classList.add('visible'); }, 50);
-        setTimeout(() => { titleEl.classList.add('visible'); }, 1550);
-        setTimeout(() => { btnEl.classList.add('visible'); }, 3000);
+        setTimeout(() => { titleEl.classList.add('visible'); }, 2550);
+        setTimeout(() => { btnEl.classList.add('visible'); }, 4000);
         
         btnEl.onclick = () => {
             resetGameState();
@@ -1370,8 +1370,8 @@
           blackOverlay.style.display = 'none';
           overlayText.textContent = ''; 
           setTimeout(() => { document.getElementById('exp-p1').classList.add('visible'); }, 50);
-          setTimeout(() => { document.getElementById('exp-title').classList.add('visible'); }, 1550);
-          setTimeout(() => { document.getElementById('exp-retry-btn').classList.add('visible'); }, 3000);
+          setTimeout(() => { document.getElementById('exp-title').classList.add('visible'); }, 2550);
+          setTimeout(() => { document.getElementById('exp-retry-btn').classList.add('visible'); }, 4000);
         }, 500);
       }, 1500); 
     }
@@ -1400,8 +1400,8 @@
           blackOverlay.style.display = 'none';
           overlayText.textContent = ''; 
           setTimeout(() => { document.getElementById('monster-p1').classList.add('visible'); }, 50);
-          setTimeout(() => { document.getElementById('monster-title').classList.add('visible'); }, 1550);
-          setTimeout(() => { document.getElementById('monster-retry-btn').classList.add('visible'); }, 3000);
+          setTimeout(() => { document.getElementById('monster-title').classList.add('visible'); }, 2550);
+          setTimeout(() => { document.getElementById('monster-retry-btn').classList.add('visible'); }, 4000);
         }, 500);
       }, 1500); 
     }
@@ -2030,14 +2030,14 @@
         ]
       },
       "2-1-2": {
-        text: "「請誠實的回答我，你是不是『好孩子』……？」",
+        text: "「請誠實地回答我，你是不是『好孩子』……？」",
         options: [
           { label: "「……是。」", effect: () => { return { text: "對方沒有再說話，下個瞬間，一道身影出現在面前，隱約可見無數菌絲自其背後漫出……。", isMonsterEnding: true }; } },
           { label: "「……不是。」", effect: () => { fearValue += 15; return { text: "「小心，不聽話的壞孩子，會被『怪物』盯上呢……。」" }; } }
         ]
       },
       "2-2": {
-        text: "診療椅上，一條蛇盤踞著，那雙異瞳似乎能夠看穿人的內心……？",
+        text: "診療椅上，一條蛇盤踞着，那雙異瞳似乎能夠看穿人的內心……？",
         options: [
           { label: "主動靠近", effect: () => { fearValue -= 5; snakeIndex += 10; return { text: "想要更加靠近時，蛇的身影卻消失在了黑暗裡，好似從未存在過。" }; } },
           { label: "靜觀其變", effect: () => { return { text: "那究竟是幻覺，抑或是真實？" }; } },
