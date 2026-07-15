@@ -357,23 +357,24 @@
     .announcement-scene {
       display: flex;
       flex-direction: column;
-      height: 65vh; 
-      max-height: 600px;
+      height: 75vh; 
+      max-height: 800px;
     }
     .announcement-content {
       flex: 1;
       overflow-y: auto;
-      padding-bottom: 80px; 
+      padding-bottom: 10px; 
     }
     .announcement-btn-container {
-      position: fixed;
-      bottom: 140px; 
-      left: 0;
+      position: relative; /* 解決按鈕重疊問題 */
+      bottom: auto;
+      left: auto;
       width: 100%;
       display: flex;
       justify-content: center;
       z-index: 90;
-      margin-top: 0;
+      margin-top: 15px;
+      padding-bottom: 15px;
     }
 
     .ui-container {
@@ -894,11 +895,14 @@
         blackOverlay.style.opacity = '1';
         overlayText.style.opacity = '0';
 
+        // 維持全黑過場畫面 1.5 秒
         setTimeout(() => {
+            // 在黑畫面淡出前，先顯示完全不透明的 UV 畫面，防止原劇情畫面閃爍
+            showUVOverlay(resumeCallback);
+            
             blackOverlay.style.opacity = '0';
             setTimeout(() => {
                 blackOverlay.style.display = 'none';
-                showUVOverlay(resumeCallback);
             }, 500);
         }, 1500);
     }
@@ -916,13 +920,12 @@
       const uvNextBtn = document.getElementById('uv-next-btn');
 
       uvOverlay.style.display = 'flex';
-      uvOverlay.style.opacity = '0';
-      setTimeout(() => uvOverlay.style.opacity = '1', 50);
+      uvOverlay.style.opacity = '1'; // 直接設為 1，不需要淡入效果，阻擋黑幕淡出時的閃爍
 
       uvText.style.display = 'block';
       uvText.innerHTML = "強烈的恐懼湧上，使身體不自覺戰慄……此時，前方亮起了一道溫暖的紫色光芒。";
       uvText.className = 'story-text';
-      void uvText.offsetWidth; // Force Reflow for fade-in effect
+      void uvText.offsetWidth; // Force Reflow
       uvText.classList.add('visible');
 
       uvOptions.innerHTML = '';
@@ -1955,6 +1958,12 @@
                  return;
             }
 
+            // 新增判斷：若設定了跳過回饋，則直接執行下一步，避免顯示空的回饋文字
+            if (result.skipFeedback) {
+                setupStandardNextBtn();
+                return;
+            }
+
             fbEl.innerHTML = finalFeedbackHtml;
             fbEl.style.display = 'block';
             fbEl.className = 'story-text';
@@ -2496,6 +2505,11 @@
           }
         }
       };
+    }
+
+    function startWardGameplay() {
+       document.getElementById('scene-ward-game').style.display = 'block';
+       renderWardEvent(getNextWardEventId());
     }
 
     function renderWardEvent(eventId) {
