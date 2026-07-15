@@ -52,10 +52,17 @@
     color: #070707;
   }
 
+  .ui-btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
   .ui-btn {
     width: 140px;
     text-align: center;
     padding: 10px 0;
+    margin-top: 0 !important;
   }
 
   #game-screen {
@@ -325,14 +332,6 @@
     color: #f1f5f9;
     font-weight: bold;
   }
-  
-  /* PC Defaults for Announcements */
-  .announcement-scene {
-    /* normal flow */
-  }
-  .announcement-content {
-    /* normal flow */
-  }
 
   @media (max-width: 768px) {
     body {
@@ -358,17 +357,39 @@
     .announcement-scene {
       display: flex;
       flex-direction: column;
-      height: 70vh; 
+      height: 65vh; 
       max-height: 600px;
     }
     .announcement-content {
       flex: 1;
       overflow-y: auto;
-      padding-bottom: 15px;
+      padding-bottom: 80px; 
     }
     .announcement-btn-container {
-      flex-shrink: 0;
-      margin-top: 10px;
+      position: fixed;
+      bottom: 140px; 
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      z-index: 90;
+      margin-top: 0;
+    }
+
+    .ui-container {
+      bottom: 20px;
+      right: 20px;
+      align-items: flex-end;
+    }
+    #fear-container {
+      margin-bottom: 10px;
+    }
+    .ui-btn-group {
+      flex-direction: row-reverse;
+      gap: 10px;
+    }
+    .ui-btn {
+      width: 120px;
     }
 
     .modal-content {
@@ -596,8 +617,10 @@
         </g>
       </svg>
     </div>
-    <button id="notebook-btn" class="btn ui-btn" style="display: none; margin-top: 0;">手札</button>
-    <button id="inventory-btn" class="btn ui-btn" style="display: none; margin-top: 15px;">隨身物品</button>
+    <div class="ui-btn-group">
+      <button id="notebook-btn" class="btn ui-btn" style="display: none;">手札</button>
+      <button id="inventory-btn" class="btn ui-btn" style="display: none;">隨身物品</button>
+    </div>
   </div>
 
   <div id="notebook-modal">
@@ -957,7 +980,9 @@
       } else if (choice === "stay") {
         fbText = "猶豫之際，那道光已然消失，只留下無盡的黑暗。";
       } else if (choice === "flee") {
-        fearValue = Math.max(0, fearValue - 15); sheepIndex += 15;
+        fearValue -= 15;
+        if(fearValue < 0) fearValue = 0;
+        sheepIndex += 15;
         fbText = "一道急切的聲音響起：「不要走入那道光，快快遠離那道光……。」";
       }
       updateFearUI();
@@ -1292,10 +1317,10 @@
             text = '踩著羊群的腳印站在岸邊，被沉入沼澤的，究竟是罪人，又或者蒙冤的替罪者……？';
         } else if (q1Answer === '「羊群」' && q2Answer === '「蛇」' && q3Answer === '「蛇」') {
             title = '【沉沼】';
-            text = '窒息瞬間湧上，彷彿置身泥潭。沒入黑暗之際，「羊群」依然咆哮著對「怪物」的審判……。';
+            text = '呼吸瞬間凝滯，彷彿置身泥潭。視線沒入黑暗之際，「羊群」仍咆哮著對「怪物」的審判……。';
         } else if (q1Answer === '「羊群」' && q2Answer === '「羊群」' && (q3Answer === '怪物' || q3Answer === '「蛇」')) {
             title = '【群羊】';
-            text = '喉間發出了群眾的嘶吼，當面目被扭曲，事實似乎也不再重要。';
+            text = '當面目被扭曲，喉間發出群眾的嘶吼，事實似乎也不再重要。';
         } else if (q1Answer === '「蛇」' && q2Answer === '「蛇」' && (q3Answer === '怪物' || q3Answer === '「蛇」')) {
             title = '【蛇毒】';
             text = '菌絲黏膩濕滑的觸感攀上，那份冰冷揮之不去，有一道聲音正輕柔地哼著歌謠……。';
@@ -1644,6 +1669,7 @@
         hasCandy = false;
         ateCandy = true;
         fearValue -= 10;
+        if (fearValue < 0) fearValue = 0;
         updateFearUI();
         inventoryBtn.click(); 
         
@@ -1764,7 +1790,7 @@
       "1-7": {
         text: "一旁的房間門扉緊閉，上頭寫著「手術室」，裡面隱約傳來陣陣聲響……。",
         options: [
-          { label: "偷聽動靜", effect: () => { fearValue += 10; return { text: "裡面傳來一陣騷動，聽起來並不像手術室該發出的聲音……腳下隱隱有深色液體滲出，讓人不得不立刻逃離。" }; } },
+          { label: "偷聽動靜", effect: () => { fearValue += 10; return { text: "那聽起來並不像手術室該發出的動靜……腳下隱隱有深色液體滲出，讓人不得不立刻逃離。" }; } },
           { label: "悄悄進入", effect: () => { return { text: "這座廢墟裡，有什麼正在發生？", goto: "1-7-1" }; } },
           { label: "立刻離開", effect: () => { return { text: "有時過多的好奇心，只會害了自己。" }; } }
         ]
@@ -1785,7 +1811,7 @@
         ]
       },
       "1-8": {
-        text: "透過昏暗的燈光，依稀能見到前方出現了一串腳印，但看上去並不像人類的。",
+        text: "透過昏暗的燈光，依依稀能見到前方出現了一串腳印，但看上去並不像人類的。",
         options: [
           { label: "跟隨腳印", effect: () => { sheepIndex += 10; return { text: "直到腳步與重疊才發現，眼前的腳印，竟然是羊蹄的形狀……。", triggerZoneTransition: true, targetZone: 'ward' }; } },
           { label: "忽視腳印", effect: () => { return { text: "資訊不足時，不要相信任何事物。" }; } },
@@ -1843,13 +1869,69 @@
 
         let oldFear = fearValue;
         let result = opt.effect();
-        let newFear = fearValue;
+        let rawNewFear = fearValue;
+        if (fearValue < 0) fearValue = 0;
         updateFearUI();
 
-        let resumeLogic = () => {
-            // 當恐懼值 >= 60，隱藏 Next 按鈕並等待 3 秒後觸發迷失結局過場
-            if (fearValue >= 60) {
-                fbEl.innerHTML = result.text;
+        let isLostEnding = (fearValue >= 60);
+
+        let fearDiff = rawNewFear - oldFear;
+        let fearText = "";
+        if (fearDiff > 0) fearText = "一陣懼意漫上心頭。";
+        else if (fearDiff < 0) fearText = "情緒似乎得到了緩和。";
+
+        let finalFeedbackHtml = result.text;
+        if (result.transitionText) {
+            finalFeedbackHtml += `<br><br><span style="font-size: 1rem; color: #a9a9a9;">${result.transitionText}</span>`;
+        }
+
+        let nextAction = () => {
+            if (result.triggerZoneTransition) {
+                triggerBlackScreenTransition(() => {
+                    document.getElementById(containerId).style.display = 'none';
+                    transitionToZone(result.targetZone);
+                });
+            } else {
+                const nextId = result.goto ? result.goto : getNextIdFn();
+                if (nextId) renderEventFn(nextId);
+            }
+        };
+
+        let setupStandardNextBtn = () => {
+            if (result.skipFeedback) {
+                nextAction();
+                return;
+            }
+            if (fearText) {
+                nextBtn.textContent = "Next";
+                nextBtn.style.display = 'inline-block';
+                nextBtn.classList.add('instant-visible');
+                
+                nextBtn.onclick = () => {
+                    fbEl.classList.remove('instant-visible', 'visible');
+                    nextBtn.classList.remove('instant-visible', 'visible');
+                    void fbEl.offsetWidth; 
+                    
+                    fbEl.innerHTML = fearText;
+                    fbEl.classList.add('visible');
+                    nextBtn.classList.add('visible');
+                    
+                    nextBtn.onclick = nextAction;
+                    startIdleTimer();
+                };
+                startIdleTimer();
+            } else {
+                nextBtn.textContent = "Next";
+                nextBtn.style.display = 'inline-block';
+                nextBtn.classList.add('instant-visible');
+                nextBtn.onclick = nextAction;
+                startIdleTimer();
+            }
+        };
+
+        let showFeedbackAndProceed = () => {
+            if (isLostEnding) {
+                fbEl.innerHTML = finalFeedbackHtml;
                 fbEl.style.display = 'block';
                 fbEl.className = 'story-text instant-visible';
                 nextBtn.style.display = 'none';
@@ -1860,7 +1942,7 @@
             }
 
             if (result.isSpecialAutoTransition) {
-                 fbEl.innerHTML = result.text;
+                 fbEl.innerHTML = finalFeedbackHtml;
                  fbEl.style.display = 'block';
                  fbEl.className = 'story-text instant-visible';
                  nextBtn.style.display = 'none';
@@ -1871,40 +1953,6 @@
                      });
                  }, 3000);
                  return;
-            }
-
-            let fearDiff = newFear - oldFear;
-            let fearText = "";
-            if (fearDiff > 0) fearText = "一陣懼意漫上心頭。";
-            else if (fearDiff < 0) fearText = "情緒似乎得到了緩和。";
-
-            if (result.skipFeedback) {
-                if (result.goto) {
-                    renderEventFn(result.goto);
-                } else if (result.triggerZoneTransition) {
-                    triggerBlackScreenTransition(() => {
-                        document.getElementById(containerId).style.display = 'none';
-                        transitionToZone(result.targetZone);
-                    });
-                }
-                return;
-            }
-
-            let nextAction = () => {
-                if (result.triggerZoneTransition) {
-                    triggerBlackScreenTransition(() => {
-                        document.getElementById(containerId).style.display = 'none';
-                        transitionToZone(result.targetZone);
-                    });
-                } else {
-                    const nextId = result.goto ? result.goto : getNextIdFn();
-                    if (nextId) renderEventFn(nextId);
-                }
-            };
-
-            let finalFeedbackHtml = result.text;
-            if (result.transitionText) {
-                finalFeedbackHtml += `<br><br><span style="font-size: 1rem; color: #a9a9a9;">${result.transitionText}</span>`;
             }
 
             fbEl.innerHTML = finalFeedbackHtml;
@@ -1933,41 +1981,20 @@
                 return;
             }
 
-            // 當有恐懼增減時，點按第一次 Next 進入額外的提示劇情畫面
-            if (fearText) {
-                nextBtn.textContent = "Next";
-                nextBtn.style.display = 'inline-block';
-                nextBtn.classList.add('instant-visible');
-                
-                nextBtn.onclick = () => {
-                    // 切換為顯示恐懼提示
-                    fbEl.classList.remove('instant-visible', 'visible');
-                    nextBtn.classList.remove('instant-visible', 'visible');
-                    void fbEl.offsetWidth; // Force Reflow
-                    
-                    fbEl.innerHTML = fearText;
-                    fbEl.classList.add('visible');
-                    nextBtn.classList.add('visible');
-                    
-                    nextBtn.onclick = nextAction;
-                    startIdleTimer();
-                };
-                startIdleTimer();
+            if (fearValue >= 50 && !uvTriggered) {
+                uvTriggered = true;
+                nextBtn.style.display = 'none';
+                setTimeout(() => {
+                    triggerUVBlackScreen(() => {
+                        setupStandardNextBtn();
+                    });
+                }, 3000);
             } else {
-                nextBtn.textContent = "Next";
-                nextBtn.style.display = 'inline-block';
-                nextBtn.classList.add('instant-visible');
-                nextBtn.onclick = nextAction;
-                startIdleTimer();
+                setupStandardNextBtn();
             }
         };
 
-        if (fearValue >= 50 && !uvTriggered) {
-            uvTriggered = true;
-            triggerUVBlackScreen(resumeLogic);
-        } else {
-            resumeLogic();
-        }
+        showFeedbackAndProceed();
     }
 
     function handleOptionClick(opt) {
@@ -2240,7 +2267,7 @@
           {
             label: "上前查看",
             effect: () => {
-              fearValue = Math.max(0, fearValue - 5);
+              fearValue -= 5;
               snakeIndex += 5;
               return { text: "光彩熠熠，恍惚間，彷彿忘卻了一部分恐懼。", goto: "3-1-1" };
             }
@@ -2254,7 +2281,7 @@
           {
             label: "將其丟棄",
             effect: () => {
-              fearValue = Math.max(0, fearValue - 5);
+              fearValue -= 5;
               sheepIndex += 10;
               return { text: "不該出現的存在，就應該排除。" };
             }
@@ -2286,7 +2313,7 @@
           {
             label: "凝神細聽",
             effect: () => {
-              fearValue = Math.max(0, fearValue - 5);
+              fearValue -= 5;
               snakeIndex += 5;
               return { text: "歌聲彷彿治癒了恐懼，卻也將思緒引到了某個方向……。" };
             }
@@ -2515,11 +2542,6 @@
             });
             startIdleTimer();
         }
-    }
-
-    function startWardGameplay() {
-       document.getElementById('scene-ward-game').style.display = 'block';
-       renderWardEvent(getNextWardEventId());
     }
 
   </script>
