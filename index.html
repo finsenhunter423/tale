@@ -80,7 +80,7 @@
     text-align: left;
     opacity: 0;
     transform: translateY(10px);
-    transition: opacity 2s ease, transform 2s ease;
+    transition: opacity 2s ease, transform 2s ease, color 0.8s ease;
   }
 
   .visible {
@@ -124,7 +124,7 @@
     text-align: center;
     opacity: 0;
     transform: translateY(10px);
-    transition: opacity 1s ease, transform 1s ease;
+    transition: opacity 1s ease, transform 1s ease, color 0.8s ease;
     letter-spacing: 2px;
   }
 
@@ -140,7 +140,7 @@
     font-size: 1.2rem;
     line-height: 2;
     letter-spacing: 1.5px;
-    transition: opacity 0.8s ease, transform 0.8s ease;
+    transition: opacity 0.8s ease, transform 0.8s ease, color 0.8s ease;
   }
 
   .ui-container {
@@ -348,6 +348,8 @@
     body.show-announcement {
       align-items: flex-start; 
       padding-top: 5vh;
+      height: 100vh;
+      overflow: hidden; /* 防止整個畫面跟著滾動，讓捲動僅限於框內 */
     }
     #game-screen {
       height: auto;
@@ -357,24 +359,32 @@
     .announcement-scene {
       display: flex;
       flex-direction: column;
-      height: 75vh; 
-      max-height: 800px;
+      height: calc(100vh - 160px); /* 預留給底部右下角 UI 按鈕的空間 */
+      max-height: none; 
+      width: 100%;
+      margin: 0 auto;
     }
     .announcement-content {
       flex: 1;
       overflow-y: auto;
-      padding-bottom: 10px; 
+      padding-bottom: 20px;
+      padding-left: 20px;
+      padding-right: 20px;
+      box-sizing: border-box;
+      /* 隱藏網頁滾動條讓視覺更乾淨（視需求可保留） */
+      scrollbar-width: none; 
+    }
+    .announcement-content::-webkit-scrollbar {
+      display: none; 
     }
     .announcement-btn-container {
-      position: relative; /* 解決按鈕重疊問題 */
-      bottom: auto;
-      left: auto;
-      width: 100%;
+      position: relative; 
+      flex-shrink: 0; 
+      margin-top: 10px;
+      padding-bottom: 15px;
       display: flex;
       justify-content: center;
       z-index: 90;
-      margin-top: 15px;
-      padding-bottom: 15px;
     }
 
     .ui-container {
@@ -469,13 +479,13 @@
         <h2 class="scene-title" id="s2-title">【聖心醫院公告】</h2>
         <ul class="bullet-list">
           <li class="story-text bullet-item s2-item">• 手術室嚴格禁止進入，若有人問你看見了什麼，回答「什麼都沒看見」。</li>
-          <li class="story-text bullet-item s2-item">• 住院部是安全的，診療室是危險的。</li>
-          <li class="story-text bullet-item s2-item">• 糖果是屬於「好孩子」的，只有「好孩子」能夠取走。</li>
+          <li class="story-text bullet-item s2-item snake-resonance-target">• 住院部是安全的，診療室是危險的。</li>
+          <li class="story-text bullet-item s2-item snake-resonance-target">• 糖果是屬於「好孩子」的，只有「好孩子」能夠取走。</li>
           <li class="story-text bullet-item s2-item">• 「壞孩子」的牙齒會被「怪物」拔掉。</li>
-          <li class="story-text bullet-item s2-item">• 「蛇」是危險的，請務必迴避。</li>
-          <li class="story-text bullet-item s2-item">• 如果聽見「羊群」的聲音，那是正常的，請不要迴避。</li>
-          <li class="story-text bullet-item s2-item">• 「羊群」的腳印通向「安全」的地方。</li>
-          <li class="story-text bullet-item s2-item">• 本院不存在名為「芬森·亨特」的醫生，如果遇見自稱「亨特醫生」的人，請立刻離開現場。</li>
+          <li class="story-text bullet-item s2-item snake-resonance-target">• 「蛇」是危險的，請務必迴避。</li>
+          <li class="story-text bullet-item s2-item snake-resonance-target">• 如果聽見「羊群」的聲音，那是正常的，請不要迴避。</li>
+          <li class="story-text bullet-item s2-item snake-resonance-target">• 「羊群」的腳印通向「安全」的地方。</li>
+          <li class="story-text bullet-item s2-item snake-resonance-target">• 本院不存在名為「芬森·亨特」的醫生，如果遇見自稱「亨特醫生」的人，請立刻離開現場。</li>
         </ul>
       </div>
       <div class="announcement-btn-container">
@@ -510,15 +520,15 @@
 
     <div id="scene-clinic-rules" style="display: none;" class="announcement-scene">
       <div class="announcement-content">
-        <h2 class="scene-title" id="clinic-s2-title">【診療室公告】</h2>
+        <h2 class="scene-title clinic-resonance-target" id="clinic-s2-title">【診療室公告】</h2>
         <ul class="bullet-list" id="clinic-s2-list">
-          <li class="story-text bullet-item clinic-s2-item">• 請不要逃離紫外光，它能消除一切恐懼。</li>
-          <li class="story-text bullet-item clinic-s2-item">• 請不要害怕「蛇」，它不會傷害你。</li>
-          <li class="story-text bullet-item clinic-s2-item">• 請不要聆聽騷動聲的內容，並立刻找「醫生」求助。</li>
-          <li class="story-text bullet-item clinic-s2-item">• 請不要吃太多糖果，那不是好孩子該做的。</li>
-          <li class="story-text bullet-item clinic-s2-item">• 請不要擔心，「醫生」會保護好孩子。</li>
-          <li class="story-text bullet-item clinic-s2-item">• 請不要迴避哼唱歌曲的聲音，那是安全的訊號。</li>
-          <li class="story-text bullet-item clinic-s2-item">• 請不要清除菌絲，它並不會傷害人，靜待消失即可。</li>
+          <li class="story-text bullet-item clinic-s2-item clinic-resonance-target">• 請不要逃離紫外光，它能消除一切恐懼。</li>
+          <li class="story-text bullet-item clinic-s2-item clinic-resonance-target">• 請不要害怕「蛇」，它不會傷害你。</li>
+          <li class="story-text bullet-item clinic-s2-item clinic-resonance-target">• 請不要聆聽騷動聲的內容，並立刻找「醫生」求助。</li>
+          <li class="story-text bullet-item clinic-s2-item clinic-resonance-target">• 請不要吃太多糖果，那不是好孩子該做的。</li>
+          <li class="story-text bullet-item clinic-s2-item clinic-resonance-target">• 請不要擔心，「醫生」會保護好孩子。</li>
+          <li class="story-text bullet-item clinic-s2-item clinic-resonance-target">• 請不要迴避哼唱歌曲的聲音，那是安全的訊號。</li>
+          <li class="story-text bullet-item clinic-s2-item clinic-resonance-target">• 請不要清除菌絲，它並不會傷害人，靜待消失即可。</li>
         </ul>
       </div>
       <div class="announcement-btn-container">
@@ -545,14 +555,14 @@
 
     <div id="scene-ward-rules" style="display: none;" class="announcement-scene">
       <div class="announcement-content">
-        <h2 class="scene-title" id="ward-s2-title">【住院部須知】</h2>
+        <h2 class="scene-title ward-resonance-target" id="ward-s2-title">【住院部須知】</h2>
         <ul class="bullet-list" id="ward-s2-list">
-          <li class="story-text bullet-item ward-s2-item">• 相信「羊群」，審判「怪物」。</li>
-          <li class="story-text bullet-item ward-s2-item">• 「蛇」不應該出現在住院部，如果看見「蛇」的痕跡，應儘速清除。</li>
-          <li class="story-text bullet-item ward-s2-item">• 請不要走入紫外光裡。</li>
-          <li class="story-text bullet-item ward-s2-item">• 如果看見菌絲，請立刻逃跑。</li>
-          <li class="story-text bullet-item ward-s2-item">• 如果聽見哼唱歌曲的聲音，捂上耳朵。</li>
-          <li class="story-text bullet-item ward-s2-item">• 感到害怕是正常的，「羊群」會保護你。</li>
+          <li class="story-text bullet-item ward-s2-item ward-resonance-target">• 相信「羊群」，審判「怪物」。</li>
+          <li class="story-text bullet-item ward-s2-item ward-resonance-target">• 「蛇」不應該出現在住院部，如果看見「蛇」的痕跡，應儘速清除。</li>
+          <li class="story-text bullet-item ward-s2-item ward-resonance-target">• 請不要走入紫外光裡。</li>
+          <li class="story-text bullet-item ward-s2-item ward-resonance-target">• 如果看見菌絲，請立刻逃跑。</li>
+          <li class="story-text bullet-item ward-s2-item ward-resonance-target">• 如果聽見哼唱歌曲的聲音，捂上耳朵。</li>
+          <li class="story-text bullet-item ward-s2-item ward-resonance-target">• 感到害怕是正常的，「羊群」會保護你。</li>
         </ul>
       </div>
       <div class="announcement-btn-container">
@@ -632,38 +642,38 @@
         <h2 style="font-size: 1.5rem; text-align: center; letter-spacing: 2px; margin-bottom: 30px;">【聖心醫院公告】</h2>
         <ul class="bullet-list">
           <li class="bullet-item" style="opacity: 1; transform: none;">• 手術室嚴格禁止進入，若有人問你看見了什麼，回答「什麼都沒看見」。</li>
-          <li class="bullet-item" style="opacity: 1; transform: none;">• 住院部是安全的，診療室是危險的。</li>
-          <li class="bullet-item" style="opacity: 1; transform: none;">• 糖果是屬於「好孩子」的，只有「好孩子」能夠取走。</li>
+          <li class="bullet-item snake-resonance-target" style="opacity: 1; transform: none;">• 住院部是安全的，診療室是危險的。</li>
+          <li class="bullet-item snake-resonance-target" style="opacity: 1; transform: none;">• 糖果是屬於「好孩子」的，只有「好孩子」能夠取走。</li>
           <li class="bullet-item" style="opacity: 1; transform: none;">• 「壞孩子」的牙齒會被「怪物」拔掉。</li>
-          <li class="bullet-item" style="opacity: 1; transform: none;">• 「蛇」是危險的，請務必迴避。</li>
-          <li class="bullet-item" style="opacity: 1; transform: none;">• 如果聽見「羊群」的聲音，那是正常的，請不要迴避。</li>
-          <li class="bullet-item" style="opacity: 1; transform: none;">• 「羊群」的腳印通向「安全」的地方。</li>
-          <li class="bullet-item" style="opacity: 1; transform: none;">• 本院不存在名為「芬森·亨特」的醫生，如果遇見自稱「亨特醫生」的人，請立刻離開現場。</li>
+          <li class="bullet-item snake-resonance-target" style="opacity: 1; transform: none;">• 「蛇」是危險的，請務必迴避。</li>
+          <li class="bullet-item snake-resonance-target" style="opacity: 1; transform: none;">• 如果聽見「羊群」的聲音，那是正常的，請不要迴避。</li>
+          <li class="bullet-item snake-resonance-target" style="opacity: 1; transform: none;">• 「羊群」的腳印通向「安全」的地方。</li>
+          <li class="bullet-item snake-resonance-target" style="opacity: 1; transform: none;">• 本院不存在名為「芬森·亨特」的醫生，如果遇見自稱「亨特醫生」的人，請立刻離開現場。</li>
         </ul>
       </div>
 
       <div id="notebook-clinic-content" style="display: none;">
-        <h2 style="font-size: 1.5rem; text-align: center; letter-spacing: 2px; margin-bottom: 30px;">【診療室公告】</h2>
+        <h2 class="clinic-resonance-target" style="font-size: 1.5rem; text-align: center; letter-spacing: 2px; margin-bottom: 30px;">【診療室公告】</h2>
         <ul class="bullet-list">
-          <li class="bullet-item" style="opacity: 1; transform: none;">• 請不要逃離紫外光，它能消除一切恐懼。</li>
-          <li class="bullet-item" style="opacity: 1; transform: none;">• 請不要害怕「蛇」，它不會傷害你。</li>
-          <li class="bullet-item" style="opacity: 1; transform: none;">• 請不要聆聽騷動聲的內容，並立刻找「醫生」求助。</li>
-          <li class="bullet-item" style="opacity: 1; transform: none;">• 請不要吃太多糖果，那不是好孩子該做的。</li>
-          <li class="bullet-item" style="opacity: 1; transform: none;">• 請不要擔心，「醫生」會保護好孩子。</li>
-          <li class="bullet-item" style="opacity: 1; transform: none;">• 請不要迴避哼唱歌曲的聲音，那是安全的訊號。</li>
-          <li class="bullet-item" style="opacity: 1; transform: none;">• 請不要清除菌絲，它並不會傷害人，靜待消失即可。</li>
+          <li class="bullet-item clinic-resonance-target" style="opacity: 1; transform: none;">• 請不要逃離紫外光，它能消除一切恐懼。</li>
+          <li class="bullet-item clinic-resonance-target" style="opacity: 1; transform: none;">• 請不要害怕「蛇」，它不會傷害你。</li>
+          <li class="bullet-item clinic-resonance-target" style="opacity: 1; transform: none;">• 請不要聆聽騷動聲的內容，並立刻找「醫生」求助。</li>
+          <li class="bullet-item clinic-resonance-target" style="opacity: 1; transform: none;">• 請不要吃太多糖果，那不是好孩子該做的。</li>
+          <li class="bullet-item clinic-resonance-target" style="opacity: 1; transform: none;">• 請不要擔心，「醫生」會保護好孩子。</li>
+          <li class="bullet-item clinic-resonance-target" style="opacity: 1; transform: none;">• 請不要迴避哼唱歌曲的聲音，那是安全的訊號。</li>
+          <li class="bullet-item clinic-resonance-target" style="opacity: 1; transform: none;">• 請不要清除菌絲，它並不會傷害人，靜待消失即可。</li>
         </ul>
       </div>
 
       <div id="notebook-ward-content" style="display: none;">
-        <h2 style="font-size: 1.5rem; text-align: center; letter-spacing: 2px; margin-bottom: 30px;">【住院部須知】</h2>
+        <h2 class="ward-resonance-target" style="font-size: 1.5rem; text-align: center; letter-spacing: 2px; margin-bottom: 30px;">【住院部須知】</h2>
         <ul class="bullet-list">
-          <li class="bullet-item" style="opacity: 1; transform: none;">• 相信「羊群」，審判「怪物」。</li>
-          <li class="bullet-item" style="opacity: 1; transform: none;">• 「蛇」不應該出現在住院部，如果看見「蛇」的痕跡，應儘速清除。</li>
-          <li class="bullet-item" style="opacity: 1; transform: none;">• 請不要走入紫外光裡。</li>
-          <li class="bullet-item" style="opacity: 1; transform: none;">• 如果看見菌絲，請立刻逃跑。</li>
-          <li class="bullet-item" style="opacity: 1; transform: none;">• 如果聽見哼唱歌曲的聲音，捂上耳朵。</li>
-          <li class="bullet-item" style="opacity: 1; transform: none;">• 感到害怕是正常的，「羊群」會保護你。</li>
+          <li class="bullet-item ward-resonance-target" style="opacity: 1; transform: none;">• 相信「羊群」，審判「怪物」。</li>
+          <li class="bullet-item ward-resonance-target" style="opacity: 1; transform: none;">• 「蛇」不應該出現在住院部，如果看見「蛇」的痕跡，應儘速清除。</li>
+          <li class="bullet-item ward-resonance-target" style="opacity: 1; transform: none;">• 請不要走入紫外光裡。</li>
+          <li class="bullet-item ward-resonance-target" style="opacity: 1; transform: none;">• 如果看見菌絲，請立刻逃跑。</li>
+          <li class="bullet-item ward-resonance-target" style="opacity: 1; transform: none;">• 如果聽見哼唱歌曲的聲音，捂上耳朵。</li>
+          <li class="bullet-item ward-resonance-target" style="opacity: 1; transform: none;">• 感到害怕是正常的，「羊群」會保護你。</li>
         </ul>
       </div>
 
@@ -819,6 +829,25 @@
     let wardRulesTimeouts = [];
     let wardIntroPlayed = false;
 
+    // 共鳴狀態檢查與 UI 更新
+    function updateResonanceUI() {
+      let diff = Math.abs(sheepIndex - snakeIndex);
+      let isSheepResonance = (sheepIndex > snakeIndex && diff > 15);
+      let isSnakeResonance = (snakeIndex > sheepIndex && diff > 15);
+
+      // 蛇之共鳴影響的對象（醫院部分公告 + 住院部全部公告）
+      const snakeTargets = document.querySelectorAll('.snake-resonance-target, .ward-resonance-target');
+      snakeTargets.forEach(el => {
+        el.style.color = isSnakeResonance ? '#bd1f1f' : '';
+      });
+
+      // 羊群共鳴影響的對象（診療室全部公告）
+      const clinicTargets = document.querySelectorAll('.clinic-resonance-target');
+      clinicTargets.forEach(el => {
+        el.style.color = isSheepResonance ? '#bd1f1f' : '';
+      });
+    }
+
     function switchNotebookTab(activeTab, activeContent) {
         [tabHospital, tabClinic, tabWard].forEach(t => {
             t.style.backgroundColor = 'transparent';
@@ -895,11 +924,8 @@
         blackOverlay.style.opacity = '1';
         overlayText.style.opacity = '0';
 
-        // 維持全黑過場畫面 1.5 秒
         setTimeout(() => {
-            // 在黑畫面淡出前，先顯示完全不透明的 UV 畫面，防止原劇情畫面閃爍
             showUVOverlay(resumeCallback);
-            
             blackOverlay.style.opacity = '0';
             setTimeout(() => {
                 blackOverlay.style.display = 'none';
@@ -920,12 +946,12 @@
       const uvNextBtn = document.getElementById('uv-next-btn');
 
       uvOverlay.style.display = 'flex';
-      uvOverlay.style.opacity = '1'; // 直接設為 1，不需要淡入效果，阻擋黑幕淡出時的閃爍
+      uvOverlay.style.opacity = '1'; 
 
       uvText.style.display = 'block';
       uvText.innerHTML = "強烈的恐懼湧上，使身體不自覺戰慄……此時，前方亮起了一道溫暖的紫色光芒。";
       uvText.className = 'story-text';
-      void uvText.offsetWidth; // Force Reflow
+      void uvText.offsetWidth; 
       uvText.classList.add('visible');
 
       uvOptions.innerHTML = '';
@@ -1536,6 +1562,9 @@
         heartPath.setAttribute('fill', '#555555'); 
         fearHeart.classList.add('cracked');
       }
+
+      // 同步檢查隱藏屬性共鳴並更新介面
+      updateResonanceUI();
     }
 
     startBtn.addEventListener('click', function() {
@@ -1864,7 +1893,6 @@
       }
     }
 
-    // 統一抽出的選項點擊邏輯，負責處理各個 Zone 相同的恐懼值判斷、轉場處理與提示分離
     function handleGenericOptionClick(opt, containerId, textEl, optEl, fbEl, nextBtn, renderEventFn, getNextIdFn) {
         stopIdleTimer();
         optEl.style.display = 'none';
@@ -1958,7 +1986,6 @@
                  return;
             }
 
-            // 新增判斷：若設定了跳過回饋，則直接執行下一步，避免顯示空的回饋文字
             if (result.skipFeedback) {
                 setupStandardNextBtn();
                 return;
