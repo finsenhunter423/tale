@@ -349,7 +349,8 @@
       align-items: flex-start; 
       padding-top: 5vh;
       height: 100vh;
-      overflow: hidden; /* 防止整個畫面跟著滾動，讓捲動僅限於框內 */
+      overflow: hidden; 
+      box-sizing: border-box;
     }
     #game-screen {
       height: auto;
@@ -357,33 +358,35 @@
     }
     
     .announcement-scene {
-      display: flex;
-      flex-direction: column;
-      height: calc(100vh - 160px); /* 預留給底部右下角 UI 按鈕的空間 */
-      max-height: none; 
+      display: block;
+      height: calc(95vh - 150px);
       width: 100%;
+      position: relative;
       margin: 0 auto;
     }
     .announcement-content {
-      flex: 1;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 70px;
       overflow-y: auto;
-      padding-bottom: 20px;
-      padding-left: 20px;
-      padding-right: 20px;
+      padding: 0 20px;
       box-sizing: border-box;
-      /* 隱藏網頁滾動條讓視覺更乾淨（視需求可保留） */
       scrollbar-width: none; 
     }
     .announcement-content::-webkit-scrollbar {
       display: none; 
     }
     .announcement-btn-container {
-      position: relative; 
-      flex-shrink: 0; 
-      margin-top: 10px;
-      padding-bottom: 15px;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
       display: flex;
       justify-content: center;
+      align-items: center;
       z-index: 90;
     }
 
@@ -835,13 +838,11 @@
       let isSheepResonance = (sheepIndex > snakeIndex && diff > 15);
       let isSnakeResonance = (snakeIndex > sheepIndex && diff > 15);
 
-      // 蛇之共鳴影響的對象（醫院部分公告 + 住院部全部公告）
       const snakeTargets = document.querySelectorAll('.snake-resonance-target, .ward-resonance-target');
       snakeTargets.forEach(el => {
         el.style.color = isSnakeResonance ? '#bd1f1f' : '';
       });
 
-      // 羊群共鳴影響的對象（診療室全部公告）
       const clinicTargets = document.querySelectorAll('.clinic-resonance-target');
       clinicTargets.forEach(el => {
         el.style.color = isSheepResonance ? '#bd1f1f' : '';
@@ -1010,7 +1011,6 @@
         fbText = "猶豫之際，那道光已然消失，只留下無盡的黑暗。";
       } else if (choice === "flee") {
         fearValue -= 15;
-        if(fearValue < 0) fearValue = 0;
         sheepIndex += 15;
         fbText = "一道急切的聲音響起：「不要走入那道光，快快遠離那道光……。」";
       }
@@ -1563,7 +1563,6 @@
         fearHeart.classList.add('cracked');
       }
 
-      // 同步檢查隱藏屬性共鳴並更新介面
       updateResonanceUI();
     }
 
@@ -1701,7 +1700,6 @@
         hasCandy = false;
         ateCandy = true;
         fearValue -= 10;
-        if (fearValue < 0) fearValue = 0;
         updateFearUI();
         inventoryBtn.click(); 
         
@@ -1901,7 +1899,7 @@
         let oldFear = fearValue;
         let result = opt.effect();
         let rawNewFear = fearValue;
-        if (fearValue < 0) fearValue = 0;
+        
         updateFearUI();
 
         let isLostEnding = (fearValue >= 60);
