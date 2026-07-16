@@ -1942,7 +1942,7 @@
         ]
       },
       "1-8": {
-        text: "透過昏暗的燈光，依詢能見到前方出現了一串腳印，但看上去並不像人類的。",
+        text: "透過昏暗的燈光，依稀能見到前方出現了一串腳印，但看上去並不像人類的。",
         options: [
           { label: "跟隨腳印", effect: () => { sheepIndex += 10; return { text: "直到腳步與之重疊才發現，眼前的腳印，竟然是羊蹄的形狀……。", triggerZoneTransition: true, targetZone: 'ward' }; } },
           { label: "忽視腳印", effect: () => { return { text: "資訊不足時，不要相信任何事物。" }; } },
@@ -2178,7 +2178,7 @@
       "2-1-n": {
         text: "一道溫柔的聲音從背後傳來：「嗯？又遇見了……為什麼還沒有離開這裡呢？」<br><br>回頭看去，卻沒有任何人。",
         options: [
-          { label: "「你是誰？」", effect: () => { return { text: "「我是亨特醫生……。」", goto: "2-1-1" }; } },
+          { label: "「你是誰？」", effect: () => { return { text: "「不記得了嗎？我是亨特醫生……。」", goto: "2-1-1" }; } },
           { label: "「……亨特醫生？」", effect: () => { return { goto: "2-1-1", skipFeedback: true }; } }
         ]
       },
@@ -2578,8 +2578,19 @@
       "3-5-a": {
         text: "原先尚且存在的微弱燈光乍然熄滅，只留下無盡黑暗。伴隨刺骨寒冷，形成了沉重的壓迫感，令人窒息……。",
         options: [
-          { label: "停留原地", effect: () => { fearValue += 10; return { text: "越發濃烈的恐懼，並不是嘗試保持冷靜便能控制的。<br><br>慌不擇路之下，竟來到了廢棄的診療室……。", triggerZoneTransition: true, targetZone: 'clinic', isSpecialAutoTransition: true }; } },
-          { label: "立刻逃離", effect: () => { return { text: "慌不擇路之下，竟來到了廢棄的診療室……。", triggerZoneTransition: true, targetZone: 'clinic', isSpecialAutoTransition: true }; } }
+          {
+            label: "停留原地",
+            effect: () => {
+              fearValue += 10;
+              return { text: "越發濃烈的恐懼，並不是嘗試保持冷靜便能控制的。<br><br>慌不擇路之下，竟來到了醫院的診療室……。", triggerZoneTransition: true, targetZone: 'clinic', isSpecialAutoTransition: true };
+            }
+          },
+          {
+            label: "立刻逃離",
+            effect: () => {
+              return { text: "慌不擇路之下，竟來到了醫院的診療室……。", triggerZoneTransition: true, targetZone: 'clinic', isSpecialAutoTransition: true };
+            }
+          }
         ]
       },
       "3-5-b": {
@@ -2590,13 +2601,6 @@
 
     function enterWardScene() {
       stopIdleTimer();
-      
-      if (wardIntroPlayed) {
-        enterWardRulesScene();
-        return;
-      }
-      wardIntroPlayed = true;
-
       const sceneWardIntro = document.getElementById('scene-ward-intro');
       const p1 = document.getElementById('ward-p1');
       const introNextBtn = document.getElementById('next-btn-ward-intro');
@@ -2604,7 +2608,7 @@
       sceneWardIntro.style.display = 'block';
       p1.classList.remove('visible', 'instant-visible');
       introNextBtn.classList.remove('visible', 'instant-visible');
-      
+
       wardIntroTimeouts = [];
 
       wardIntroTimeouts.push(setTimeout(() => { p1.classList.add('visible'); }, 50));
@@ -2667,7 +2671,7 @@
             sceneFb.style.display = 'block';
             
             const wardFbText = document.getElementById('ward-fb-text');
-            wardFbText.innerHTML = '全新的規則，也需要紀錄下來。';
+            wardFbText.innerHTML = '住院部的須知也已被記錄。';
             wardFbText.classList.add('instant-visible');
             
             const fbNext = document.getElementById('ward-fb-next');
@@ -2698,7 +2702,7 @@
       const swOptions = document.getElementById('sw-options');
       const swFeedback = document.getElementById('sw-feedback');
       const nextBtnW = document.getElementById('next-btn-w');
-      
+
       swFeedback.style.opacity = '';
       swFeedback.style.transition = '';
 
@@ -2742,6 +2746,7 @@
     function handleWardOptionClick(opt) {
         handleGenericOptionClick(opt, 'scene-ward-game', document.getElementById('sw-text'), document.getElementById('sw-options'), document.getElementById('sw-feedback'), document.getElementById('next-btn-w'), renderWardEvent, getNextWardEventId);
     }
+
   </script>
 </body>
 </html>
