@@ -394,10 +394,10 @@
       bottom: 20px;
       right: 20px;
       align-items: flex-end;
-      pointer-events: none;
+      pointer-events: none; /* 修復：防止透明容器遮擋公告按鈕點擊 */
     }
     .ui-container * {
-      pointer-events: auto;
+      pointer-events: auto; /* 修復：讓子按鈕與心形容器保持可正常點按 */
     }
     #fear-container {
       margin-bottom: 10px;
@@ -744,6 +744,7 @@
     let ateCandy = false;
     let hasLens = false; 
     let recordsNotebook = false; 
+    let hideCandyTakeOption = false;
 
     // 計數器
     let count_1_5 = 0;
@@ -1221,6 +1222,7 @@
            hideAllScenes();
            document.querySelector('.ui-container').style.display = 'none';
            
+           // 迷失結局：重置恐懼值、羊群指數、蛇指數 (其餘如手札、隨身物品、特定題目觸發次數不重置)
            fearValue = 0;
            sheepIndex = 0;
            snakeIndex = 0;
@@ -1432,6 +1434,7 @@
         setTimeout(() => { btnEl.classList.add('visible'); }, 4000);
         
         btnEl.onclick = () => {
+            // 其他結局的 Retry 按鈕會完整重置所有資料
             resetGameState();
             document.getElementById('scene-final-ending').style.display = 'none';
             gameScreen.style.display = 'none';
@@ -1501,6 +1504,7 @@
     }
 
     function resetGameState() {
+        // 重置所有數值，包含恐懼值、羊群指數、蛇指數、手札、隨身物品、糖果互動與特定題目觸發次數
         fearValue = 0;
         sheepIndex = 0;
         snakeIndex = 0;
@@ -1510,6 +1514,7 @@
         uvTriggered = false;
         played1_1 = false;
         recordsNotebook = false; 
+        hideCandyTakeOption = false;
         currentZone = 'lobby';
         hasPassedWard = false;
         hasPassedClinic = false;
@@ -1524,11 +1529,6 @@
         count_2_1_1 = 0;
         count_2_1_2 = 0;
         candyInteractionCount = 0;
-
-        if (eventsData["1-4"]) {
-            eventsData["1-4"].options[0].label = "拿走糖果";
-            eventsData["1-4"].options[0].disabled = false;
-        }
 
         updateFearUI();
 
@@ -1825,32 +1825,29 @@
         text: "牆邊靠著一張陳舊的木桌，上面放置的糖果罐，卻是嶄新的。",
         options: [
           { label: "拿走糖果", effect: () => { 
-              candyInteractionCount++;
-              hasCandy = true; 
-              fearValue -= 10;
-              updateFearUI();
-              inventoryBtn.style.display = 'block'; 
-              
-              const msgModal = document.getElementById('message-modal');
-              const closeBtn = document.getElementById('close-message-btn');
-              const msgText = document.getElementById('message-text');
-              closeBtn.style.display = 'none';
-              msgText.textContent = "……真是貪心。";
-              msgModal.style.display = 'flex';
-              
-              eventsData["1-4"].options[0].label = "拿走糖果（隨身物品有糖果）";
-              eventsData["1-4"].options[0].disabled = true;
-
-              setTimeout(() => {
-                msgModal.style.display = 'none';
-                closeBtn.style.display = 'block';
-                s4Text.style.display = 'block';
-                s4Options.style.display = 'flex';
-                renderEvent("1-4");
-                startIdleTimer();
-              }, 3000);
-
-              return { stayOnEvent: true };
+              if (!hasCandy) {
+                candyInteractionCount++;
+                hasCandy = true; 
+                fearValue -= 10;
+                inventoryBtn.style.display = 'block'; 
+                randomEvents.push("1-5"); shuffleArray(randomEvents);
+                return { text: "或許它會派上用場……或許。" }; 
+              } else {
+                hideCandyTakeOption = true;
+                const msgModal = document.getElementById('message-modal');
+                const closeBtn = document.getElementById('close-message-btn');
+                const msgText = document.getElementById('message-text');
+                closeBtn.style.display = 'none';
+                msgText.textContent = "……真是貪心。";
+                msgModal.style.display = 'flex';
+                setTimeout(() => {
+                  msgModal.style.display = 'none';
+                  closeBtn.style.display = 'block';
+                  renderEvent("1-4");
+                  startIdleTimer();
+                }, 2000);
+                return { stayOnEvent: true };
+              }
             } 
           },
           { label: "吃下糖果", effect: () => { 
@@ -1865,7 +1862,6 @@
                 candyInteractionCount++;
                 sheepIndex += 5; 
                 ateCandy = true; 
-                hasCandy = false; 
                 randomEvents.push("1-5"); shuffleArray(randomEvents);
                 return { text: "貪婪的味道，甜膩萬分。" }; 
               }
@@ -1997,20 +1993,16 @@
       nextBtn4.classList.remove('instant-visible');
 
       if (ev.options && ev.options.length > 0) {
-        ev.options.forEach(opt => {
+        let optionsToRender = ev.options;
+        if (actualId === "1-4" && hideCandyTakeOption) {
+          optionsToRender = ev.options.filter(opt => opt.label !== "拿走糖果");
+        }
+        optionsToRender.forEach(opt => {
           const btn = document.createElement('button');
           btn.className = 'btn';
           btn.style.marginTop = '0';
           btn.textContent = opt.label;
-          if (opt.disabled) {
-             btn.disabled = true;
-             btn.style.color = '#555';
-             btn.style.borderColor = '#555';
-             btn.style.cursor = 'not-allowed';
-             btn.style.backgroundColor = 'transparent';
-          } else {
-             btn.onclick = () => handleOptionClick(opt);
-          }
+          btn.onclick = () => handleOptionClick(opt);
           s4Options.appendChild(btn);
         });
         startIdleTimer();
@@ -2459,15 +2451,7 @@
           btn.className = 'btn';
           btn.style.marginTop = '0';
           btn.textContent = opt.label;
-          if (opt.disabled) {
-             btn.disabled = true;
-             btn.style.color = '#555';
-             btn.style.borderColor = '#555';
-             btn.style.cursor = 'not-allowed';
-             btn.style.backgroundColor = 'transparent';
-          } else {
-             btn.onclick = () => handleClinicOptionClick(opt);
-          }
+          btn.onclick = () => handleClinicOptionClick(opt);
           scOptions.appendChild(btn);
         });
         startIdleTimer();
@@ -2524,68 +2508,103 @@
           {
             label: "動手清除",
             effect: () => {
-              fearValue -= 5;
-              snakeIndex += 5;
-              return { text: "費了一番功夫，終於將那些令人作嘔的菌絲清除乾淨。" };
+              fearValue += 10;
+              return { text: "觸碰到的瞬間，菌絲竟收緊了力道，奮力掙扎後才勉強脫身……。" };
             }
           },
           {
-            label: "靜待消失",
+            label: "靜觀其變",
             effect: () => {
-              fearValue += 5;
-              sheepIndex += 5;
-              return { text: "等待的過程漫長而煎熬，恐懼逐漸蔓延。" };
+              return { text: "一段時間後菌絲鬆開了箝制，緩緩褪去，只留下腳腕上一道濕痕。" };
+            }
+          },
+          {
+            label: "仔細觀察",
+            effect: () => {
+              snakeIndex += 5;
+              return { text: "菌絲彷彿能夠感知到視線，放輕了纏勒的力度，而後緩緩退開，只在腳腕上留下一道濕痕。" };
             }
           }
         ]
       },
       "3-3": {
-        text: "不遠處閃爍著微弱的紫光，那是這片黑暗中唯一的光源。",
+        text: "人群的聲音再度響起，這一次變得更加清晰……。<br><br>「褻瀆屍體的罪人！」<br><br>同時，一道穿著白袍的模糊身影，出現在了面前。",
         options: [
           {
-            label: "走入光裡",
+            label: "凝神細聽",
             effect: () => {
-              snakeIndex += 5;
-              fearValue -= 5;
-              return { text: "溫暖的光芒包裹全身，彷彿所有的不安都被驅散了。" };
+              sheepIndex += 10;
+              return { text: "「把他沉下去！沉下去！」" };
             }
           },
           {
-            label: "轉身離開",
+            label: "無視",
             effect: () => {
-              sheepIndex += 5;
-              return { text: "謹記規則，遠離不該靠近的事物。" };
+              return { text: "雖然並不理解，但那聽上去不是應該知道的事……。" };
+            }
+          },
+          {
+            label: "尋求幫助",
+            effect: () => {
+              fearValue -= 5;
+              sheepIndex -= 10;
+              return { text: "「別擔心，會沒事的……。」<br><br>「醫生」輕輕地低語。" };
             }
           }
         ]
       },
       "3-4": {
-        text: "空曠的走廊裡，不知從哪傳來一陣微弱的哼唱聲，旋律詭異。",
+        text: "牆上的掛畫繪著一對眼睛，正直直注視前方，那雙瞳孔會是什麼形狀？",
         options: [
           {
-            label: "捂上耳朵",
+            label: "豎瞳",
             effect: () => {
-              sheepIndex += 5;
-              return { text: "遵從規則，不要去聽那會帶來危險的聲音。" };
+              fearValue += 5;
+              snakeIndex += 10;
+              return { text: "如蛇一般，冰冷銳利。" };
             }
           },
           {
-            label: "凝神細聽",
+            label: "橫瞳",
             effect: () => {
-              snakeIndex += 5;
-              fearValue -= 5;
-              return { text: "那旋律雖然詭異，卻莫名有種安撫人心的力量。" };
+              fearValue += 5;
+              sheepIndex += 10;
+              return { text: "如羊一般，溫和沉著。" };
+            }
+          },
+          {
+            label: "圓瞳",
+            effect: () => {
+              fearValue += 5;
+              return { text: "如人一般，深沉憂鬱。" };
             }
           }
         ]
       },
       "3-5-a": {
-        text: "走廊的盡頭，一扇虛掩的門後透出微光。推開門，竟然來到了……。",
+        text: "原先尚且存在的微弱燈光乍然熄滅，只留下無盡黑暗。伴隨刺骨寒冷，形成了沉重的壓迫感，令人窒息……。",
         options: [
           {
-            label: "進入",
+            label: "停留原地",
             effect: () => {
-              return { triggerZoneTransition: true, targetZone: 'clinic', skipFeedback: true };
+              fearValue += 10;
+              return {
+                text: "越發濃烈的恐懼，並不是嘗試保持冷靜便能控制的。<br><br>慌不擇路之下，竟來到了醫院的診療室……。",
+                triggerZoneTransition: true,
+                targetZone: 'clinic',
+                isSpecialAutoTransition: true
+              };
+            }
+          },
+          {
+            label: "立刻逃離",
+            effect: () => {
+              return {
+                text: "慌不擇路之下，竟來到了醫院的診療室……。",
+                triggerZoneTransition: true,
+                targetZone: 'clinic',
+                isSpecialAutoTransition: true
+              };
             }
           }
         ]
@@ -2733,15 +2752,7 @@
           btn.className = 'btn';
           btn.style.marginTop = '0';
           btn.textContent = opt.label;
-          if (opt.disabled) {
-             btn.disabled = true;
-             btn.style.color = '#555';
-             btn.style.borderColor = '#555';
-             btn.style.cursor = 'not-allowed';
-             btn.style.backgroundColor = 'transparent';
-          } else {
-             btn.onclick = () => handleWardOptionClick(opt);
-          }
+          btn.onclick = () => handleWardOptionClick(opt);
           swOptions.appendChild(btn);
         });
         startIdleTimer();
@@ -2751,7 +2762,6 @@
     function handleWardOptionClick(opt) {
         handleGenericOptionClick(opt, 'scene-ward-game', document.getElementById('sw-text'), document.getElementById('sw-options'), document.getElementById('sw-feedback'), document.getElementById('next-btn-w'), renderWardEvent, getNextWardEventId);
     }
-
   </script>
 </body>
 </html>
