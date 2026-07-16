@@ -394,6 +394,10 @@
       bottom: 20px;
       right: 20px;
       align-items: flex-end;
+      pointer-events: none; /* 修復：防止透明容器遮擋公告按鈕點擊 */
+    }
+    .ui-container * {
+      pointer-events: auto; /* 修復：讓子按鈕與心形容器保持可正常點按 */
     }
     #fear-container {
       margin-bottom: 10px;
@@ -741,7 +745,7 @@
     let hasLens = false; 
     let recordsNotebook = false; 
 
-    // 新增機制用的計數器
+    // 計數器
     let count_1_5 = 0;
     let count_1_7_2 = 0;
     let count_2_1 = 0;
@@ -1217,6 +1221,7 @@
            hideAllScenes();
            document.querySelector('.ui-container').style.display = 'none';
            
+           // 迷失結局：重置恐懼值、羊群指數、蛇指數 (其餘如手札、隨身物品、特定題目觸發次數不重置)
            fearValue = 0;
            sheepIndex = 0;
            snakeIndex = 0;
@@ -1428,6 +1433,7 @@
         setTimeout(() => { btnEl.classList.add('visible'); }, 4000);
         
         btnEl.onclick = () => {
+            // 其他結局的 Retry 按鈕會完整重置所有資料
             resetGameState();
             document.getElementById('scene-final-ending').style.display = 'none';
             gameScreen.style.display = 'none';
@@ -1497,6 +1503,7 @@
     }
 
     function resetGameState() {
+        // 重置所有數值，包含恐懼值、羊群指數、蛇指數、手札、隨身物品、糖果互動與特定題目觸發次數
         fearValue = 0;
         sheepIndex = 0;
         snakeIndex = 0;
@@ -2634,16 +2641,16 @@
           document.body.classList.remove('show-announcement');
 
           if (recordsNotebook) {
-            document.getElementById('notebook-tabs').style.display = 'flex';
-            document.getElementById('tab-ward').style.display = 'inline-block';
+            document.getElementById('notebook-tabs').style.display = 'flex'; 
+            document.getElementById('tab-ward').style.display = 'inline-block'; 
 
             const sceneFb = document.getElementById('scene-ward-feedback');
             sceneFb.style.display = 'block';
-
+            
             const wardFbText = document.getElementById('ward-fb-text');
             wardFbText.innerHTML = '還是記住這些規則為好。';
             wardFbText.classList.add('instant-visible');
-
+            
             const fbNext = document.getElementById('ward-fb-next');
             fbNext.classList.add('instant-visible');
 
@@ -2659,8 +2666,8 @@
     }
 
     function startWardGameplay() {
-      document.getElementById('scene-ward-game').style.display = 'block';
-      renderWardEvent(getNextWardEventId());
+       document.getElementById('scene-ward-game').style.display = 'block';
+       renderWardEvent(getNextWardEventId());
     }
 
     function renderWardEvent(eventId) {
@@ -2672,9 +2679,6 @@
       const swOptions = document.getElementById('sw-options');
       const swFeedback = document.getElementById('sw-feedback');
       const nextBtnW = document.getElementById('next-btn-w');
-
-      swFeedback.style.opacity = '';
-      swFeedback.style.transition = '';
 
       swText.style.display = 'block';
       swText.innerHTML = ev.text;
@@ -2716,6 +2720,7 @@
     function handleWardOptionClick(opt) {
         handleGenericOptionClick(opt, 'scene-ward-game', document.getElementById('sw-text'), document.getElementById('sw-options'), document.getElementById('sw-feedback'), document.getElementById('next-btn-w'), renderWardEvent, getNextWardEventId);
     }
+
   </script>
 </body>
 </html>
