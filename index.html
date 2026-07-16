@@ -430,6 +430,13 @@
       left: auto;
       padding-top: 10px;
       width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+    #notebook-tabs .btn {
+      white-space: nowrap;
     }
   }
 </style>
@@ -734,6 +741,14 @@
     let hasLens = false; 
     let recordsNotebook = false; 
 
+    // 新增機制用的計數器
+    let count_1_5 = 0;
+    let count_1_7_2 = 0;
+    let count_2_1 = 0;
+    let count_2_1_1 = 0;
+    let count_2_1_2 = 0;
+    let candyInteractionCount = 0;
+
     let uvTriggered = false;
     let idleTimer = null;
     let idleInterval = null;
@@ -832,7 +847,10 @@
     let wardRulesTimeouts = [];
     let wardIntroPlayed = false;
 
-    // 共鳴狀態檢查與 UI 更新
+    function isBadChild() {
+        return hasCandy || ateCandy || candyInteractionCount > 0;
+    }
+
     function updateResonanceUI() {
       let diff = Math.abs(sheepIndex - snakeIndex);
       let isSheepResonance = (sheepIndex > snakeIndex && diff > 15);
@@ -914,6 +932,25 @@
           blackOverlay.style.display = 'none';
         }, 500);
       }, 2000);
+    }
+
+    function trigger1_5sBlackScreen(callback) {
+        stopIdleTimer();
+        const overlayText = document.getElementById('overlay-text');
+        overlayText.textContent = '';
+        blackOverlay.style.display = 'block';
+        void blackOverlay.offsetWidth;
+        blackOverlay.style.opacity = '1';
+        
+        setTimeout(() => {
+            setTimeout(() => {
+                if (callback) callback();
+                blackOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    blackOverlay.style.display = 'none';
+                }, 500);
+            }, 1500);
+        }, 500); 
     }
 
     function triggerUVBlackScreen(resumeCallback) {
@@ -1022,33 +1059,27 @@
       uvNextBtn.style.display = 'none';
 
       let finalize = () => {
-        const uvOverlay = document.getElementById('scene-uv-overlay');
-        uvOverlay.style.opacity = '0';
-        setTimeout(() => {
-          uvOverlay.style.display = 'none';
-          savedModals.forEach(m => m.style.display = 'flex');
-          activeModals = savedModals;
-          resumeCallback();
-        }, 500);
+        trigger1_5sBlackScreen(() => {
+            const uvOverlay = document.getElementById('scene-uv-overlay');
+            uvOverlay.style.opacity = '0';
+            uvOverlay.style.display = 'none';
+            savedModals.forEach(m => m.style.display = 'flex');
+            activeModals = savedModals;
+            resumeCallback();
+        });
       };
 
       if (choice === "stay") {
         setTimeout(() => {
-            const uvOverlay = document.getElementById('scene-uv-overlay');
             if (fearValue >= 60) {
+                const uvOverlay = document.getElementById('scene-uv-overlay');
                 uvOverlay.style.opacity = '0';
                 setTimeout(() => {
                     uvOverlay.style.display = 'none';
                     handleLostEndingTransition();
                 }, 500);
             } else {
-                uvOverlay.style.opacity = '0';
-                setTimeout(() => {
-                    uvOverlay.style.display = 'none';
-                    savedModals.forEach(m => m.style.display = 'flex');
-                    activeModals = savedModals;
-                    resumeCallback();
-                }, 500);
+                finalize();
             }
         }, 3000);
       } else {
@@ -1171,55 +1202,60 @@
       stopIdleTimer();
       
       const overlayText = document.getElementById('overlay-text');
-      overlayText.textContent = '……';
+      overlayText.textContent = ''; 
+      overlayText.style.opacity = '0';
       
       blackOverlay.style.display = 'block';
       void blackOverlay.offsetWidth; 
       blackOverlay.style.opacity = '1';
-      overlayText.style.opacity = '1';
 
       setTimeout(() => {
-        hideAllScenes();
-        document.querySelector('.ui-container').style.display = 'none';
-        
-        fearValue = 0;
-        sheepIndex = 0;
-        snakeIndex = 0;
-        updateFearUI();
-        uvTriggered = false;
-        
-        hasPassedWard = false;
-        hasPassedClinic = false;
-        wardIntroPlayed = false;
-
-        played1_1 = false;
-        randomEvents = ["1-2", "1-3", "1-4", "1-6", "1-7"];
-        shuffleArray(randomEvents);
-        nextFixed = "1-8";
-        currentZone = 'lobby';
-
-        const sceneLost = document.getElementById('scene-lost');
-        const lp1 = document.getElementById('lost-p1');
-        const lp2 = document.getElementById('lost-p2');
-        const lostNextBtn = document.getElementById('lost-next-btn');
-
-        lp1.classList.remove('visible', 'instant-visible');
-        lp2.classList.remove('visible', 'instant-visible');
-        lostNextBtn.classList.remove('visible', 'instant-visible');
-
-        sceneLost.style.display = 'block';
-
-        blackOverlay.style.opacity = '0';
-        overlayText.style.opacity = '0';
+        overlayText.textContent = '……';
+        overlayText.style.opacity = '1';
         
         setTimeout(() => {
-          blackOverlay.style.display = 'none';
-          overlayText.textContent = ''; 
-          setTimeout(() => { lp1.classList.add('visible'); }, 50);
-          setTimeout(() => { lp2.classList.add('visible'); }, 2000);
-          setTimeout(() => { lostNextBtn.classList.add('visible'); }, 4000);
-        }, 500);
-      }, 1500); 
+           hideAllScenes();
+           document.querySelector('.ui-container').style.display = 'none';
+           
+           fearValue = 0;
+           sheepIndex = 0;
+           snakeIndex = 0;
+           updateFearUI();
+           uvTriggered = false;
+           
+           hasPassedWard = false;
+           hasPassedClinic = false;
+           wardIntroPlayed = false;
+
+           played1_1 = false;
+           randomEvents = ["1-2", "1-3", "1-4", "1-6", "1-7"];
+           shuffleArray(randomEvents);
+           nextFixed = "1-8";
+           currentZone = 'lobby';
+
+           const sceneLost = document.getElementById('scene-lost');
+           const lp1 = document.getElementById('lost-p1');
+           const lp2 = document.getElementById('lost-p2');
+           const lostNextBtn = document.getElementById('lost-next-btn');
+
+           lp1.classList.remove('visible', 'instant-visible');
+           lp2.classList.remove('visible', 'instant-visible');
+           lostNextBtn.classList.remove('visible', 'instant-visible');
+
+           sceneLost.style.display = 'block';
+
+           blackOverlay.style.opacity = '0';
+           overlayText.style.opacity = '0';
+           
+           setTimeout(() => {
+             blackOverlay.style.display = 'none';
+             overlayText.textContent = ''; 
+             setTimeout(() => { lp1.classList.add('visible'); }, 50);
+             setTimeout(() => { lp2.classList.add('visible'); }, 2000);
+             setTimeout(() => { lostNextBtn.classList.add('visible'); }, 4000);
+           }, 500);
+        }, 1500); 
+      }, 800); 
     }
     
     function triggerFinalQuestioningTransition() {
@@ -1478,6 +1514,13 @@
         randomEvents = ["1-2", "1-3", "1-4", "1-6", "1-7"];
         shuffleArray(randomEvents);
         
+        count_1_5 = 0;
+        count_1_7_2 = 0;
+        count_2_1 = 0;
+        count_2_1_1 = 0;
+        count_2_1_2 = 0;
+        candyInteractionCount = 0;
+
         updateFearUI();
 
         stopIdleTimer();
@@ -1773,6 +1816,7 @@
         text: "牆邊靠著一張陳舊的木桌，上面放置的糖果罐，卻是嶄新的。",
         options: [
           { label: "拿走糖果", effect: () => { 
+              candyInteractionCount++;
               hasCandy = true; 
               inventoryBtn.style.display = 'block'; 
               randomEvents.push("1-5"); shuffleArray(randomEvents);
@@ -1780,6 +1824,7 @@
             } 
           },
           { label: "吃下糖果", effect: () => { 
+              candyInteractionCount++;
               fearValue -= 15; 
               sheepIndex += 5; 
               ateCandy = true; 
@@ -1798,8 +1843,8 @@
         text: "一道嚴厲的聲音從背後傳來：「為什麼一個人待在這裡，很危險的。」<br><br>回頭看去，卻沒有任何人。",
         options: [
           { label: "「你是誰？」", effect: () => {
-              if (ateCandy || hasCandy) {
-                return { text: "「這裡不是好孩子該待的地方，快點離開。」" };
+              if (isBadChild()) {
+                return { text: "「這裡不是『好孩子』該待的地方，快點離開。」" };
               } else {
                 fearValue += 10;
                 return { text: "「這不是你該過問的。」" };
@@ -1807,6 +1852,21 @@
             }
           },
           { label: "立刻離開", effect: () => { fearValue += 10; return { text: "在廢棄的醫院裡的，會是什麼人？" }; } }
+        ]
+      },
+      "1-5-n": {
+        text: "一道嚴厲的聲音從背後傳來：「……又闖進來了？趕快離開。」<br><br>回頭看去，卻沒有任何人。",
+        options: [
+          { label: "「你是誰？」", effect: () => {
+              if (isBadChild()) {
+                return { text: "「這不重要，總之別待在這裡了。」" };
+              } else {
+                fearValue += 10;
+                return { text: "「壞孩子，沒有資格問這種問題。」" };
+              }
+            }
+          },
+          { label: "立刻離開", effect: () => { fearValue += 10; return { text: "那個人……究竟是誰？" }; } }
         ]
       },
       "1-6": {
@@ -1836,7 +1896,15 @@
         text: "瞬息之間，原先正在手術臺前的人已來到了面前，面容在黑暗之中無法看清。<br><br>「你看見了什麼？」",
         options: [
           { label: "「什麼都沒看見。」", effect: () => { fearValue += 15; return { text: "「現在立刻離開，別讓我說第二次。」" }; } },
-          { label: "「……。」", effect: () => { return { text: "「干擾『手術』的壞孩子……該怎麼懲罰呢？」", isExperimentEnding: true }; } },
+          { label: "「……。」", effect: () => { return { text: "「干擾手術的壞孩子……該怎麼懲罰呢？」", isExperimentEnding: true }; } },
+          { label: "「一場手術。」", effect: () => { return { text: "「不，那可不是一般的手術，倘若好奇……不如，你親自來參與吧……。」", isExperimentEnding: true }; } }
+        ]
+      },
+      "1-7-2-n": {
+        text: "瞬息之間，原先正在手術臺前的人已來到了面前，面容在黑暗之中無法看清。<br><br>「你看見了什麼？」",
+        options: [
+          { label: "「什麼都沒看見。」", effect: () => { fearValue += 15; return { text: "「……我說過，出去。」" }; } },
+          { label: "「……。」", effect: () => { return { text: "「干擾手術的壞孩子……該怎麼懲罰呢？」", isExperimentEnding: true }; } },
           { label: "「一場手術。」", effect: () => { return { text: "「不，那可不是一般的手術，倘若好奇……不如，你親自來參與吧……。」", isExperimentEnding: true }; } }
         ]
       },
@@ -1860,7 +1928,18 @@
     function renderEvent(eventId) {
       stopIdleTimer();
       if (!eventId) return; 
-      const ev = eventsData[eventId];
+      
+      let actualId = eventId;
+      if (eventId === "1-5") {
+          if (count_1_5 > 0) actualId = "1-5-n";
+          count_1_5++;
+      }
+      if (eventId === "1-7-2") {
+          if (count_1_7_2 > 0) actualId = "1-7-2-n";
+          count_1_7_2++;
+      }
+
+      const ev = eventsData[actualId];
       
       s4Text.style.display = 'block';
       s4Text.innerHTML = ev.text;
@@ -2060,27 +2139,34 @@
           { label: "「你是誰？」", effect: () => { return { text: "「我是亨特醫生……請別害怕，我不會傷害好孩子的……。」", goto: "2-1-1" }; } }
         ]
       },
+      "2-1-n": {
+        text: "一道溫柔的聲音從背後傳來：「嗯？又遇見了……為什麼還沒有離開這裡呢？」<br><br>回頭看去，卻沒有任何人。",
+        options: [
+          { label: "「你是誰？」", effect: () => { return { text: "「不記得了嗎？我是亨特醫生……。」", goto: "2-1-1" }; } },
+          { label: "「……亨特醫生？」", effect: () => { return { goto: "2-1-1", skipFeedback: true }; } }
+        ]
+      },
       "2-1-1": {
-        text: "「那麼……你會是『好孩子』嗎？」",
+        text: "「那麼……你會是好孩子嗎？」",
         options: [
           { label: "「是。」", effect: () => {
-              if (!hasCandy && !ateCandy) {
+              if (!isBadChild()) {
                 fearValue -= 15;
                 snakeIndex += 5;
-                return { text: "「真乖，好孩子……可以得到獎勵……。」" };
+                return { text: "「真乖，好孩子……可以得到獎勵。」" };
               } else {
                 return { text: "「說謊，可不是好孩子應該有的行為呢……。」", goto: "2-1-2" };
               }
             }
           },
           { label: "「不是。」", effect: () => {
-              if (!hasCandy && !ateCandy) {
+              if (!isBadChild()) {
                 fearValue -= 5;
                 snakeIndex += 5;
                 return { text: "「別擔心，『醫生』會幫助聽話的好孩子……。」" };
               } else {
                 fearValue += 10;
-                return { text: "「小心，不聽話的壞孩子，會被『怪物』盯上呢……？」" };
+                return { text: "「小心，不聽話的『壞孩子』，會被『怪物』盯上喔……？」" };
               }
             }
           },
@@ -2090,25 +2176,58 @@
           }
         ]
       },
+      "2-1-1-n": {
+        text: "「……這一次的你，會是好孩子嗎？」",
+        options: [
+          { label: "「是。」", effect: () => {
+              if (!isBadChild()) {
+                fearValue -= 15;
+                snakeIndex += 5;
+                return { text: "「真乖。」" };
+              } else {
+                return { text: "「……請不要說謊了。」", goto: "2-1-2" };
+              }
+            }
+          },
+          { label: "「不是。」", effect: () => {
+              if (!isBadChild()) {
+                fearValue -= 5;
+                snakeIndex += 5;
+                return { text: "「別怕，好孩子應該得到幫助，不是嗎？」" };
+              } else {
+                fearValue += 10;
+                return { text: "「雖然不是好孩子，不過……還算誠實呢。」" };
+              }
+            }
+          }
+        ]
+      },
       "2-1-2": {
         text: "「請誠實地回答我，你是不是『好孩子』……？」",
         options: [
           { label: "「……是。」", effect: () => { return { text: "對方沒有再說話，下個瞬間，一道身影出現在面前，隱約可見無數菌絲自其背後漫出……。", isMonsterEnding: true }; } },
-          { label: "「……不是。」", effect: () => { fearValue += 15; return { text: "「小心，不聽話的壞孩子，會被『怪物』盯上呢……。」" }; } }
+          { label: "「……不是。」", effect: () => { fearValue += 15; return { text: "「小心，不聽話的『壞孩子』，會被『怪物』盯上喔……？」" }; } }
+        ]
+      },
+      "2-1-2-n": {
+        text: "「請仔細思考再回答——你是不是『好孩子』？」",
+        options: [
+          { label: "「……是。」", effect: () => { return { text: "對方沒有再說話，下個瞬間，一道身影出現在面前，隱約可見無數菌絲自其背後漫出……。", isMonsterEnding: true }; } },
+          { label: "「……不是。」", effect: () => { fearValue += 15; return { text: "「那條規則……務必記住呢。」" }; } }
         ]
       },
       "2-2": {
         text: "診療椅旁架著一塊透鏡，微弱的光線通過，有個瞬間似乎反射出了……蛇鱗的形狀？",
         options: [
           { label: "上前查看", effect: () => { fearValue -= 5; snakeIndex += 10; return { text: "光彩熠熠，恍惚間，彷彿忘卻了一部分恐懼。", goto: "2-2-1" }; } },
-          { label: "置之不理", effect: () => { return { text: "或許不應該深思，為什麼它會出現在這種地方……。" }; } }
+          { label: "置之不理", effect: () => { return { text: "那只是普通的醫療器具罷了……或許。" }; } }
         ]
       },
       "2-2-1": {
         text: "如此美麗的透鏡……是否將其帶走？",
         options: [
           { label: "是", effect: () => { hasLens = true; inventoryBtn.style.display = 'block'; return { text: "希望之光，必將私藏。" }; } },
-          { label: "否", effect: () => { return { text: "妖異之物，只可遠觀。" }; } }
+          { label: "否", effect: () => { return { text: "異樣之物，只可遠觀。" }; } }
         ]
       },
       "2-3": {
@@ -2237,7 +2356,21 @@
       stopIdleTimer();
       if (!eventId) return;
 
-      const ev = clinicEventsData[eventId];
+      let actualId = eventId;
+      if (eventId === "2-1") {
+          if (count_2_1 > 0) actualId = "2-1-n";
+          count_2_1++;
+      }
+      if (eventId === "2-1-1") {
+          if (count_2_1_1 > 0) actualId = "2-1-1-n";
+          count_2_1_1++;
+      }
+      if (eventId === "2-1-2") {
+          if (count_2_1_2 > 0) actualId = "2-1-2-n";
+          count_2_1_2++;
+      }
+
+      const ev = clinicEventsData[actualId];
       const scText = document.getElementById('sc-text');
       const scOptions = document.getElementById('sc-options');
       const scFeedback = document.getElementById('sc-feedback');
@@ -2353,7 +2486,7 @@
         ]
       },
       "3-3": {
-        text: "人群的聲音再度響起，這一次變得更加清晰……「褻瀆屍體的罪人！」。同時，一道穿著白袍的模糊身影，出現在了面前。",
+        text: "人群的聲音再度響起，這一次變得更加清晰……。<br><br>「褻瀆屍體的罪人！」<br><br>同時，一道穿著白袍的模糊身影，出現在了面前。",
         options: [
           {
             label: "凝神細聽",
@@ -2501,16 +2634,16 @@
           document.body.classList.remove('show-announcement');
 
           if (recordsNotebook) {
-            document.getElementById('notebook-tabs').style.display = 'flex'; 
-            document.getElementById('tab-ward').style.display = 'inline-block'; 
+            document.getElementById('notebook-tabs').style.display = 'flex';
+            document.getElementById('tab-ward').style.display = 'inline-block';
 
             const sceneFb = document.getElementById('scene-ward-feedback');
             sceneFb.style.display = 'block';
-            
+
             const wardFbText = document.getElementById('ward-fb-text');
-            wardFbText.innerHTML = '全新的規則，也需要紀錄下來。';
+            wardFbText.innerHTML = '還是記住這些規則為好。';
             wardFbText.classList.add('instant-visible');
-            
+
             const fbNext = document.getElementById('ward-fb-next');
             fbNext.classList.add('instant-visible');
 
@@ -2526,56 +2659,63 @@
     }
 
     function startWardGameplay() {
-       document.getElementById('scene-ward-game').style.display = 'block';
-       renderWardEvent(getNextWardEventId());
+      document.getElementById('scene-ward-game').style.display = 'block';
+      renderWardEvent(getNextWardEventId());
     }
 
     function renderWardEvent(eventId) {
-        stopIdleTimer();
-        if (!eventId) return;
+      stopIdleTimer();
+      if (!eventId) return;
 
-        const ev = wardEventsData[eventId];
-        
-        swFeedback.style.opacity = '';
-        swFeedback.style.transition = '';
+      const ev = wardEventsData[eventId];
+      const swText = document.getElementById('sw-text');
+      const swOptions = document.getElementById('sw-options');
+      const swFeedback = document.getElementById('sw-feedback');
+      const nextBtnW = document.getElementById('next-btn-w');
 
-        swText.style.display = 'block';
-        swText.innerHTML = ev.text;
-        swText.className = 'story-text';
-        void swText.offsetWidth;
-        swText.classList.add('visible');
+      swFeedback.style.opacity = '';
+      swFeedback.style.transition = '';
 
-        swOptions.innerHTML = '';
-        swOptions.style.display = 'flex';
-        swOptions.className = 'options-container hidden-element';
-        void swOptions.offsetWidth;
-        swOptions.classList.add('visible');
+      swText.style.display = 'block';
+      swText.innerHTML = ev.text;
+      swText.className = 'story-text';
+      void swText.offsetWidth;
+      swText.classList.add('visible');
 
-        swFeedback.style.display = 'none';
-        nextBtnW.style.display = 'none';
-        nextBtnW.classList.remove('instant-visible');
+      swOptions.innerHTML = '';
+      swOptions.style.display = 'flex';
+      swOptions.className = 'options-container hidden-element';
+      void swOptions.offsetWidth;
+      swOptions.classList.add('visible');
 
-        if (ev.isAutoFinalTransition) {
-            swOptions.style.display = 'none';
-            setTimeout(() => {
-                triggerFinalQuestioningTransition();
-            }, 3000);
-            return;
-        }
+      swFeedback.style.display = 'none';
+      nextBtnW.style.display = 'none';
+      nextBtnW.classList.remove('instant-visible');
 
-        if (ev.options && ev.options.length > 0) {
-            ev.options.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = 'btn';
-                btn.style.marginTop = '0';
-                btn.textContent = opt.label;
-                btn.onclick = () => handleGenericOptionClick(opt, 'scene-ward-game', swText, swOptions, swFeedback, nextBtnW, renderWardEvent, getNextWardEventId);
-                swOptions.appendChild(btn);
-            });
-            startIdleTimer();
-        }
+      if (ev.isAutoFinalTransition) {
+          swOptions.style.display = 'none';
+          setTimeout(() => {
+              triggerFinalQuestioningTransition();
+          }, 3000);
+          return;
+      }
+
+      if (ev.options && ev.options.length > 0) {
+        ev.options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = 'btn';
+          btn.style.marginTop = '0';
+          btn.textContent = opt.label;
+          btn.onclick = () => handleWardOptionClick(opt);
+          swOptions.appendChild(btn);
+        });
+        startIdleTimer();
+      }
     }
 
+    function handleWardOptionClick(opt) {
+        handleGenericOptionClick(opt, 'scene-ward-game', document.getElementById('sw-text'), document.getElementById('sw-options'), document.getElementById('sw-feedback'), document.getElementById('next-btn-w'), renderWardEvent, getNextWardEventId);
+    }
   </script>
 </body>
 </html>
