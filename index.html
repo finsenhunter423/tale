@@ -1823,20 +1823,46 @@
         text: "牆邊靠著一張陳舊的木桌，上面放置的糖果罐，卻是嶄新的。",
         options: [
           { label: "拿走糖果", effect: () => { 
-              candyInteractionCount++;
-              hasCandy = true; 
-              inventoryBtn.style.display = 'block'; 
-              randomEvents.push("1-5"); shuffleArray(randomEvents);
-              return { text: "或許它會派上用場……或許。" }; 
+              if (!hasCandy) {
+                candyInteractionCount++;
+                hasCandy = true; 
+                fearValue -= 10;
+                inventoryBtn.style.display = 'block'; 
+                randomEvents.push("1-5"); shuffleArray(randomEvents);
+                return { text: "或許它會派上用場……或許。" }; 
+              } else {
+                const msgModal = document.getElementById('message-modal');
+                const closeBtn = document.getElementById('close-message-btn');
+                const msgText = document.getElementById('message-text');
+                closeBtn.style.display = 'none';
+                msgText.textContent = "……真是貪心。";
+                msgModal.style.display = 'flex';
+                setTimeout(() => {
+                  msgModal.style.display = 'none';
+                  closeBtn.style.display = 'block';
+                  s4Text.style.display = 'block';
+                  s4Options.style.display = 'flex';
+                  startIdleTimer();
+                }, 2000);
+                return { stayOnEvent: true };
+              }
             } 
           },
           { label: "吃下糖果", effect: () => { 
-              candyInteractionCount++;
-              fearValue -= 15; 
-              sheepIndex += 5; 
-              ateCandy = true; 
-              randomEvents.push("1-5"); shuffleArray(randomEvents);
-              return { text: "甜蜜的味道，暫時安撫了內心的不安。" }; 
+              if (!hasCandy) {
+                candyInteractionCount++;
+                fearValue -= 15; 
+                sheepIndex += 5; 
+                ateCandy = true; 
+                randomEvents.push("1-5"); shuffleArray(randomEvents);
+                return { text: "甜蜜的味道，暫時安撫了內心的不安。" }; 
+              } else {
+                candyInteractionCount++;
+                sheepIndex += 5; 
+                ateCandy = true; 
+                randomEvents.push("1-5"); shuffleArray(randomEvents);
+                return { text: "貪婪的味道，甜膩萬分。" }; 
+              }
             } 
           },
           { label: "置之不理", effect: () => { 
@@ -1984,6 +2010,9 @@
 
         let oldFear = fearValue;
         let result = opt.effect();
+        if (result && result.stayOnEvent) {
+            return;
+        }
         let rawNewFear = fearValue;
         
         updateFearUI();
@@ -2231,7 +2260,7 @@
         ]
       },
       "2-2-1": {
-        text: "如此美麗的透鏡……是否將其帶走？",
+        text: "挑戰極限的透鏡……是否將其帶走？",
         options: [
           { label: "是", effect: () => { hasLens = true; inventoryBtn.style.display = 'block'; return { text: "希望之光，必將私藏。" }; } },
           { label: "否", effect: () => { return { text: "異樣之物，只可遠觀。" }; } }
@@ -2572,12 +2601,6 @@
 
     function enterWardScene() {
       stopIdleTimer();
-      if (wardIntroPlayed) {
-          startWardGameplay();
-          return;
-      }
-      wardIntroPlayed = true;
-
       const sceneWardIntro = document.getElementById('scene-ward-intro');
       const p1 = document.getElementById('ward-p1');
       const introNextBtn = document.getElementById('next-btn-ward-intro');
@@ -2585,7 +2608,7 @@
       sceneWardIntro.style.display = 'block';
       p1.classList.remove('visible', 'instant-visible');
       introNextBtn.classList.remove('visible', 'instant-visible');
-      
+
       wardIntroTimeouts = [];
 
       wardIntroTimeouts.push(setTimeout(() => { p1.classList.add('visible'); }, 50));
@@ -2648,7 +2671,7 @@
             sceneFb.style.display = 'block';
             
             const wardFbText = document.getElementById('ward-fb-text');
-            wardFbText.innerHTML = '還是記住這些規則為好。';
+            wardFbText.innerHTML = '住院部的須知也已被記錄。';
             wardFbText.classList.add('instant-visible');
             
             const fbNext = document.getElementById('ward-fb-next');
@@ -2679,6 +2702,9 @@
       const swOptions = document.getElementById('sw-options');
       const swFeedback = document.getElementById('sw-feedback');
       const nextBtnW = document.getElementById('next-btn-w');
+
+      swFeedback.style.opacity = '';
+      swFeedback.style.transition = '';
 
       swText.style.display = 'block';
       swText.innerHTML = ev.text;
