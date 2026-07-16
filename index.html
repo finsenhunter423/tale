@@ -394,10 +394,10 @@
       bottom: 20px;
       right: 20px;
       align-items: flex-end;
-      pointer-events: none; /* 修復：防止透明容器遮擋公告按鈕點擊 */
+      pointer-events: none;
     }
     .ui-container * {
-      pointer-events: auto; /* 修復：讓子按鈕與心形容器保持可正常點按 */
+      pointer-events: auto;
     }
     #fear-container {
       margin-bottom: 10px;
@@ -1822,11 +1822,10 @@
       "1-4": {
         text: "牆邊靠著一張陳舊的木桌，上面放置的糖果罐，卻是嶄新的。",
         options: [
-          { label: "拿走糖果", effect: () => { 
+          { label: "拿走糖果", effect: (btn) => { 
               if (!hasCandy) {
                 candyInteractionCount++;
                 hasCandy = true; 
-                fearValue -= 10;
                 inventoryBtn.style.display = 'block'; 
                 randomEvents.push("1-5"); shuffleArray(randomEvents);
                 return { text: "或許它會派上用場……或許。" }; 
@@ -1842,6 +1841,7 @@
                   closeBtn.style.display = 'block';
                   s4Text.style.display = 'block';
                   s4Options.style.display = 'flex';
+                  if (btn) btn.style.display = 'none'; // 將選項隱藏
                   startIdleTimer();
                 }, 2000);
                 return { stayOnEvent: true };
@@ -1942,7 +1942,7 @@
         ]
       },
       "1-8": {
-        text: "透過昏暗的燈光，依稀能見到前方出現了一串腳印，但看上去並不像人類的。",
+        text: "透過昏暗的燈光，依依稀稀能見到前方出現了一串腳印，但看上去並不像人類的。",
         options: [
           { label: "跟隨腳印", effect: () => { sheepIndex += 10; return { text: "直到腳步與之重疊才發現，眼前的腳印，竟然是羊蹄的形狀……。", triggerZoneTransition: true, targetZone: 'ward' }; } },
           { label: "忽視腳印", effect: () => { return { text: "資訊不足時，不要相信任何事物。" }; } },
@@ -1996,20 +1996,20 @@
           btn.className = 'btn';
           btn.style.marginTop = '0';
           btn.textContent = opt.label;
-          btn.onclick = () => handleOptionClick(opt);
+          btn.onclick = () => handleOptionClick(opt, btn);
           s4Options.appendChild(btn);
         });
         startIdleTimer();
       }
     }
 
-    function handleGenericOptionClick(opt, containerId, textEl, optEl, fbEl, nextBtn, renderEventFn, getNextIdFn) {
+    function handleGenericOptionClick(opt, containerId, textEl, optEl, fbEl, nextBtn, renderEventFn, getNextIdFn, btn) {
         stopIdleTimer();
         optEl.style.display = 'none';
         textEl.style.display = 'none';
 
         let oldFear = fearValue;
-        let result = opt.effect();
+        let result = opt.effect(btn);
         if (result && result.stayOnEvent) {
             return;
         }
@@ -2146,8 +2146,8 @@
         showFeedbackAndProceed();
     }
 
-    function handleOptionClick(opt) {
-        handleGenericOptionClick(opt, 'scene-4', s4Text, s4Options, s4Feedback, nextBtn4, renderEvent, getNextEventId);
+    function handleOptionClick(opt, btn) {
+        handleGenericOptionClick(opt, 'scene-4', s4Text, s4Options, s4Feedback, nextBtn4, renderEvent, getNextEventId, btn);
     }
 
     nextBtn3.addEventListener('click', function() {
@@ -2445,15 +2445,15 @@
           btn.className = 'btn';
           btn.style.marginTop = '0';
           btn.textContent = opt.label;
-          btn.onclick = () => handleClinicOptionClick(opt);
+          btn.onclick = () => handleClinicOptionClick(opt, btn);
           scOptions.appendChild(btn);
         });
         startIdleTimer();
       }
     }
 
-    function handleClinicOptionClick(opt) {
-        handleGenericOptionClick(opt, 'scene-clinic-game', document.getElementById('sc-text'), document.getElementById('sc-options'), document.getElementById('sc-feedback'), document.getElementById('next-btn-c'), renderClinicEvent, getNextClinicEventId);
+    function handleClinicOptionClick(opt, btn) {
+        handleGenericOptionClick(opt, 'scene-clinic-game', document.getElementById('sc-text'), document.getElementById('sc-options'), document.getElementById('sc-feedback'), document.getElementById('next-btn-c'), renderClinicEvent, getNextClinicEventId, btn);
     }
 
     function initWardEvents() {
@@ -2736,15 +2736,15 @@
           btn.className = 'btn';
           btn.style.marginTop = '0';
           btn.textContent = opt.label;
-          btn.onclick = () => handleWardOptionClick(opt);
+          btn.onclick = () => handleWardOptionClick(opt, btn);
           swOptions.appendChild(btn);
         });
         startIdleTimer();
       }
     }
 
-    function handleWardOptionClick(opt) {
-        handleGenericOptionClick(opt, 'scene-ward-game', document.getElementById('sw-text'), document.getElementById('sw-options'), document.getElementById('sw-feedback'), document.getElementById('next-btn-w'), renderWardEvent, getNextWardEventId);
+    function handleWardOptionClick(opt, btn) {
+        handleGenericOptionClick(opt, 'scene-ward-game', document.getElementById('sw-text'), document.getElementById('sw-options'), document.getElementById('sw-feedback'), document.getElementById('next-btn-w'), renderWardEvent, getNextWardEventId, btn);
     }
 
   </script>
