@@ -1867,7 +1867,11 @@
           },
           { label: "置之不理", effect: () => { 
               randomEvents.push("1-5"); shuffleArray(randomEvents);
-              return { text: "來路不明的饋贈，反而是一種陷阱。" }; 
+              if (hasCandy) {
+                return { text: "貪求過多，並不是好的行為。" }; 
+              } else {
+                return { text: "來路不明的饋贈，反而是一種陷阱。" }; 
+              }
             } 
           }
         ]
@@ -1944,8 +1948,8 @@
       "1-8": {
         text: "透過昏暗的燈光，依依稀稀能見到前方出現了一串腳印，但看上去並不像人類的。",
         options: [
-          { label: "跟隨腳印", effect: () => { sheepIndex += 10; return { text: "直到腳步與之重疊才發現，眼前的腳印，竟然是羊蹄的形狀……。", triggerZoneTransition: true, targetZone: 'ward' }; } },
-          { label: "忽視腳印", effect: () => { return { text: "資訊不足時，不要相信任何事物。" }; } },
+          { label: "跟隨腳印", effect: () => { sheepIndex += 10; return { text: "直到步伐與之重疊才發現，眼前的腳印，竟然是羊蹄的形狀……。", triggerZoneTransition: true, targetZone: 'ward' }; } },
+          { label: "忽視腳印", effect: () => { return { text: "乍然出現的痕跡，又會通向哪裡？" }; } },
           { label: "反向離開", effect: () => { snakeIndex += 10; return { text: "迷霧中的指引，更像是誘人深入的陷阱。" }; } }
         ]
       },
@@ -2179,7 +2183,7 @@
         text: "一道溫柔的聲音從背後傳來：「嗯？又遇見了……為什麼還沒有離開這裡呢？」<br><br>回頭看去，卻沒有任何人。",
         options: [
           { label: "「你是誰？」", effect: () => { return { text: "「不記得了嗎？我是亨特醫生……。」", goto: "2-1-1" }; } },
-          { label: "「……亨特醫生？」", effect: () => { return { goto: "2-1-1", skipFeedback: true }; } }
+          { label: "「……亨特醫生？」", effect: () => { return { text: "「你還記得我……真令人高興……。」", goto: "2-1-1" }; } }
         ]
       },
       "2-1-1": {
@@ -2548,7 +2552,7 @@
         ]
       },
       "3-4": {
-        text: "牆上的掛畫繪著一對眼睛，正直直注視前方，那雙瞳孔會是什麼形狀？",
+        text: "牆上的裂縫裡，似乎藏著一隻眼睛，正直直注視前方……它的瞳孔會是什麼形狀？",
         options: [
           {
             label: "豎瞳",
