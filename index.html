@@ -1259,7 +1259,7 @@
              setTimeout(() => { lp2.classList.add('visible'); }, 2000);
              setTimeout(() => { lostNextBtn.classList.add('visible'); }, 4000);
            }, 500);
-        }, 1500); 
+        }, 2200); 
       }, 800); 
     }
     
@@ -1433,7 +1433,6 @@
         setTimeout(() => { btnEl.classList.add('visible'); }, 4000);
         
         btnEl.onclick = () => {
-            // 其他結局的 Retry 按鈕會完整重置所有資料
             resetGameState();
             document.getElementById('scene-final-ending').style.display = 'none';
             gameScreen.style.display = 'none';
@@ -1503,7 +1502,6 @@
     }
 
     function resetGameState() {
-        // 重置所有數值，包含恐懼值、羊群指數、蛇指數、手札、隨身物品、糖果互動與特定題目觸發次數
         fearValue = 0;
         sheepIndex = 0;
         snakeIndex = 0;
@@ -1841,7 +1839,7 @@
                   closeBtn.style.display = 'block';
                   s4Text.style.display = 'block';
                   s4Options.style.display = 'flex';
-                  if (btn) btn.style.display = 'none'; // 將選項隱藏
+                  if (btn) btn.style.display = 'none'; 
                   startIdleTimer();
                 }, 2000);
                 return { stayOnEvent: true };
@@ -2675,7 +2673,7 @@
             sceneFb.style.display = 'block';
             
             const wardFbText = document.getElementById('ward-fb-text');
-            wardFbText.innerHTML = '全新的規則，也需要紀錄下來。';
+            wardFbText.innerHTML = '還是記住這些規則為好。';
             wardFbText.classList.add('instant-visible');
             
             const fbNext = document.getElementById('ward-fb-next');
@@ -2702,11 +2700,7 @@
       if (!eventId) return;
 
       const ev = wardEventsData[eventId];
-      const swText = document.getElementById('sw-text');
-      const swOptions = document.getElementById('sw-options');
-      const swFeedback = document.getElementById('sw-feedback');
-      const nextBtnW = document.getElementById('next-btn-w');
-
+      
       swFeedback.style.opacity = '';
       swFeedback.style.transition = '';
 
@@ -2748,9 +2742,8 @@
     }
 
     function handleWardOptionClick(opt, btn) {
-        handleGenericOptionClick(opt, 'scene-ward-game', document.getElementById('sw-text'), document.getElementById('sw-options'), document.getElementById('sw-feedback'), document.getElementById('next-btn-w'), renderWardEvent, getNextWardEventId, btn);
+        handleGenericOptionClick(opt, 'scene-ward-game', swText, swOptions, swFeedback, nextBtnW, renderWardEvent, getNextWardEventId, btn);
     }
-
   </script>
 </body>
 </html>
