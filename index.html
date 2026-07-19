@@ -1,1 +1,2751 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dentist's Swamp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #070707;
+    color: #d3d3d3;
+    font-family: 'Playfair Display', 'Noto Serif TC', serif; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  #intro-screen {
+    text-align: center;
+    animation: fadeIn 2.5s ease-in-out;
+  }
+
+  .poem-line {
+    margin: 12px 0;
+    font-size: 1.3rem;
+    letter-spacing: 2px;
+    line-height: 1.5;
+  }
+
+  .btn {
+    margin-top: 40px;
+    padding: 10px 30px;
+    background-color: transparent;
+    color: #a9a9a9;
+    border: 1px solid #a9a9a9;
+    font-size: 1.2rem;
+    font-family: inherit;
+    cursor: pointer;
+    letter-spacing: 2px;
+    transition: all 0.5s ease;
+  }
+
+  .btn:hover {
+    background-color: #d3d3d3;
+    color: #070707;
+  }
+
+  .ui-btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .ui-btn {
+    width: 140px;
+    text-align: center;
+    padding: 10px 0;
+    margin-top: 0 !important;
+  }
+
+  #game-screen {
+    display: none;
+    text-align: center;
+    width: 80%;
+    max-width: 800px;
+  }
+
+  .story-text {
+    font-size: 1.2rem;
+    line-height: 2;
+    letter-spacing: 1.5px;
+    margin-bottom: 30px;
+    text-align: left;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 2s ease, transform 2s ease, color 0.8s ease;
+  }
+
+  .visible {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+  }
+
+  .instant-visible {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    transition: none !important; 
+  }
+
+  .hidden-element {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 1.5s ease, visibility 1.5s ease;
+  }
+
+  .hidden-element.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .hidden-element.instant-visible {
+    opacity: 1;
+    visibility: visible;
+    transition: none !important;
+  }
+
+  .options-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap; 
+  }
+
+  .scene-title {
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 1s ease, transform 1s ease, color 0.8s ease;
+    letter-spacing: 2px;
+  }
+
+  .bullet-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+  }
+
+  .bullet-item {
+    margin-bottom: 18px;
+    font-size: 1.2rem;
+    line-height: 2;
+    letter-spacing: 1.5px;
+    transition: opacity 0.8s ease, transform 0.8s ease, color 0.8s ease;
+  }
+
+  .ui-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 100;
+  }
+
+  #fear-container {
+    width: 44px;
+    height: 44px;
+    display: none;
+    margin-bottom: 15px;
+  }
+
+  .heart-svg {
+    width: 100%;
+    height: 100%;
+    transform-origin: center;
+    display: block;
+  }
+
+  #heart-path {
+    transition: fill 0.5s ease;
+  }
+
+  .crack-line {
+    stroke: #000000;
+    stroke-width: 1.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .cracked .crack-line {
+    opacity: 1;
+  }
+
+  @keyframes slightBeat {
+    0%, 100% { transform: scale(1); }
+    20% { transform: scale(1.06); }
+    40% { transform: scale(1.02); }
+    60% { transform: scale(1.06); }
+  }
+  .slight-beat {
+    animation: slightBeat 1.2s infinite ease-in-out;
+  }
+
+  @keyframes violentBeat {
+    0%, 100% { transform: scale(1); }
+    15% { transform: scale(1.15); }
+    30% { transform: scale(1.05); }
+    45% { transform: scale(1.15); }
+  }
+  .violent-beat {
+    animation: violentBeat 0.8s infinite ease-in-out;
+  }
+
+  #notebook-modal, #inventory-modal, #confirm-modal, #item-detail-modal, #message-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 999;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #confirm-modal, #item-detail-modal {
+    z-index: 1000;
+  }
+
+  #message-modal {
+    z-index: 1005;
+  }
+
+  .modal-content {
+    background-color: #070707;
+    border: 1px solid #a9a9a9;
+    padding: 40px;
+    width: 80%;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  #notebook-modal .modal-content {
+    height: 600px;
+    min-height: 550px;
+    padding-bottom: 80px; 
+    position: relative;
+  }
+
+  #notebook-tabs {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+    display: none;
+    justify-content: center;
+    gap: 20px;
+    margin: 0;
+  }
+
+  .close-modal {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 2.5rem;
+    cursor: pointer;
+    color: #a9a9a9;
+    transition: color 0.3s;
+  }
+
+  .close-modal:hover {
+    color: #d3d3d3;
+  }
+
+  .inventory-item {
+    font-size: 1.3rem;
+    padding: 10px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-block;
+  }
+  .inventory-item:hover {
+    border-color: #a9a9a9;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  #black-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000000;
+    z-index: 2000;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  #debug-panel {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    background: rgba(0, 0, 0, 0.75);
+    padding: 12px;
+    border: 1px dashed #a9a9a9;
+    font-family: monospace;
+    z-index: 3000;
+    font-size: 0.95rem;
+    color: #cbd5e1;
+    pointer-events: none;
+  }
+
+  #debug-timer-panel {
+    display: none;
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.75);
+    padding: 12px;
+    border: 1px dashed #a9a9a9;
+    font-family: monospace;
+    z-index: 3000;
+    font-size: 0.95rem;
+    color: #cbd5e1;
+    pointer-events: none;
+  }
+
+  .debug-val {
+    color: #f1f5f9;
+    font-weight: bold;
+  }
+
+  @media (max-width: 768px) {
+    body {
+      height: auto;
+      min-height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center; 
+      padding-top: 0;
+      padding-bottom: 120px;
+      box-sizing: border-box;
+    }
+    body.show-announcement {
+      align-items: flex-start; 
+      padding-top: 5vh;
+      height: 100vh;
+      overflow: hidden; 
+      box-sizing: border-box;
+    }
+    #game-screen {
+      height: auto;
+      overflow: visible;
+    }
+    
+    .announcement-scene {
+      display: block;
+      height: calc(95vh - 150px);
+      width: 100%;
+      position: relative;
+      margin: 0 auto;
+    }
+    .announcement-content {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 70px;
+      overflow-y: auto;
+      padding: 0 20px;
+      box-sizing: border-box;
+      scrollbar-width: none; 
+    }
+    .announcement-content::-webkit-scrollbar {
+      display: none; 
+    }
+    .announcement-btn-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 90;
+    }
+
+    .ui-container {
+      bottom: 20px;
+      right: 20px;
+      align-items: flex-end;
+      pointer-events: none;
+    }
+    .ui-container * {
+      pointer-events: auto;
+    }
+    #fear-container {
+      margin-bottom: 10px;
+    }
+    .ui-btn-group {
+      flex-direction: row-reverse;
+      gap: 10px;
+    }
+    .ui-btn {
+      width: 120px;
+    }
+
+    .modal-content {
+      max-height: 85vh;
+    }
+    #notebook-modal .modal-content {
+      height: 75vh;
+      max-height: 85vh;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 20px;
+    }
+    #notebook-hospital-content,
+    #notebook-clinic-content,
+    #notebook-ward-content {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    #notebook-tabs {
+      position: relative;
+      bottom: auto;
+      left: auto;
+      padding-top: 10px;
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+    #notebook-tabs .btn {
+      white-space: nowrap;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <div id="debug-panel">
+    【實驗階段數據】 
+    恐懼值: <span id="debug-fear" class="debug-val">0</span> | 
+    羊群指數: <span id="debug-sheep" class="debug-val">0</span> | 
+    蛇指數: <span id="debug-snake" class="debug-val">0</span>
+  </div>
+
+  <div id="debug-timer-panel">
+    閒置倒數: <span id="debug-timer-val" class="debug-val">40</span>s
+  </div>
+
+  <div id="black-overlay">
+    <div id="overlay-text" style="color: #d3d3d3; font-size: 1.5rem; letter-spacing: 2px; text-align: center; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0; transition: opacity 0.5s ease;"></div>
+  </div>
+
+  <div id="scene-uv-overlay" style="display: none; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #070707; z-index: 1500; transition: opacity 0.5s ease;">
+    <div style="width: 80%; max-width: 800px; text-align: center;">
+      <p class="story-text" id="uv-text"></p>
+      <div id="uv-options" class="options-container hidden-element"></div>
+      <p class="story-text" id="uv-feedback" style="display: none;"></p>
+      <button id="uv-next-btn" class="btn hidden-element" style="display: none; margin-top: 30px;">Next</button>
+    </div>
+  </div>
+
+  <div id="intro-screen">
+    <div class="poem-line">Long long ago, a tale was born</div>
+    <div class="poem-line">In the mist, monsters roam</div>
+    <div class="poem-line">A land of mystery, a hunting ground</div>
+    <div class="poem-line">Welcome to the dentist's swamp</div>
+    <button id="start-btn" class="btn">Start</button>
+  </div>
+
+  <div id="game-screen">
+    
+    <div id="scene-1">
+      <p class="story-text" id="s1-p1">冰冷、潮濕，四周瀰漫著令人不適的氣息。</p>
+      <p class="story-text" id="s1-p2">已然記不清究竟是何時昏了過去，意識回籠之際，只覺頭痛欲裂。映入眼簾的是一片破敗景象，能大致判斷這裡是一座廢棄的醫院。</p>
+      <p class="story-text" id="s1-p3">面前的佈告欄寫著數項公告，內容似乎相當重要，以防萬一，最好仔細閱讀……。</p>
+      <button id="action-btn-1" class="btn hidden-element">Skip</button>
+    </div>
+
+    <div id="scene-2" style="display: none;" class="announcement-scene">
+      <div class="announcement-content">
+        <h2 class="scene-title" id="s2-title">【聖心醫院公告】</h2>
+        <ul class="bullet-list">
+          <li class="story-text bullet-item s2-item">• 手術室嚴格禁止進入，若有人問你看見了什麼，回答「什麼都沒看見」。</li>
+          <li class="story-text bullet-item s2-item snake-resonance-target">• 住院部是安全的，診療室是危險的。</li>
+          <li class="story-text bullet-item s2-item snake-resonance-target">• 糖果是屬於「好孩子」的，只有「好孩子」能夠取走。</li>
+          <li class="story-text bullet-item s2-item">• 「壞孩子」的牙齒會被「怪物」拔掉。</li>
+          <li class="story-text bullet-item s2-item snake-resonance-target">• 「蛇」是危險的，請務必迴避。</li>
+          <li class="story-text bullet-item s2-item snake-resonance-target">• 如果聽見「羊群」的聲音，那是正常的，請不要迴避。</li>
+          <li class="story-text bullet-item s2-item snake-resonance-target">• 「羊群」的腳印通向「安全」的地方。</li>
+          <li class="story-text bullet-item s2-item snake-resonance-target">• 本院不存在名為「芬森·亨特」的醫生，如果遇見自稱「亨特醫生」的人，請立刻離開現場。</li>
+        </ul>
+      </div>
+      <div class="announcement-btn-container">
+        <button id="action-btn-2" class="btn hidden-element">Skip</button>
+      </div>
+    </div>
+
+    <div id="scene-3" style="display: none;">
+      <p class="story-text" id="s3-q" style="text-align: center;">是否將規則紀錄於手札？</p>
+      <div id="s3-options" class="options-container hidden-element">
+        <button id="btn-yes" class="btn" style="margin-top: 0;">是</button>
+        <button id="btn-no" class="btn" style="margin-top: 0;">否</button>
+      </div>
+    </div>
+
+    <div id="scene-feedback" style="display: none;">
+      <p class="story-text" id="feedback-text"></p>
+      <button id="next-btn-3" class="btn hidden-element">Next</button>
+    </div>
+
+    <div id="scene-4" style="display: none;">
+      <p class="story-text" id="s4-text"></p>
+      <div id="s4-options" class="options-container hidden-element"></div>
+      <p class="story-text" id="s4-feedback" style="display: none;"></p>
+      <button id="next-btn-4" class="btn hidden-element">Next</button>
+    </div>
+
+    <div id="scene-clinic-intro" style="display: none;">
+      <p class="story-text" id="clinic-p1">廢棄的診療室光線昏暗，辦公桌上擺放的名牌因為污損，已然看不清楚名字，牆上貼著一張公告。</p>
+      <button id="next-btn-clinic-intro" class="btn hidden-element">Next</button>
+    </div>
+
+    <div id="scene-clinic-rules" style="display: none;" class="announcement-scene">
+      <div class="announcement-content">
+        <h2 class="scene-title clinic-resonance-target" id="clinic-s2-title">【診療室公告】</h2>
+        <ul class="bullet-list" id="clinic-s2-list">
+          <li class="story-text bullet-item clinic-s2-item clinic-resonance-target">• 請不要逃離紫外光，它能消除一切恐懼。</li>
+          <li class="story-text bullet-item clinic-s2-item clinic-resonance-target">• 請不要害怕「蛇」，它不會傷害你。</li>
+          <li class="story-text bullet-item clinic-s2-item clinic-resonance-target">• 請不要細聽騷動聲的內容，並立刻向「醫生」求助。</li>
+          <li class="story-text bullet-item clinic-s2-item clinic-resonance-target">• 請不要吃太多糖果，那不是好孩子該做的。</li>
+          <li class="story-text bullet-item clinic-s2-item clinic-resonance-target">• 請不要擔心，「醫生」會保護好孩子。</li>
+          <li class="story-text bullet-item clinic-s2-item clinic-resonance-target">• 請不要迴避哼唱歌曲的聲音，那是安全的訊號。</li>
+          <li class="story-text bullet-item clinic-s2-item clinic-resonance-target">• 請不要逃離菌絲，靜待消失即可。</li>
+        </ul>
+      </div>
+      <div class="announcement-btn-container">
+        <button id="action-btn-clinic-rules" class="btn hidden-element">Skip</button>
+      </div>
+    </div>
+
+    <div id="scene-clinic-feedback" style="display: none;">
+      <p class="story-text" id="clinic-fb-text"></p>
+      <button id="clinic-fb-next" class="btn hidden-element">Next</button>
+    </div>
+
+    <div id="scene-clinic-game" style="display: none;">
+      <p class="story-text" id="sc-text"></p>
+      <div id="sc-options" class="options-container hidden-element"></div>
+      <p class="story-text" id="sc-feedback" style="display: none;"></p>
+      <button id="next-btn-c" class="btn hidden-element">Next</button>
+    </div>
+
+    <div id="scene-ward-intro" style="display: none;">
+      <p class="story-text" id="ward-p1">此處曾經是醫院的住院部，如今只剩下一片廢墟，門口的佈告欄似乎寫了一些須知。</p>
+      <button id="next-btn-ward-intro" class="btn hidden-element">Next</button>
+    </div>
+
+    <div id="scene-ward-rules" style="display: none;" class="announcement-scene">
+      <div class="announcement-content">
+        <h2 class="scene-title ward-resonance-target" id="ward-s2-title">【住院部須知】</h2>
+        <ul class="bullet-list" id="ward-s2-list">
+          <li class="story-text bullet-item ward-s2-item ward-resonance-target">• 相信「羊群」，審判「怪物」。</li>
+          <li class="story-text bullet-item ward-s2-item ward-resonance-target">• 「蛇」不應該出現在住院部，如果看見「蛇」的痕跡，應儘速清除。</li>
+          <li class="story-text bullet-item ward-s2-item ward-resonance-target">• 請不要走入紫外光裡。</li>
+          <li class="story-text bullet-item ward-s2-item ward-resonance-target">• 如果看見菌絲，請立刻清除。</li>
+          <li class="story-text bullet-item ward-s2-item ward-resonance-target">• 如果聽見哼唱歌曲的聲音，捂上耳朵。</li>
+          <li class="story-text bullet-item ward-s2-item ward-resonance-target">• 感到害怕是正常的，「羊群」會保護你。</li>
+        </ul>
+      </div>
+      <div class="announcement-btn-container">
+        <button id="action-btn-ward-rules" class="btn hidden-element">Skip</button>
+      </div>
+    </div>
+
+    <div id="scene-ward-feedback" style="display: none;">
+      <p class="story-text" id="ward-fb-text"></p>
+      <button id="ward-fb-next" class="btn hidden-element">Next</button>
+    </div>
+
+    <div id="scene-ward-game" style="display: none;">
+      <p class="story-text" id="sw-text"></p>
+      <div id="sw-options" class="options-container hidden-element"></div>
+      <p class="story-text" id="sw-feedback" style="display: none;"></p>
+      <button id="next-btn-w" class="btn hidden-element">Next</button>
+    </div>
+
+    <div id="scene-lost" style="display: none;">
+      <p class="story-text" id="lost-p1">冰冷、潮濕，四周的空氣瀰漫著令人不適的氣息。</p>
+      <p class="story-text" id="lost-p2">已然記不清究竟是何時昏了過去，意識回籠之際，只覺頭痛欲裂。映入眼簾的是一片破敗景象，能大致判斷這裡是一座廢棄的醫院。</p>
+      <div style="text-align: center;">
+        <button id="lost-next-btn" class="btn hidden-element" style="margin-top: 20px;">Next</button>
+      </div>
+    </div>
+
+    <div id="scene-experiment" style="display: none;">
+      <h2 class="scene-title" id="exp-title" style="color: #bd1f1f; margin-bottom: 20px;">【實驗】</h2>
+      <p class="story-text" id="exp-p1" style="color: #bd1f1f; text-align: left;">闖入手術室的壞孩子，終將成為「奇蹟」誕生的養料……。</p>
+      <div style="text-align: center;">
+        <button id="exp-retry-btn" class="btn hidden-element" style="margin-top: 20px;">Retry</button>
+      </div>
+    </div>
+
+    <div id="scene-monster" style="display: none;">
+      <h2 class="scene-title" id="monster-title" style="color: #bd1f1f; margin-bottom: 20px;">【怪物】</h2>
+      <p class="story-text" id="monster-p1" style="color: #bd1f1f; text-align: left;">伴隨哼唱歌謠的聲音，意識逐漸變得模糊，冰冷的器械探入口腔，一陣劇痛淹沒了呼吸……。</p>
+      <div style="text-align: center;">
+        <button id="monster-retry-btn" class="btn hidden-element" style="margin-top: 20px;">Retry</button>
+      </div>
+    </div>
+
+    <div id="scene-final-q" style="display: none; text-align: center;">
+      <p class="story-text" id="final-q-text" style="font-size: 1.5rem; text-align: center; margin-bottom: 40px;"></p>
+      <div id="final-q-options" class="options-container hidden-element"></div>
+    </div>
+
+    <div id="scene-final-ending" style="display: none; text-align: center;">
+      <h2 class="scene-title" id="ending-title" style="margin-bottom: 20px;"></h2>
+      <p class="story-text" id="ending-text" style="text-align: left; margin-bottom: 40px;"></p>
+      <button id="ending-retry-btn" class="btn hidden-element" style="margin-top: 20px;">Retry</button>
+    </div>
+
+  </div>
+
+  <div class="ui-container">
+    <div id="fear-container">
+      <svg id="fear-heart" class="heart-svg" viewBox="0 0 24 24">
+        <path id="heart-path" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        <g class="crack-lines">
+          <path class="crack-line" d="M12 5.5 L11 8.5 L13.5 11.5 L10.5 14.5 L13 17.5 L12 20.5" />
+        </g>
+      </svg>
+    </div>
+    <div class="ui-btn-group">
+      <button id="notebook-btn" class="btn ui-btn" style="display: none;">手札</button>
+      <button id="inventory-btn" class="btn ui-btn" style="display: none;">隨身物品</button>
+    </div>
+  </div>
+
+  <div id="notebook-modal">
+    <div class="modal-content">
+      <span class="close-modal" id="close-notebook">&times;</span>
+      
+      <div id="notebook-hospital-content">
+        <h2 style="font-size: 1.5rem; text-align: center; letter-spacing: 2px; margin-bottom: 30px;">【聖心醫院公告】</h2>
+        <ul class="bullet-list">
+          <li class="bullet-item" style="opacity: 1; transform: none;">• 手術室嚴格禁止進入，若有人問你看見了什麼，回答「什麼都沒看見」。</li>
+          <li class="bullet-item snake-resonance-target" style="opacity: 1; transform: none;">• 住院部是安全的，診療室是危險的。</li>
+          <li class="bullet-item snake-resonance-target" style="opacity: 1; transform: none;">• 糖果是屬於「好孩子」的，只有「好孩子」能夠取走。</li>
+          <li class="bullet-item" style="opacity: 1; transform: none;">• 「壞孩子」的牙齒會被「怪物」拔掉。</li>
+          <li class="bullet-item snake-resonance-target" style="opacity: 1; transform: none;">• 「蛇」是危險的，請務必迴避。</li>
+          <li class="bullet-item snake-resonance-target" style="opacity: 1; transform: none;">• 如果聽見「羊群」的聲音，那是正常的，請不要迴避。</li>
+          <li class="bullet-item snake-resonance-target" style="opacity: 1; transform: none;">• 「羊群」的腳印通向「安全」的地方。</li>
+          <li class="bullet-item snake-resonance-target" style="opacity: 1; transform: none;">• 本院不存在名為「芬森·亨特」的醫生，如果遇見自稱「亨特醫生」的人，請立刻離開現場。</li>
+        </ul>
+      </div>
+
+      <div id="notebook-clinic-content" style="display: none;">
+        <h2 class="clinic-resonance-target" style="font-size: 1.5rem; text-align: center; letter-spacing: 2px; margin-bottom: 30px;">【診療室公告】</h2>
+        <ul class="bullet-list">
+          <li class="bullet-item clinic-resonance-target" style="opacity: 1; transform: none;">• 請不要逃離紫外光，它能消除一切恐懼。</li>
+          <li class="bullet-item clinic-resonance-target" style="opacity: 1; transform: none;">• 請不要害怕「蛇」，它不會傷害你。</li>
+          <li class="bullet-item clinic-resonance-target" style="opacity: 1; transform: none;">• 請不要細聽騷動聲的內容，並立刻向「醫生」求助。</li>
+          <li class="bullet-item clinic-resonance-target" style="opacity: 1; transform: none;">• 請不要吃太多糖果，那不是好孩子該做的。</li>
+          <li class="bullet-item clinic-resonance-target" style="opacity: 1; transform: none;">• 請不要擔心，「醫生」會保護好孩子。</li>
+          <li class="bullet-item clinic-resonance-target" style="opacity: 1; transform: none;">• 請不要迴避哼唱歌曲的聲音，那是安全的訊號。</li>
+          <li class="bullet-item clinic-resonance-target" style="opacity: 1; transform: none;">• 請不要逃離菌絲，靜待消失即可。</li>
+        </ul>
+      </div>
+
+      <div id="notebook-ward-content" style="display: none;">
+        <h2 class="ward-resonance-target" style="font-size: 1.5rem; text-align: center; letter-spacing: 2px; margin-bottom: 30px;">【住院部須知】</h2>
+        <ul class="bullet-list">
+          <li class="bullet-item ward-resonance-target" style="opacity: 1; transform: none;">• 相信「羊群」，審判「怪物」。</li>
+          <li class="bullet-item ward-resonance-target" style="opacity: 1; transform: none;">• 「蛇」不應該出現在住院部，如果看見「蛇」的痕跡，應儘速清除。</li>
+          <li class="bullet-item ward-resonance-target" style="opacity: 1; transform: none;">• 請不要走入紫外光裡。</li>
+          <li class="bullet-item ward-resonance-target" style="opacity: 1; transform: none;">• 如果看見菌絲，請立刻清除。</li>
+          <li class="bullet-item ward-resonance-target" style="opacity: 1; transform: none;">• 如果聽見哼唱歌曲的聲音，捂上耳朵。</li>
+          <li class="bullet-item ward-resonance-target" style="opacity: 1; transform: none;">• 感到害怕是正常的，「羊群」會保護你。</li>
+        </ul>
+      </div>
+
+      <div id="notebook-tabs">
+        <button id="tab-hospital" class="btn" style="margin-top:0; padding: 5px 15px; background-color: #d3d3d3; color: #070707;">醫院公告</button>
+        <button id="tab-clinic" class="btn" style="margin-top:0; padding: 5px 15px; display: none;">診療室公告</button>
+        <button id="tab-ward" class="btn" style="margin-top:0; padding: 5px 15px; display: none;">住院部須知</button>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="inventory-modal">
+    <div class="modal-content" style="text-align: center; max-width: 500px;">
+      <span class="close-modal" id="close-inventory">&times;</span>
+      <h2 style="font-size: 1.5rem; letter-spacing: 2px; margin-bottom: 30px;">【隨身物品】</h2>
+      <div id="inventory-list">
+      </div>
+    </div>
+  </div>
+
+  <div id="confirm-modal">
+    <div class="modal-content" style="text-align: left; max-width: 400px; padding: 30px;">
+      <p style="font-size: 1.2rem; line-height: 2; letter-spacing: 1.5px; margin-bottom: 20px; color: #d3d3d3; text-align: center;" id="confirm-text">
+        散發香甜氣息的糖果，是否吃下？
+      </p>
+      <div class="options-container">
+        <button id="confirm-yes" class="btn" style="margin-top: 0;">是</button>
+        <button id="confirm-no" class="btn" style="margin-top: 0;">否</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="item-detail-modal">
+    <div class="modal-content" style="text-align: left; max-width: 400px; padding: 30px;">
+      <span class="close-modal" id="close-item-detail">&times;</span>
+      <p style="font-size: 1.2rem; line-height: 2; letter-spacing: 1.5px; text-align: left; margin-top: 20px; color: #d3d3d3;">一枚折射出璀璨光彩的凸透鏡，擁有它，似乎能和某個存在產生共鳴？</p>
+    </div>
+  </div>
+
+  <div id="message-modal">
+    <div class="modal-content" style="text-align: center; max-width: 400px; padding: 30px;">
+      <span class="close-modal" id="close-message-btn">&times;</span>
+      <p id="message-text" style="font-size: 1.2rem; line-height: 2; letter-spacing: 1.5px; text-align: center; margin-top: 20px; color: #d3d3d3; opacity: 1; transform: none; transition: none;"></p>
+    </div>
+  </div>
+
+  <script>
+    let fearValue = 0; 
+    let sheepIndex = 0;
+    let snakeIndex = 0;
+    
+    let hasCandy = false;
+    let ateCandy = false;
+    let hasLens = false; 
+    let recordsNotebook = false; 
+
+    // 計數器
+    let count_1_5 = 0;
+    let count_1_7_2 = 0;
+    let count_2_1 = 0;
+    let count_2_1_1 = 0;
+    let count_2_1_2 = 0;
+    let candyInteractionCount = 0;
+
+    let uvTriggered = false;
+    let idleTimer = null;
+    let idleInterval = null;
+    let uvInterval = null;
+    let idleTimeLeft = 40;
+    let activeModals = []; 
+
+    let currentZone = 'lobby'; 
+    let hasPassedWard = false; 
+    let hasPassedClinic = false;
+    let clinicRandomEvents = []; 
+    let wardRandomEvents = [];
+
+    let q1Answer = '';
+    let q2Answer = '';
+    let q3Answer = '';
+
+    const startBtn = document.getElementById('start-btn');
+    const introScreen = document.getElementById('intro-screen');
+    const gameScreen = document.getElementById('game-screen');
+    
+    const scene1 = document.getElementById('scene-1');
+    const scene2 = document.getElementById('scene-2');
+    const scene3 = document.getElementById('scene-3');
+    const sceneFeedback = document.getElementById('scene-feedback');
+    const scene4 = document.getElementById('scene-4');
+    const sceneLost = document.getElementById('scene-lost');
+    const sceneExperiment = document.getElementById('scene-experiment');
+    const sceneMonster = document.getElementById('scene-monster');
+
+    const p1 = document.getElementById('s1-p1');
+    const p2 = document.getElementById('s1-p2');
+    const p3 = document.getElementById('s1-p3');
+    const actionBtn1 = document.getElementById('action-btn-1');
+    const actionBtn2 = document.getElementById('action-btn-2');
+
+    const btnYes = document.getElementById('btn-yes');
+    const btnNo = document.getElementById('btn-no');
+    const feedbackText = document.getElementById('feedback-text');
+    const nextBtn3 = document.getElementById('next-btn-3');
+
+    const fearContainer = document.getElementById('fear-container');
+    const fearHeart = document.getElementById('fear-heart');
+    const heartPath = document.getElementById('heart-path');
+    
+    const notebookBtn = document.getElementById('notebook-btn');
+    const notebookModal = document.getElementById('notebook-modal');
+    const closeNotebook = document.getElementById('close-notebook');
+
+    const tabHospital = document.getElementById('tab-hospital');
+    const tabClinic = document.getElementById('tab-clinic');
+    const tabWard = document.getElementById('tab-ward');
+    const nbHospitalContent = document.getElementById('notebook-hospital-content');
+    const nbClinicContent = document.getElementById('notebook-clinic-content');
+    const nbWardContent = document.getElementById('notebook-ward-content');
+
+    const inventoryBtn = document.getElementById('inventory-btn');
+    const inventoryModal = document.getElementById('inventory-modal');
+    const closeInventory = document.getElementById('close-inventory');
+    const inventoryList = document.getElementById('inventory-list');
+
+    const confirmModal = document.getElementById('confirm-modal');
+    const confirmYes = document.getElementById('confirm-yes');
+    const confirmNo = document.getElementById('confirm-no');
+
+    const itemDetailModal = document.getElementById('item-detail-modal');
+    const closeItemDetail = document.getElementById('close-item-detail');
+
+    const messageModal = document.getElementById('message-modal');
+    const messageText = document.getElementById('message-text');
+    const closeMessageBtn = document.getElementById('close-message-btn');
+
+    const blackOverlay = document.getElementById('black-overlay');
+
+    const s4Text = document.getElementById('s4-text');
+    const s4Options = document.getElementById('s4-options');
+    const s4Feedback = document.getElementById('s4-feedback');
+    const nextBtn4 = document.getElementById('next-btn-4');
+
+    const swText = document.getElementById('sw-text');
+    const swOptions = document.getElementById('sw-options');
+    const swFeedback = document.getElementById('sw-feedback');
+    const nextBtnW = document.getElementById('next-btn-w');
+
+    let scene1State = 'playing'; 
+    let s1Timeouts = []; 
+    let scene2State = 'playing';
+    let s2Timeouts = [];
+    
+    let clinicIntroTimeouts = [];
+    let clinicRulesState = 'playing';
+    let clinicRulesTimeouts = [];
+
+    let wardIntroTimeouts = [];
+    let wardRulesState = 'playing';
+    let wardRulesTimeouts = [];
+    let wardIntroPlayed = false;
+
+    function isBadChild() {
+        return hasCandy || ateCandy || candyInteractionCount > 0;
+    }
+
+    function updateResonanceUI() {
+      let diff = Math.abs(sheepIndex - snakeIndex);
+      let isSheepResonance = (sheepIndex > snakeIndex && diff > 15);
+      let isSnakeResonance = (snakeIndex > sheepIndex && diff > 15);
+
+      const snakeTargets = document.querySelectorAll('.snake-resonance-target, .ward-resonance-target');
+      snakeTargets.forEach(el => {
+        el.style.color = isSnakeResonance ? '#bd1f1f' : '';
+      });
+
+      const clinicTargets = document.querySelectorAll('.clinic-resonance-target');
+      clinicTargets.forEach(el => {
+        el.style.color = isSheepResonance ? '#bd1f1f' : '';
+      });
+    }
+
+    function switchNotebookTab(activeTab, activeContent) {
+        [tabHospital, tabClinic, tabWard].forEach(t => {
+            t.style.backgroundColor = 'transparent';
+            t.style.color = '#a9a9a9';
+        });
+        activeTab.style.backgroundColor = '#d3d3d3';
+        activeTab.style.color = '#070707';
+
+        [nbHospitalContent, nbClinicContent, nbWardContent].forEach(c => {
+            c.style.display = 'none';
+        });
+        activeContent.style.display = 'block';
+    }
+
+    tabHospital.addEventListener('click', () => switchNotebookTab(tabHospital, nbHospitalContent));
+    tabClinic.addEventListener('click', () => switchNotebookTab(tabClinic, nbClinicContent));
+    tabWard.addEventListener('click', () => switchNotebookTab(tabWard, nbWardContent));
+
+    function showMessageModal(text) {
+      messageText.textContent = text;
+      messageModal.style.display = 'flex';
+    }
+
+    closeMessageBtn.addEventListener('click', () => {
+      messageModal.style.display = 'none';
+    });
+
+    function transitionToZone(zoneName) {
+      if (zoneName === 'clinic') {
+        currentZone = 'clinic';
+        initClinicEvents();
+        enterClinicScene();
+      } else if (zoneName === 'ward') {
+        if (currentZone === 'clinic') {
+          hasPassedClinic = true;
+        }
+        currentZone = 'ward';
+        hasPassedWard = true;
+        initWardEvents();
+        enterWardScene();
+      }
+    }
+
+    function stopIdleTimer() {
+        if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
+        if (idleInterval) { clearInterval(idleInterval); idleInterval = null; }
+        if (uvInterval) { clearInterval(uvInterval); uvInterval = null; }
+    }
+
+    function triggerBlackScreenTransition(callback) {
+      stopIdleTimer();
+      const overlayText = document.getElementById('overlay-text');
+      overlayText.textContent = ''; 
+      blackOverlay.style.display = 'block';
+      void blackOverlay.offsetWidth; 
+      blackOverlay.style.opacity = '1';
+      overlayText.style.opacity = '0';
+
+      setTimeout(() => {
+        if (callback) callback();
+        blackOverlay.style.opacity = '0';
+        setTimeout(() => {
+          blackOverlay.style.display = 'none';
+        }, 500);
+      }, 2000);
+    }
+
+    function trigger1_5sBlackScreen(callback) {
+        stopIdleTimer();
+        const overlayText = document.getElementById('overlay-text');
+        overlayText.textContent = '';
+        blackOverlay.style.display = 'block';
+        void blackOverlay.offsetWidth;
+        blackOverlay.style.opacity = '1';
+        
+        setTimeout(() => {
+            setTimeout(() => {
+                if (callback) callback();
+                blackOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    blackOverlay.style.display = 'none';
+                }, 500);
+            }, 1500);
+        }, 500); 
+    }
+
+    function triggerUVBlackScreen(resumeCallback) {
+        stopIdleTimer();
+        const overlayText = document.getElementById('overlay-text');
+        overlayText.textContent = '';
+        blackOverlay.style.display = 'block';
+        void blackOverlay.offsetWidth;
+        blackOverlay.style.opacity = '1';
+        overlayText.style.opacity = '0';
+
+        setTimeout(() => {
+            showUVOverlay(resumeCallback);
+            blackOverlay.style.opacity = '0';
+            setTimeout(() => {
+                blackOverlay.style.display = 'none';
+            }, 500);
+        }, 1500);
+    }
+
+    function showUVOverlay(resumeCallback) {
+      stopIdleTimer();
+      
+      let savedModals = activeModals.slice();
+      activeModals.forEach(m => m.style.display = 'none');
+      
+      const uvOverlay = document.getElementById('scene-uv-overlay');
+      const uvText = document.getElementById('uv-text');
+      const uvOptions = document.getElementById('uv-options');
+      const uvFeedback = document.getElementById('uv-feedback');
+      const uvNextBtn = document.getElementById('uv-next-btn');
+
+      uvOverlay.style.display = 'flex';
+      uvOverlay.style.opacity = '1'; 
+
+      uvText.style.display = 'block';
+      uvText.innerHTML = "強烈的恐懼湧上，使身體不自覺戰慄……此時，前方亮起了一道溫暖的「光」。";
+      uvText.className = 'story-text';
+      void uvText.offsetWidth; 
+      uvText.classList.add('visible');
+
+      uvOptions.innerHTML = '';
+      uvOptions.style.display = 'flex';
+      uvOptions.className = 'options-container hidden-element';
+      void uvOptions.offsetWidth;
+      uvOptions.classList.add('visible');
+      
+      uvFeedback.style.display = 'none';
+      uvNextBtn.style.display = 'none';
+
+      let uvTimeLeft = 40;
+      document.getElementById('debug-timer-val').textContent = uvTimeLeft;
+      
+      uvInterval = setInterval(() => {
+        uvTimeLeft--;
+        document.getElementById('debug-timer-val').textContent = uvTimeLeft;
+        if (uvTimeLeft <= 0) {
+          clearInterval(uvInterval);
+          uvInterval = null;
+          handleUVChoice("stay", resumeCallback, savedModals);
+        }
+      }, 1000);
+
+      const opt1 = document.createElement('button');
+      opt1.className = 'btn'; opt1.style.marginTop = '0'; opt1.textContent = "跟上光芒";
+      opt1.onclick = () => handleUVChoice("follow", resumeCallback, savedModals);
+
+      const opt2 = document.createElement('button');
+      opt2.className = 'btn'; opt2.style.marginTop = '0'; opt2.textContent = "停留原地";
+      opt2.onclick = () => handleUVChoice("stay", resumeCallback, savedModals);
+
+      const opt3 = document.createElement('button');
+      opt3.className = 'btn'; opt3.style.marginTop = '0'; opt3.textContent = "轉身逃離";
+      opt3.onclick = () => handleUVChoice("flee", resumeCallback, savedModals);
+
+      uvOptions.append(opt1, opt2, opt3);
+    }
+
+    function handleUVChoice(choice, resumeCallback, savedModals) {
+      if (uvInterval) { clearInterval(uvInterval); uvInterval = null; }
+      
+      const uvText = document.getElementById('uv-text');
+      const uvOptions = document.getElementById('uv-options');
+      const uvFeedback = document.getElementById('uv-feedback');
+      const uvNextBtn = document.getElementById('uv-next-btn');
+
+      uvOptions.style.display = 'none';
+      uvText.style.display = 'none';
+
+      let fbText = "";
+      if (choice === "follow") {
+        fearValue = 0; snakeIndex += 15;
+        fbText = "在治癒之光的照耀下，彷彿再也沒有什麼能夠讓人害怕了……。";
+      } else if (choice === "stay") {
+        fbText = "猶豫之際，那道光已然消失，只留下無盡的黑暗。";
+      } else if (choice === "flee") {
+        fearValue -= 15;
+        sheepIndex += 15;
+        fbText = "一道急切的聲音響起：「不要走入那道光，快快遠離那道光……。」";
+      }
+      updateFearUI();
+
+      uvFeedback.innerHTML = fbText;
+      uvFeedback.style.display = 'block';
+      uvFeedback.className = 'story-text instant-visible';
+      uvNextBtn.style.display = 'none';
+
+      let finalize = () => {
+        trigger1_5sBlackScreen(() => {
+            const uvOverlay = document.getElementById('scene-uv-overlay');
+            uvOverlay.style.opacity = '0';
+            uvOverlay.style.display = 'none';
+            savedModals.forEach(m => m.style.display = 'flex');
+            activeModals = savedModals;
+            resumeCallback();
+        });
+      };
+
+      if (choice === "stay") {
+        setTimeout(() => {
+            if (fearValue >= 60) {
+                const uvOverlay = document.getElementById('scene-uv-overlay');
+                uvOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    uvOverlay.style.display = 'none';
+                    handleLostEndingTransition();
+                }, 500);
+            } else {
+                finalize();
+            }
+        }, 3000);
+      } else {
+        setTimeout(finalize, 3000);
+      }
+    }
+
+    function triggerIdle() {
+      stopIdleTimer();
+
+      activeModals = [];
+      if (notebookModal.style.display === 'flex') activeModals.push(notebookModal);
+      if (inventoryModal.style.display === 'flex') activeModals.push(inventoryModal);
+      if (confirmModal.style.display === 'flex') activeModals.push(confirmModal);
+      if (itemDetailModal.style.display === 'flex') activeModals.push(itemDetailModal);
+      if (messageModal.style.display === 'flex') activeModals.push(messageModal);
+
+      activeModals.forEach(m => m.style.display = 'none');
+      
+      let txtEl, optEl, fbEl, btnEl, container;
+      if (currentZone === 'lobby') {
+        txtEl = s4Text; optEl = s4Options; fbEl = s4Feedback; btnEl = nextBtn4;
+        container = scene4;
+      } else if (currentZone === 'clinic') {
+        txtEl = document.getElementById('sc-text'); optEl = document.getElementById('sc-options');
+        fbEl = document.getElementById('sc-feedback'); btnEl = document.getElementById('next-btn-c');
+        container = document.getElementById('scene-clinic-game');
+      } else if (currentZone === 'ward') {
+        txtEl = document.getElementById('sw-text'); optEl = document.getElementById('sw-options');
+        fbEl = document.getElementById('sw-feedback'); btnEl = document.getElementById('next-btn-w');
+        container = document.getElementById('scene-ward-game');
+      }
+
+      let wasFeedbackVisible = (fbEl.style.display === 'block');
+
+      txtEl.style.display = 'none';
+      optEl.style.display = 'none';
+      fbEl.style.display = 'none';
+      btnEl.style.display = 'none';
+
+      fearValue += 30;
+      updateFearUI();
+
+      let timeoutMsg = document.createElement('p');
+      timeoutMsg.className = 'story-text instant-visible';
+      timeoutMsg.innerHTML = '沉默裡，令人窒息的恐懼襲來……。';
+      timeoutMsg.style.textAlign = 'left';
+      container.insertBefore(timeoutMsg, btnEl); 
+
+      setTimeout(() => {
+        timeoutMsg.remove(); 
+        
+        let resumeIdle = () => {
+          if (fearValue >= 60) {
+            handleLostEndingTransition();
+          } else {
+            if (wasFeedbackVisible) {
+              fbEl.style.display = 'block';
+              if (btnEl) btnEl.style.display = 'inline-block';
+            } else {
+              txtEl.style.display = 'block';
+              optEl.style.display = 'flex';
+            }
+            activeModals.forEach(m => m.style.display = 'flex');
+            activeModals = [];
+            startIdleTimer(); 
+          }
+        };
+
+        if (fearValue >= 50 && !uvTriggered) {
+            uvTriggered = true;
+            triggerUVBlackScreen(resumeIdle);
+        } else {
+            resumeIdle();
+        }
+      }, 3000);
+    }
+
+    function startIdleTimer() {
+      stopIdleTimer();
+      idleTimeLeft = 40;
+      document.getElementById('debug-timer-val').textContent = idleTimeLeft;
+      
+      idleInterval = setInterval(() => {
+          idleTimeLeft--;
+          document.getElementById('debug-timer-val').textContent = idleTimeLeft;
+          if (idleTimeLeft <= 0) {
+              clearInterval(idleInterval);
+          }
+      }, 1000);
+      
+      idleTimer = setTimeout(() => {
+        triggerIdle();
+      }, 40000);
+    }
+
+    function hideAllScenes() {
+        scene1.style.display = 'none';
+        scene2.style.display = 'none';
+        scene3.style.display = 'none';
+        sceneFeedback.style.display = 'none';
+        scene4.style.display = 'none';
+        document.getElementById('scene-clinic-intro').style.display = 'none';
+        document.getElementById('scene-clinic-rules').style.display = 'none';
+        document.getElementById('scene-clinic-feedback').style.display = 'none';
+        document.getElementById('scene-clinic-game').style.display = 'none';
+        document.getElementById('scene-ward-intro').style.display = 'none';
+        document.getElementById('scene-ward-rules').style.display = 'none';
+        document.getElementById('scene-ward-feedback').style.display = 'none';
+        document.getElementById('scene-ward-game').style.display = 'none';
+        sceneExperiment.style.display = 'none';
+        sceneMonster.style.display = 'none';
+        sceneLost.style.display = 'none';
+        document.getElementById('scene-final-q').style.display = 'none';
+        document.getElementById('scene-final-ending').style.display = 'none';
+        document.querySelector('.ui-container').style.display = 'none';
+    }
+
+    function handleLostEndingTransition() {
+      stopIdleTimer();
+      
+      const overlayText = document.getElementById('overlay-text');
+      overlayText.textContent = ''; 
+      overlayText.style.opacity = '0';
+      
+      blackOverlay.style.display = 'block';
+      void blackOverlay.offsetWidth; 
+      blackOverlay.style.opacity = '1';
+
+      setTimeout(() => {
+        overlayText.textContent = '……';
+        overlayText.style.opacity = '1';
+        
+        setTimeout(() => {
+           hideAllScenes();
+           document.querySelector('.ui-container').style.display = 'none';
+           
+           // 迷失結局：重置恐懼值、羊群指數、蛇指數 (其餘如手札、隨身物品、特定題目觸發次數不重置)
+           fearValue = 0;
+           sheepIndex = 0;
+           snakeIndex = 0;
+           updateFearUI();
+           uvTriggered = false;
+           
+           hasPassedWard = false;
+           hasPassedClinic = false;
+           wardIntroPlayed = false;
+
+           played1_1 = false;
+           randomEvents = ["1-2", "1-3", "1-4", "1-6", "1-7"];
+           shuffleArray(randomEvents);
+           nextFixed = "1-8";
+           currentZone = 'lobby';
+
+           const sceneLost = document.getElementById('scene-lost');
+           const lp1 = document.getElementById('lost-p1');
+           const lp2 = document.getElementById('lost-p2');
+           const lostNextBtn = document.getElementById('lost-next-btn');
+
+           lp1.classList.remove('visible', 'instant-visible');
+           lp2.classList.remove('visible', 'instant-visible');
+           lostNextBtn.classList.remove('visible', 'instant-visible');
+
+           sceneLost.style.display = 'block';
+
+           blackOverlay.style.opacity = '0';
+           overlayText.style.opacity = '0';
+           
+           setTimeout(() => {
+             blackOverlay.style.display = 'none';
+             overlayText.textContent = ''; 
+             setTimeout(() => { lp1.classList.add('visible'); }, 50);
+             setTimeout(() => { lp2.classList.add('visible'); }, 2000);
+             setTimeout(() => { lostNextBtn.classList.add('visible'); }, 4000);
+           }, 500);
+        }, 2200); 
+      }, 800); 
+    }
+    
+    function triggerFinalQuestioningTransition() {
+        stopIdleTimer();
+        const overlayText = document.getElementById('overlay-text');
+        overlayText.textContent = '';
+        
+        blackOverlay.style.display = 'block';
+        void blackOverlay.offsetWidth;
+        blackOverlay.style.opacity = '1';
+        
+        setTimeout(() => {
+            hideAllScenes();
+            document.querySelector('.ui-container').style.display = 'none';
+            
+            setTimeout(() => {
+                blackOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    blackOverlay.style.display = 'none';
+                    startFinalQuestioning();
+                }, 500);
+            }, 1500); 
+        }, 500);
+    }
+
+    function triggerEndingTransition() {
+        stopIdleTimer();
+        const overlayText = document.getElementById('overlay-text');
+        overlayText.textContent = '';
+        
+        blackOverlay.style.display = 'block';
+        void blackOverlay.offsetWidth;
+        blackOverlay.style.opacity = '1';
+        
+        setTimeout(() => {
+            document.getElementById('scene-final-q').style.display = 'none';
+            
+            setTimeout(() => {
+                blackOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    blackOverlay.style.display = 'none';
+                }, 500);
+                calculateEnding();
+            }, 1500); 
+        }, 500); 
+    }
+
+    function startFinalQuestioning() {
+        document.getElementById('scene-final-q').style.display = 'block';
+        q1Answer = ''; q2Answer = ''; q3Answer = '';
+        
+        const qText = document.getElementById('final-q-text');
+        const qOpts = document.getElementById('final-q-options');
+        qText.classList.remove('visible', 'instant-visible');
+        qOpts.classList.remove('visible', 'instant-visible');
+        
+        showQuestionInner(1);
+    }
+
+    function showQuestionInner(qNum) {
+        const qText = document.getElementById('final-q-text');
+        const qOpts = document.getElementById('final-q-options');
+        
+        qOpts.innerHTML = '';
+        let diff = Math.abs(sheepIndex - snakeIndex);
+        let hideSnakeOption = (sheepIndex > snakeIndex && diff > 15);
+        let hideSheepOption = (snakeIndex > sheepIndex && diff > 15);
+        
+        if (qNum === 1) {
+            qText.innerHTML = '你選擇相信？';
+            if (!hideSheepOption) qOpts.appendChild(createQBtn('「羊群」', 1));
+            if (!hideSnakeOption) qOpts.appendChild(createQBtn('「蛇」', 1));
+        } else if (qNum === 2) {
+            qText.innerHTML = '誰是真正的「罪人」？';
+            qOpts.appendChild(createQBtn('「羊群」', 2));
+            qOpts.appendChild(createQBtn('「蛇」', 2));
+        } else if (qNum === 3) {
+            qText.innerHTML = '「芬森·亨特」是？';
+            if (!hideSheepOption) qOpts.appendChild(createQBtn('怪物', 3));
+            qOpts.appendChild(createQBtn('「蛇」', 3));
+            if (!hideSnakeOption) qOpts.appendChild(createQBtn('醫者', 3));
+        }
+        
+        qOpts.style.display = 'flex';
+        void qText.offsetWidth;
+        qText.classList.add('visible');
+        qOpts.classList.add('visible');
+    }
+
+    function createQBtn(text, qNum) {
+        let btn = document.createElement('button');
+        btn.className = 'btn';
+        btn.textContent = text;
+        btn.style.marginTop = '0';
+        btn.onclick = () => {
+            if (qNum === 1) q1Answer = text;
+            if (qNum === 2) q2Answer = text;
+            if (qNum === 3) q3Answer = text;
+            
+            const qText = document.getElementById('final-q-text');
+            const qOpts = document.getElementById('final-q-options');
+            qText.classList.remove('visible');
+            qOpts.classList.remove('visible');
+            
+            setTimeout(() => {
+                if (qNum < 3) {
+                    showQuestionInner(qNum + 1);
+                } else {
+                    triggerEndingTransition();
+                }
+            }, 1000); 
+        };
+        return btn;
+    }
+
+    function calculateEnding() {
+        document.getElementById('scene-final-ending').style.display = 'block';
+        
+        let title = '';
+        let text = '';
+
+        if (q1Answer === '「羊群」' && q2Answer === '「蛇」' && q3Answer === '怪物') {
+            title = '【罪孽】';
+            text = '踩著羊群的腳印站在岸邊，被沉入沼澤的，究竟是罪人，又或者蒙冤的替罪者……？';
+        } else if (q1Answer === '「羊群」' && q2Answer === '「蛇」' && q3Answer === '「蛇」') {
+            title = '【沉沼】';
+            text = '呼吸瞬間凝滯，彷彿置身泥潭。視線沒入黑暗之際，「羊群」仍咆哮著對「怪物」的審判……。';
+        } else if (q1Answer === '「羊群」' && q2Answer === '「羊群」' && (q3Answer === '怪物' || q3Answer === '「蛇」')) {
+            title = '【群羊】';
+            text = '當面目被扭曲，喉間發出群眾的嘶吼，事實似乎也不再重要。';
+        } else if (q1Answer === '「蛇」' && q2Answer === '「蛇」' && (q3Answer === '怪物' || q3Answer === '「蛇」')) {
+            title = '【蛇毒】';
+            text = '菌絲黏膩濕滑的觸感攀上，是誰的凝視正靠近？ ';
+        } else if (q1Answer === '「蛇」' && q2Answer === '「蛇」' && q3Answer === '醫者') {
+            title = '【深淵】';
+            text = '觸手從沼底升起，將迷失的孩子沉入永夜。冰冷之中，有一道聲音正輕柔地哼著歌謠……。 ';
+        } else if ((q1Answer === '「蛇」' && q2Answer === '「羊群」' && q3Answer === '「蛇」') || 
+                   (q1Answer === '「蛇」' && q2Answer === '「羊群」' && q3Answer === '醫者' && !hasLens)) {
+            title = '【向光】';
+            text = '在紫外光的照耀下，一切恐懼都得到了「治癒」……。';
+        } else if (q1Answer === '「蛇」' && q2Answer === '「羊群」' && q3Answer === '醫者' && hasLens) {
+            title = '【救贖】';
+            text = '透鏡折射出溫暖的光芒，當「存在」的希望再一次眷顧，從沼澤裡現身的，會是曾經的他嗎……？';
+        } else {
+            title = '【未知的結局】';
+            text = '你的選擇引導向了一個未知的深淵……。';
+        }
+
+        const titleEl = document.getElementById('ending-title');
+        const textEl = document.getElementById('ending-text');
+        const btnEl = document.getElementById('ending-retry-btn');
+
+        titleEl.textContent = title;
+        textEl.textContent = text;
+        
+        if (title === '【群羊】' || title === '【蛇毒】') {
+            titleEl.style.color = '#bd1f1f';
+            textEl.style.color = '#bd1f1f';
+        } else {
+            titleEl.style.color = '';
+            textEl.style.color = '';
+        }
+
+        titleEl.classList.remove('visible', 'instant-visible');
+        textEl.classList.remove('visible', 'instant-visible');
+        btnEl.classList.remove('visible', 'instant-visible');
+
+        setTimeout(() => { textEl.classList.add('visible'); }, 50);
+        setTimeout(() => { titleEl.classList.add('visible'); }, 2550);
+        setTimeout(() => { btnEl.classList.add('visible'); }, 4000);
+        
+        btnEl.onclick = () => {
+            resetGameState();
+            document.getElementById('scene-final-ending').style.display = 'none';
+            gameScreen.style.display = 'none';
+            introScreen.style.display = 'block'; 
+            fearContainer.style.display = 'none'; 
+        };
+    }
+
+    function handleExperimentEndingTransition() {
+      const overlayText = document.getElementById('overlay-text');
+      overlayText.textContent = '';
+      
+      blackOverlay.style.display = 'block';
+      void blackOverlay.offsetWidth; 
+      blackOverlay.style.opacity = '1';
+      overlayText.style.opacity = '1';
+
+      setTimeout(() => {
+        hideAllScenes();
+        document.getElementById('exp-title').classList.remove('visible', 'instant-visible');
+        document.getElementById('exp-p1').classList.remove('visible', 'instant-visible');
+        document.getElementById('exp-retry-btn').classList.remove('visible', 'instant-visible');
+
+        sceneExperiment.style.display = 'block';
+
+        blackOverlay.style.opacity = '0';
+        overlayText.style.opacity = '0';
+        
+        setTimeout(() => {
+          blackOverlay.style.display = 'none';
+          overlayText.textContent = ''; 
+          setTimeout(() => { document.getElementById('exp-p1').classList.add('visible'); }, 50);
+          setTimeout(() => { document.getElementById('exp-title').classList.add('visible'); }, 2550);
+          setTimeout(() => { document.getElementById('exp-retry-btn').classList.add('visible'); }, 4000);
+        }, 500);
+      }, 1500); 
+    }
+
+    function handleMonsterEndingTransition() {
+      const overlayText = document.getElementById('overlay-text');
+      overlayText.textContent = '';
+      
+      blackOverlay.style.display = 'block';
+      void blackOverlay.offsetWidth; 
+      blackOverlay.style.opacity = '1';
+      overlayText.style.opacity = '1';
+
+      setTimeout(() => {
+        hideAllScenes();
+        document.getElementById('monster-title').classList.remove('visible', 'instant-visible');
+        document.getElementById('monster-p1').classList.remove('visible', 'instant-visible');
+        document.getElementById('monster-retry-btn').classList.remove('visible', 'instant-visible');
+
+        sceneMonster.style.display = 'block';
+
+        blackOverlay.style.opacity = '0';
+        overlayText.style.opacity = '0';
+        
+        setTimeout(() => {
+          blackOverlay.style.display = 'none';
+          overlayText.textContent = ''; 
+          setTimeout(() => { document.getElementById('monster-p1').classList.add('visible'); }, 50);
+          setTimeout(() => { document.getElementById('monster-title').classList.add('visible'); }, 2550);
+          setTimeout(() => { document.getElementById('monster-retry-btn').classList.add('visible'); }, 4000);
+        }, 500);
+      }, 1500); 
+    }
+
+    function resetGameState() {
+        fearValue = 0;
+        sheepIndex = 0;
+        snakeIndex = 0;
+        hasCandy = false;
+        ateCandy = false;
+        hasLens = false;
+        uvTriggered = false;
+        played1_1 = false;
+        recordsNotebook = false; 
+        currentZone = 'lobby';
+        hasPassedWard = false;
+        hasPassedClinic = false;
+        wardIntroPlayed = false;
+        nextFixed = "1-8";
+        randomEvents = ["1-2", "1-3", "1-4", "1-6", "1-7"];
+        shuffleArray(randomEvents);
+        
+        count_1_5 = 0;
+        count_1_7_2 = 0;
+        count_2_1 = 0;
+        count_2_1_1 = 0;
+        count_2_1_2 = 0;
+        candyInteractionCount = 0;
+
+        updateFearUI();
+
+        stopIdleTimer();
+        activeModals.forEach(m => m.style.display = 'none');
+        activeModals = [];
+        [notebookModal, inventoryModal, confirmModal, itemDetailModal, messageModal].forEach(m => m.style.display = 'none');
+        
+        document.getElementById('notebook-tabs').style.display = 'none'; 
+        tabClinic.style.display = 'none';
+        tabWard.style.display = 'none';
+        switchNotebookTab(tabHospital, nbHospitalContent);
+        
+        notebookBtn.style.display = 'none'; 
+        inventoryBtn.style.display = 'none';
+        document.body.classList.remove('show-announcement');
+
+        scene1State = 'playing';
+        s1Timeouts.forEach(clearTimeout);
+        s1Timeouts = [];
+        p1.classList.remove('visible', 'instant-visible');
+        p2.classList.remove('visible', 'instant-visible');
+        p3.classList.remove('visible', 'instant-visible');
+        actionBtn1.classList.remove('visible', 'instant-visible');
+        actionBtn1.textContent = 'Skip';
+
+        scene2State = 'playing';
+        s2Timeouts.forEach(clearTimeout);
+        s2Timeouts = [];
+        document.getElementById('s2-title').classList.remove('visible', 'instant-visible');
+        document.querySelectorAll('.s2-item').forEach(i => i.classList.remove('visible', 'instant-visible'));
+        actionBtn2.classList.remove('visible', 'instant-visible');
+        actionBtn2.textContent = 'Skip';
+
+        hideAllScenes();
+        scene1.style.display = 'block'; 
+    }
+
+    document.getElementById('lost-next-btn').addEventListener('click', () => {
+        triggerBlackScreenTransition(() => {
+            document.getElementById('scene-lost').style.display = 'none';
+            document.querySelector('.ui-container').style.display = 'flex';
+            scene4.style.display = 'block';
+            renderEvent(getNextEventId());
+        });
+    });
+    
+    document.getElementById('exp-retry-btn').addEventListener('click', () => {
+        resetGameState();
+        sceneExperiment.style.display = 'none';
+        gameScreen.style.display = 'none';
+        introScreen.style.display = 'block'; 
+        fearContainer.style.display = 'none'; 
+    });
+
+    document.getElementById('monster-retry-btn').addEventListener('click', () => {
+        resetGameState();
+        sceneMonster.style.display = 'none';
+        gameScreen.style.display = 'none';
+        introScreen.style.display = 'block'; 
+        fearContainer.style.display = 'none'; 
+    });
+
+    function updateFearUI() {
+      document.getElementById('debug-fear').textContent = fearValue;
+      document.getElementById('debug-sheep').textContent = sheepIndex;
+      document.getElementById('debug-snake').textContent = snakeIndex;
+
+      fearHeart.classList.remove('slight-beat', 'violent-beat', 'cracked');
+      
+      if (fearValue <= 20) {
+        heartPath.setAttribute('fill', '#cccccc'); 
+      } else if (fearValue > 20 && fearValue <= 35) {
+        heartPath.setAttribute('fill', '#cccccc'); 
+        fearHeart.classList.add('slight-beat');
+      } else if (fearValue > 35 && fearValue <= 45) {
+        heartPath.setAttribute('fill', '#888888'); 
+        fearHeart.classList.add('slight-beat');
+      } else if (fearValue > 45 && fearValue < 60) {
+        heartPath.setAttribute('fill', '#888888'); 
+        fearHeart.classList.add('violent-beat');
+      } else if (fearValue >= 60) {
+        heartPath.setAttribute('fill', '#555555'); 
+        fearHeart.classList.add('cracked');
+      }
+
+      updateResonanceUI();
+    }
+
+    startBtn.addEventListener('click', function() {
+      introScreen.style.display = 'none';
+      gameScreen.style.display = 'block';
+      gameScreen.style.animation = 'fadeIn 1.5s ease-in-out';
+      
+      document.querySelector('.ui-container').style.display = 'flex';
+
+      fearContainer.style.display = 'block';
+      updateFearUI();
+
+      s1Timeouts.push(setTimeout(() => { p1.classList.add('visible'); }, 500));
+      s1Timeouts.push(setTimeout(() => { actionBtn1.classList.add('visible'); }, 2000));
+      s1Timeouts.push(setTimeout(() => { p2.classList.add('visible'); }, 3000));
+      s1Timeouts.push(setTimeout(() => { p3.classList.add('visible'); }, 5500));
+
+      s1Timeouts.push(setTimeout(() => { 
+        scene1State = 'done';
+        actionBtn1.textContent = 'Next';
+      }, 8000));
+    });
+
+    actionBtn1.addEventListener('click', function() {
+      if (scene1State === 'playing') {
+        s1Timeouts.forEach(clearTimeout);
+        p1.classList.add('instant-visible');
+        p2.classList.add('instant-visible');
+        p3.classList.add('instant-visible');
+        actionBtn1.classList.add('instant-visible'); 
+        
+        scene1State = 'done';
+        actionBtn1.textContent = 'Next';
+      } else {
+        scene1.style.display = 'none';
+        scene2.style.display = 'block';
+        document.body.classList.add('show-announcement');
+
+        s2Timeouts.push(setTimeout(() => { document.getElementById('s2-title').classList.add('visible'); }, 100));
+        s2Timeouts.push(setTimeout(() => { actionBtn2.classList.add('visible'); }, 1600));
+
+        const s2Items = document.querySelectorAll('.s2-item');
+        s2Items.forEach((item, index) => {
+          s2Timeouts.push(setTimeout(() => {
+            item.classList.add('visible');
+          }, 1600 + (index * 1500))); 
+        });
+
+        s2Timeouts.push(setTimeout(() => {
+          scene2State = 'done';
+          actionBtn2.textContent = 'Next';
+        }, 1600 + (s2Items.length * 1500) + 500));
+      }
+    });
+
+    actionBtn2.addEventListener('click', function() {
+      if (scene2State === 'playing') {
+        s2Timeouts.forEach(clearTimeout);
+        const s2Items = document.querySelectorAll('.s2-item');
+        s2Items.forEach(item => {
+          item.classList.add('instant-visible');
+        });
+        document.getElementById('s2-title').classList.add('instant-visible');
+        actionBtn2.classList.add('instant-visible');
+
+        scene2State = 'done';
+        actionBtn2.textContent = 'Next';
+      } else {
+        scene2.style.display = 'none';
+        document.body.classList.remove('show-announcement');
+        scene3.style.display = 'block';
+        
+        setTimeout(() => {
+          document.getElementById('s3-q').classList.add('visible');
+          document.getElementById('s3-options').classList.add('visible');
+        }, 50);
+      }
+    });
+
+    btnYes.addEventListener('click', function() {
+      recordsNotebook = true;
+      scene3.style.display = 'none';
+      sceneFeedback.style.display = 'block';
+      feedbackText.innerHTML = '謹慎，永遠是最穩妥的選擇。';
+      feedbackText.classList.add('instant-visible');
+      
+      document.getElementById('notebook-tabs').style.display = 'flex';
+      notebookBtn.style.display = 'block';
+      nextBtn3.classList.add('instant-visible');
+    });
+
+    btnNo.addEventListener('click', function() {
+      recordsNotebook = false;
+      scene3.style.display = 'none';
+      sceneFeedback.style.display = 'block';
+      feedbackText.innerHTML = '信任記憶，也未嘗是壞事。';
+      feedbackText.classList.add('instant-visible');
+      
+      nextBtn3.classList.add('instant-visible');
+    });
+
+    notebookBtn.addEventListener('click', () => { notebookModal.style.display = 'flex'; });
+    closeNotebook.addEventListener('click', () => { notebookModal.style.display = 'none'; });
+
+    inventoryBtn.addEventListener('click', function() {
+      inventoryList.innerHTML = '';
+      
+      if (!hasCandy && !hasLens) {
+        inventoryList.innerHTML = '<p class="story-text" style="text-align: center; opacity: 1; transform: none;">空無一物</p>';
+      } else {
+        if (hasCandy) {
+          const candyItem = document.createElement('div');
+          candyItem.className = 'inventory-item';
+          candyItem.textContent = '糖果';
+          candyItem.onclick = () => { confirmModal.style.display = 'flex'; };
+          inventoryList.appendChild(candyItem);
+        }
+        if (hasLens) {
+          const lensItem = document.createElement('div');
+          lensItem.className = 'inventory-item';
+          lensItem.textContent = '透鏡';
+          lensItem.onclick = () => { itemDetailModal.style.display = 'flex'; };
+          inventoryList.appendChild(lensItem);
+        }
+      }
+      inventoryModal.style.display = 'flex';
+    });
+
+    closeInventory.addEventListener('click', () => { inventoryModal.style.display = 'none'; });
+
+    confirmYes.addEventListener('click', () => {
+      confirmModal.style.display = 'none';
+      if (hasCandy) {
+        hasCandy = false;
+        ateCandy = true;
+        fearValue -= 10;
+        updateFearUI();
+        inventoryBtn.click(); 
+        
+        showMessageModal("情緒似乎得到了緩和"); 
+      }
+    });
+
+    confirmNo.addEventListener('click', () => {
+      confirmModal.style.display = 'none';
+    });
+
+    closeItemDetail.addEventListener('click', () => {
+      itemDetailModal.style.display = 'none';
+    });
+
+    let played1_1 = false;
+    let randomEvents = ["1-2", "1-3", "1-4", "1-6", "1-7"];
+    let nextFixed = "1-8";
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+    shuffleArray(randomEvents);
+
+    function getNextEventId() {
+      if (!played1_1) {
+        played1_1 = true;
+        return "1-1";
+      }
+      if (randomEvents.length > 0) {
+        return randomEvents.pop(); 
+      }
+      if (nextFixed === "1-8") {
+        nextFixed = "1-9";
+        return "1-8";
+      }
+      if (nextFixed === "1-9") {
+        nextFixed = null;
+        return "1-9";
+      }
+      return null;
+    }
+
+    const eventsData = {
+      "1-1": {
+        text: "醫院大門緊閉，門鎖上蒙著一層厚重的塵埃。",
+        options: [
+          { label: "試著開鎖", effect: () => { fearValue += 10; return { text: "灰塵染污了雙手，門鎖沒能被打開。" }; } },
+          { label: "試著推開", effect: () => { fearValue += 5; return { text: "大門紋絲不動。" }; } },
+          { label: "不做嘗試", effect: () => { return { text: "或許有其他離開的方法。" }; } }
+        ]
+      },
+      "1-2": {
+        text: "窗外，一道模糊的身影一閃而過。",
+        options: [
+          { label: "上前查看", effect: () => { sheepIndex += 10; return { text: "透過玻璃能勉強辨認出，那些黑影的頭上似乎長著……羊角？" }; } },
+          { label: "靜觀其變", effect: () => { return { text: "隔著一段距離，加上玻璃十分厚重，因此什麼也看不見。" }; } }
+        ]
+      },
+      "1-3": {
+        text: "暗處似乎有雙黏膩的視線，一直凝視著這片迷霧……。",
+        options: [
+          { label: "上前查看", effect: () => { snakeIndex += 10; return { text: "那雙眼眸明顯不屬於人類，在察覺到窺伺的瞬間便隱入了黑暗，只留下一道濕滑的爬行痕跡。" }; } },
+          { label: "靜觀其變", effect: () => { fearValue += 5; return { text: "只是一瞬的愣神，那道視線便已消失，彷彿方才的一切都只是錯覺……。" }; } }
+        ]
+      },
+      "1-4": {
+        text: "牆邊靠著一張陳舊的木桌，上面放置的糖果罐，卻是嶄新的。",
+        options: [
+          { label: "拿走糖果", effect: (btn) => { 
+              if (!hasCandy) {
+                candyInteractionCount++;
+                hasCandy = true; 
+                inventoryBtn.style.display = 'block'; 
+                randomEvents.push("1-5"); shuffleArray(randomEvents);
+                return { text: "或許它會派上用場……或許。" }; 
+              } else {
+                const msgModal = document.getElementById('message-modal');
+                const closeBtn = document.getElementById('close-message-btn');
+                const msgText = document.getElementById('message-text');
+                closeBtn.style.display = 'none';
+                msgText.textContent = "……真是貪心。";
+                msgModal.style.display = 'flex';
+                setTimeout(() => {
+                  msgModal.style.display = 'none';
+                  closeBtn.style.display = 'block';
+                  s4Text.style.display = 'block';
+                  s4Options.style.display = 'flex';
+                  if (btn) btn.style.display = 'none'; 
+                  startIdleTimer();
+                }, 2000);
+                return { stayOnEvent: true };
+              }
+            } 
+          },
+          { label: "吃下糖果", effect: () => { 
+              if (!hasCandy) {
+                candyInteractionCount++;
+                fearValue -= 15; 
+                sheepIndex += 5; 
+                ateCandy = true; 
+                randomEvents.push("1-5"); shuffleArray(randomEvents);
+                return { text: "甜蜜的味道，暫時安撫了內心的不安。" }; 
+              } else {
+                candyInteractionCount++;
+                sheepIndex += 5; 
+                ateCandy = true; 
+                randomEvents.push("1-5"); shuffleArray(randomEvents);
+                return { text: "貪婪的味道，甜膩萬分。" }; 
+              }
+            } 
+          },
+          { label: "置之不理", effect: () => { 
+              randomEvents.push("1-5"); shuffleArray(randomEvents);
+              if (hasCandy) {
+                return { text: "貪求過多，並不是好的行為。" }; 
+              } else {
+                return { text: "來路不明的饋贈，反而是一種陷阱。" }; 
+              }
+            } 
+          }
+        ]
+      },
+      "1-5": {
+        text: "一道嚴厲的聲音從背後傳來：「為什麼一個人待在這裡，很危險的。」<br><br>回頭看去，卻沒有任何人。",
+        options: [
+          { label: "「你是誰？」", effect: () => {
+              if (isBadChild()) {
+                return { text: "「這裡不是『好孩子』該待的地方，快點離開。」" };
+              } else {
+                fearValue += 10;
+                return { text: "「這不是你該過問的。」" };
+              }
+            }
+          },
+          { label: "立刻離開", effect: () => { fearValue += 10; return { text: "在廢棄的醫院裡的，會是什麼人？" }; } }
+        ]
+      },
+      "1-5-n": {
+        text: "一道嚴厲的聲音從背後傳來：「……又闖進來了？趕快離開。」<br><br>回頭看去，卻沒有任何人。",
+        options: [
+          { label: "「你是誰？」", effect: () => {
+              if (isBadChild()) {
+                return { text: "「這不重要，總之別待在這裡了。」" };
+              } else {
+                fearValue += 10;
+                return { text: "「壞孩子，沒有資格問這種問題。」" };
+              }
+            }
+          },
+          { label: "立刻離開", effect: () => { fearValue += 10; return { text: "那個人……究竟是誰？" }; } }
+        ]
+      },
+      "1-6": {
+        text: "好幾道聲音窸窣作響，像是一群人在交談，情緒激動。",
+        options: [
+          { label: "凝神細聽", effect: () => { sheepIndex += 10; return { text: "「罪人……沉沼……。」他們在說的是什麼？" }; } },
+          { label: "無視", effect: () => { return { text: "或許這些詭異的聲音，會自己停止……。" }; } },
+          { label: "捂上耳朵", effect: () => { snakeIndex += 5; return { text: "非禮勿聽。" }; } }
+        ]
+      },
+      "1-7": {
+        text: "一旁的房間門扉緊閉，上頭寫著「手術室」，裡面隱約傳來陣陣聲響……。",
+        options: [
+          { label: "偷聽動靜", effect: () => { fearValue += 10; return { text: "那聽起來並不像手術室該發出的動靜……腳下隱隱有深色液體滲出，讓人不得不立刻逃離。" }; } },
+          { label: "悄悄進入", effect: () => { return { text: "這座廢墟裡，有什麼正在發生？", goto: "1-7-1" }; } },
+          { label: "立刻離開", effect: () => { return { text: "有時過多的好奇心，只會害了自己。" }; } }
+        ]
+      },
+      "1-7-1": {
+        text: "一片昏暗裡，只有手術臺的燈光，照亮著上面躺著的慘白身影。穿著白袍的模糊背影，正在進行手術……又或者，某種實驗？",
+        options: [
+          { label: "繼續觀察", effect: () => { return { goto: "1-7-2", skipFeedback: true }; } },
+          { label: "悄然離開", effect: () => { return { goto: "1-7-2", skipFeedback: true }; } }
+        ]
+      },
+      "1-7-2": {
+        text: "瞬息之間，原先正在手術臺前的人已來到了面前，面容在黑暗之中無法看清。<br><br>「你看見了什麼？」",
+        options: [
+          { label: "「什麼都沒看見。」", effect: () => { fearValue += 15; return { text: "「現在立刻離開，別讓我說第二次。」" }; } },
+          { label: "「……。」", effect: () => { return { text: "「干擾手術的壞孩子……該怎麼懲罰呢？」", isExperimentEnding: true }; } },
+          { label: "「一場手術。」", effect: () => { return { text: "「不，那可不是一般的手術，倘若好奇……不如，你親自來參與吧……。」", isExperimentEnding: true }; } }
+        ]
+      },
+      "1-7-2-n": {
+        text: "瞬息之間，原先正在手術臺前的人已來到了面前，面容在黑暗之中無法看清。<br><br>「你看見了什麼？」",
+        options: [
+          { label: "「什麼都沒看見。」", effect: () => { fearValue += 15; return { text: "「……我說過，出去。」" }; } },
+          { label: "「……。」", effect: () => { return { text: "「干擾手術的壞孩子……該怎麼懲罰呢？」", isExperimentEnding: true }; } },
+          { label: "「一場手術。」", effect: () => { return { text: "「不，那可不是一般的手術，倘若好奇……不如，你親自來參與吧……。」", isExperimentEnding: true }; } }
+        ]
+      },
+      "1-8": {
+        text: "透過昏暗的燈光，依依稀稀能見到前方出現了一串腳印，但看上去並不像人類的。",
+        options: [
+          { label: "跟隨腳印", effect: () => { sheepIndex += 10; return { text: "直到步伐與之重疊才發現，眼前的腳印，竟然是羊蹄的形狀……。", triggerZoneTransition: true, targetZone: 'ward' }; } },
+          { label: "忽視腳印", effect: () => { return { text: "乍然出現的痕跡，又會通向哪裡？" }; } },
+          { label: "反向離開", effect: () => { snakeIndex += 10; return { text: "迷霧中的指引，更像是誘人深入的陷阱。" }; } }
+        ]
+      },
+      "1-9": {
+        text: "映入眼簾的是一條長廊，末端似乎通往……。",
+        options: [
+          { label: "診療室", effect: () => { return { triggerZoneTransition: true, targetZone: 'clinic', skipFeedback: true }; } },
+          { label: "住院部", effect: () => { return { triggerZoneTransition: true, targetZone: 'ward', skipFeedback: true }; } }
+        ]
+      }
+    };
+
+    function renderEvent(eventId) {
+      stopIdleTimer();
+      if (!eventId) return; 
+      
+      let actualId = eventId;
+      if (eventId === "1-5") {
+          if (count_1_5 > 0) actualId = "1-5-n";
+          count_1_5++;
+      }
+      if (eventId === "1-7-2") {
+          if (count_1_7_2 > 0) actualId = "1-7-2-n";
+          count_1_7_2++;
+      }
+
+      const ev = eventsData[actualId];
+      
+      s4Text.style.display = 'block';
+      s4Text.innerHTML = ev.text;
+      s4Text.className = 'story-text'; 
+      void s4Text.offsetWidth; 
+      s4Text.classList.add('visible');
+
+      s4Options.innerHTML = '';
+      s4Options.style.display = 'flex';
+      s4Options.className = 'options-container hidden-element';
+      void s4Options.offsetWidth;
+      s4Options.classList.add('visible');
+
+      s4Feedback.style.display = 'none';
+      nextBtn4.style.display = 'none';
+      nextBtn4.classList.remove('instant-visible');
+
+      if (ev.options && ev.options.length > 0) {
+        ev.options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = 'btn';
+          btn.style.marginTop = '0';
+          btn.textContent = opt.label;
+          btn.onclick = () => handleOptionClick(opt, btn);
+          s4Options.appendChild(btn);
+        });
+        startIdleTimer();
+      }
+    }
+
+    function handleGenericOptionClick(opt, containerId, textEl, optEl, fbEl, nextBtn, renderEventFn, getNextIdFn, btn) {
+        stopIdleTimer();
+        optEl.style.display = 'none';
+        textEl.style.display = 'none';
+
+        let oldFear = fearValue;
+        let result = opt.effect(btn);
+        if (result && result.stayOnEvent) {
+            return;
+        }
+        let rawNewFear = fearValue;
+        
+        updateFearUI();
+
+        let isLostEnding = (fearValue >= 60);
+
+        let fearDiff = rawNewFear - oldFear;
+        let fearText = "";
+        if (fearDiff > 0) fearText = "一陣懼意漫上心頭。";
+        else if (fearDiff < 0) fearText = "情緒似乎得到了緩和。";
+
+        let finalFeedbackHtml = result.text;
+        if (result.transitionText) {
+            finalFeedbackHtml += `<br><br><span style="font-size: 1rem; color: #a9a9a9;">${result.transitionText}</span>`;
+        }
+
+        let nextAction = () => {
+            if (result.triggerZoneTransition) {
+                triggerBlackScreenTransition(() => {
+                    document.getElementById(containerId).style.display = 'none';
+                    transitionToZone(result.targetZone);
+                });
+            } else {
+                const nextId = result.goto ? result.goto : getNextIdFn();
+                if (nextId) renderEventFn(nextId);
+            }
+        };
+
+        let setupStandardNextBtn = () => {
+            if (result.skipFeedback) {
+                nextAction();
+                return;
+            }
+            if (fearText) {
+                nextBtn.textContent = "Next";
+                nextBtn.style.display = 'inline-block';
+                nextBtn.classList.add('instant-visible');
+                
+                nextBtn.onclick = () => {
+                    fbEl.classList.remove('instant-visible', 'visible');
+                    nextBtn.classList.remove('instant-visible', 'visible');
+                    void fbEl.offsetWidth; 
+                    
+                    fbEl.innerHTML = fearText;
+                    fbEl.classList.add('visible');
+                    nextBtn.classList.add('visible');
+                    
+                    nextBtn.onclick = nextAction;
+                    startIdleTimer();
+                };
+                startIdleTimer();
+            } else {
+                nextBtn.textContent = "Next";
+                nextBtn.style.display = 'inline-block';
+                nextBtn.classList.add('instant-visible');
+                nextBtn.onclick = nextAction;
+                startIdleTimer();
+            }
+        };
+
+        let showFeedbackAndProceed = () => {
+            if (isLostEnding) {
+                fbEl.innerHTML = finalFeedbackHtml;
+                fbEl.style.display = 'block';
+                fbEl.className = 'story-text instant-visible';
+                nextBtn.style.display = 'none';
+                setTimeout(() => {
+                    handleLostEndingTransition();
+                }, 3000);
+                return;
+            }
+
+            if (result.isSpecialAutoTransition) {
+                 fbEl.innerHTML = finalFeedbackHtml;
+                 fbEl.style.display = 'block';
+                 fbEl.className = 'story-text instant-visible';
+                 nextBtn.style.display = 'none';
+                 setTimeout(() => {
+                     triggerBlackScreenTransition(() => {
+                         document.getElementById(containerId).style.display = 'none';
+                         transitionToZone(result.targetZone);
+                     });
+                 }, 3000);
+                 return;
+            }
+
+            if (result.skipFeedback) {
+                setupStandardNextBtn();
+                return;
+            }
+
+            fbEl.innerHTML = finalFeedbackHtml;
+            fbEl.style.display = 'block';
+            fbEl.className = 'story-text';
+            void fbEl.offsetWidth;
+            fbEl.classList.add('instant-visible');
+
+            if (result.isEnding) {
+                nextBtn.textContent = "To Be Continued...";
+                nextBtn.style.display = 'inline-block';
+                nextBtn.classList.add('instant-visible');
+                nextBtn.onclick = () => { };
+                return;
+            }
+
+            if (result.isExperimentEnding) {
+                nextBtn.style.display = 'none';
+                setTimeout(() => handleExperimentEndingTransition(), 3000);
+                return;
+            }
+            
+            if (result.isMonsterEnding) {
+                nextBtn.style.display = 'none';
+                setTimeout(() => handleMonsterEndingTransition(), 3000);
+                return;
+            }
+
+            if (fearValue >= 50 && !uvTriggered) {
+                uvTriggered = true;
+                nextBtn.style.display = 'none';
+                setTimeout(() => {
+                    triggerUVBlackScreen(() => {
+                        setupStandardNextBtn();
+                    });
+                }, 3000);
+            } else {
+                setupStandardNextBtn();
+            }
+        };
+
+        showFeedbackAndProceed();
+    }
+
+    function handleOptionClick(opt, btn) {
+        handleGenericOptionClick(opt, 'scene-4', s4Text, s4Options, s4Feedback, nextBtn4, renderEvent, getNextEventId, btn);
+    }
+
+    nextBtn3.addEventListener('click', function() {
+      sceneFeedback.style.display = 'none';
+      scene4.style.display = 'block';
+      renderEvent(getNextEventId());
+    });
+
+    function initClinicEvents() {
+      clinicRandomEvents = ["2-1", "2-2", "2-3", "2-4"];
+      shuffleArray(clinicRandomEvents);
+    }
+
+    function getNextClinicEventId() {
+      if (clinicRandomEvents.length > 0) {
+        return clinicRandomEvents.pop();
+      }
+      return !hasPassedWard ? "2-5-a" : "2-5-b";
+    }
+
+    const clinicEventsData = {
+      "2-1": {
+        text: "一道溫柔的聲音從背後傳來：「怎麼一個人待在這裡呢？很危險的。」<br><br>回頭看去，卻沒有任何人。",
+        options: [
+          { label: "「你是誰？」", effect: () => { return { text: "「我是亨特醫生……請別害怕，我不會傷害好孩子的……。」", goto: "2-1-1" }; } }
+        ]
+      },
+      "2-1-n": {
+        text: "一道溫柔的聲音從背後傳來：「嗯？又遇見了……為什麼還沒有離開這裡呢？」<br><br>回頭看去，卻沒有任何人。",
+        options: [
+          { label: "「你是誰？」", effect: () => { return { text: "「不記得了嗎？我是亨特醫生……。」", goto: "2-1-1" }; } },
+          { label: "「……亨特醫生？」", effect: () => { return { text: "「你還記得我……真令人高興……。」", goto: "2-1-1" }; } }
+        ]
+      },
+      "2-1-1": {
+        text: "「那麼……你會是好孩子嗎？」",
+        options: [
+          { label: "「是。」", effect: () => {
+              if (!isBadChild()) {
+                fearValue -= 15;
+                snakeIndex += 5;
+                return { text: "「真乖，好孩子……可以得到獎勵。」" };
+              } else {
+                return { text: "「說謊，可不是好孩子應該有的行為呢……。」", goto: "2-1-2" };
+              }
+            }
+          },
+          { label: "「不是。」", effect: () => {
+              if (!isBadChild()) {
+                fearValue -= 5;
+                snakeIndex += 5;
+                return { text: "「別擔心，『醫生』會幫助聽話的好孩子……。」" };
+              } else {
+                fearValue += 10;
+                return { text: "「小心，不聽話的『壞孩子』，會被『怪物』盯上喔……？」" };
+              }
+            }
+          },
+          { label: "轉身逃跑", effect: () => {
+              return { text: "亨特……這個名字，似乎在哪裡聽過？" }; 
+            }
+          }
+        ]
+      },
+      "2-1-1-n": {
+        text: "「……這一次的你，會是好孩子嗎？」",
+        options: [
+          { label: "「是。」", effect: () => {
+              if (!isBadChild()) {
+                fearValue -= 15;
+                snakeIndex += 5;
+                return { text: "「真乖。」" };
+              } else {
+                return { text: "「……請不要說謊了。」", goto: "2-1-2" };
+              }
+            }
+          },
+          { label: "「不是。」", effect: () => {
+              if (!isBadChild()) {
+                fearValue -= 5;
+                snakeIndex += 5;
+                return { text: "「別怕，好孩子應該得到幫助，不是嗎？」" };
+              } else {
+                fearValue += 10;
+                return { text: "「雖然不是好孩子，不過……還算誠實呢。」" };
+              }
+            }
+          }
+        ]
+      },
+      "2-1-2": {
+        text: "「請誠實地回答我，你是不是『好孩子』……？」",
+        options: [
+          { label: "「……是。」", effect: () => { return { text: "對方沒有再說話，下個瞬間，一道身影出現在面前，隱約可見無數菌絲自其背後漫出……。", isMonsterEnding: true }; } },
+          { label: "「……不是。」", effect: () => { fearValue += 15; return { text: "「小心，不聽話的『壞孩子』，會被『怪物』盯上喔……？」" }; } }
+        ]
+      },
+      "2-1-2-n": {
+        text: "「請仔細思考再回答——你是不是『好孩子』？」",
+        options: [
+          { label: "「……是。」", effect: () => { return { text: "對方沒有再說話，下個瞬間，一道身影出現在面前，隱約可見無數菌絲自其背後漫出……。", isMonsterEnding: true }; } },
+          { label: "「……不是。」", effect: () => { fearValue += 15; return { text: "「那條規則……務必記住呢。」" }; } }
+        ]
+      },
+      "2-2": {
+        text: "診療椅旁架著一塊透鏡，微弱的光線通過，有個瞬間似乎反射出了……蛇鱗的形狀？",
+        options: [
+          { label: "上前查看", effect: () => { fearValue -= 5; snakeIndex += 10; return { text: "光彩熠熠，恍惚間，彷彿忘卻了一部分恐懼。", goto: "2-2-1" }; } },
+          { label: "置之不理", effect: () => { return { text: "那只是普通的醫療器具罷了……或許。" }; } }
+        ]
+      },
+      "2-2-1": {
+        text: "挑戰極限的透鏡……是否將其帶走？",
+        options: [
+          { label: "是", effect: () => { hasLens = true; inventoryBtn.style.display = 'block'; return { text: "希望之光，必將私藏。" }; } },
+          { label: "否", effect: () => { return { text: "異樣之物，只可遠觀。" }; } }
+        ]
+      },
+      "2-3": {
+        text: "不知從何處飄落一片泛黃的紙張，上面的內容是……？",
+        options: [
+          { label: "連載小說", effect: () => { sheepIndex += 10; return { text: "那是張印著懸疑小說的報紙，講述醫生將病人作為違法實驗素材的故事。" }; } },
+          { label: "繪畫作品", effect: () => { fearValue -= 5; return { text: "紙上用蠟筆所畫的，是孩子們圍著一位醫生打扮的人唱歌，筆法十分稚嫩，卻令人感到溫馨。" }; } }
+        ]
+      },
+      "2-4": {
+        text: "耳畔傳來一道輕柔的歌聲，是誰在哼唱那首童謠？",
+        options: [
+          { label: "凝神細聽", effect: () => { fearValue -= 5; snakeIndex += 10; return { text: "歌聲彷彿能夠治癒恐懼，卻也將思緒引到了某個方向……。" }; } },
+          { label: "置之不理", effect: () => { return { text: "只要假裝不存在，便什麼也沒有聽見。" }; } },
+          { label: "捂上耳朵", effect: () => { sheepIndex += 5; return { text: "越是溫柔，越是危險。" }; } }
+        ]
+      },
+      "2-5-a": {
+        text: "原先尚且存在的微弱燈光乍然熄滅，只留下無盡黑暗。伴隨刺骨寒冷，形成了沉重的壓迫感，令人窒息……。",
+        options: [
+          { label: "停留原地", effect: () => { fearValue += 10; return { text: "越發濃烈的恐懼，並不是嘗試保持冷靜便能控制的。<br><br>慌不擇路之下，竟來到了醫院的住院部……。", triggerZoneTransition: true, targetZone: 'ward', isSpecialAutoTransition: true }; } },
+          { label: "立刻逃離", effect: () => { return { text: "慌不擇路之下，竟來到了醫院的住院部……。", triggerZoneTransition: true, targetZone: 'ward', isSpecialAutoTransition: true }; } }
+        ]
+      },
+      "2-5-b": {
+        text: "強烈的眩暈襲來，讓人幾乎站立不穩，意識沉入黑暗之際，似乎聽見誰正低語……。",
+        isAutoFinalTransition: true
+      }
+    };
+
+    function enterClinicScene() {
+      stopIdleTimer();
+      const sceneClinicIntro = document.getElementById('scene-clinic-intro');
+      const p1 = document.getElementById('clinic-p1');
+      const introNextBtn = document.getElementById('next-btn-clinic-intro');
+
+      sceneClinicIntro.style.display = 'block';
+      p1.classList.remove('visible', 'instant-visible');
+      introNextBtn.classList.remove('visible', 'instant-visible');
+      
+      clinicIntroTimeouts = [];
+
+      clinicIntroTimeouts.push(setTimeout(() => { p1.classList.add('visible'); }, 50));
+      clinicIntroTimeouts.push(setTimeout(() => { introNextBtn.classList.add('visible'); }, 2550));
+
+      introNextBtn.onclick = () => {
+        sceneClinicIntro.style.display = 'none';
+        enterClinicRulesScene();
+      };
+    }
+
+    function enterClinicRulesScene() {
+      stopIdleTimer();
+      const sceneClinicRules = document.getElementById('scene-clinic-rules');
+      const title = document.getElementById('clinic-s2-title');
+      const items = document.querySelectorAll('.clinic-s2-item');
+      const actionBtn = document.getElementById('action-btn-clinic-rules');
+
+      sceneClinicRules.style.display = 'block';
+      document.body.classList.add('show-announcement');
+      title.classList.remove('visible', 'instant-visible');
+      items.forEach(i => i.classList.remove('visible', 'instant-visible'));
+      actionBtn.classList.remove('visible', 'instant-visible');
+
+      clinicRulesState = 'playing';
+      actionBtn.textContent = 'Skip';
+      clinicRulesTimeouts = [];
+
+      clinicRulesTimeouts.push(setTimeout(() => { title.classList.add('visible'); }, 100));
+      clinicRulesTimeouts.push(setTimeout(() => { actionBtn.classList.add('visible'); }, 1600));
+
+      items.forEach((item, index) => {
+        clinicRulesTimeouts.push(setTimeout(() => {
+          item.classList.add('visible');
+        }, 1600 + (index * 1500))); 
+      });
+
+      clinicRulesTimeouts.push(setTimeout(() => { 
+        clinicRulesState = 'done';
+        actionBtn.textContent = 'Next';
+      }, 1600 + (items.length * 1500) + 500));
+
+      actionBtn.onclick = () => {
+        if (clinicRulesState === 'playing') {
+          clinicRulesTimeouts.forEach(clearTimeout);
+          title.classList.add('instant-visible');
+          items.forEach(i => i.classList.add('instant-visible'));
+          actionBtn.classList.add('instant-visible');
+          clinicRulesState = 'done';
+          actionBtn.textContent = 'Next';
+        } else {
+          sceneClinicRules.style.display = 'none';
+          document.body.classList.remove('show-announcement');
+
+          if (recordsNotebook) {
+            document.getElementById('notebook-tabs').style.display = 'flex'; 
+            document.getElementById('tab-clinic').style.display = 'inline-block'; 
+
+            const sceneFb = document.getElementById('scene-clinic-feedback');
+            sceneFb.style.display = 'block';
+            
+            const clinicFbText = document.getElementById('clinic-fb-text');
+            clinicFbText.innerHTML = '還是記住這些規則為好。';
+            clinicFbText.classList.add('instant-visible');
+            
+            const fbNext = document.getElementById('clinic-fb-next');
+            fbNext.classList.add('instant-visible');
+
+            fbNext.onclick = () => {
+              sceneFb.style.display = 'none';
+              startClinicGameplay();
+            };
+          } else {
+            startClinicGameplay();
+          }
+        }
+      };
+    }
+
+    function startClinicGameplay() {
+       document.getElementById('scene-clinic-game').style.display = 'block';
+       renderClinicEvent(getNextClinicEventId());
+    }
+
+    function renderClinicEvent(eventId) {
+      stopIdleTimer();
+      if (!eventId) return;
+
+      let actualId = eventId;
+      if (eventId === "2-1") {
+          if (count_2_1 > 0) actualId = "2-1-n";
+          count_2_1++;
+      }
+      if (eventId === "2-1-1") {
+          if (count_2_1_1 > 0) actualId = "2-1-1-n";
+          count_2_1_1++;
+      }
+      if (eventId === "2-1-2") {
+          if (count_2_1_2 > 0) actualId = "2-1-2-n";
+          count_2_1_2++;
+      }
+
+      const ev = clinicEventsData[actualId];
+      const scText = document.getElementById('sc-text');
+      const scOptions = document.getElementById('sc-options');
+      const scFeedback = document.getElementById('sc-feedback');
+      const nextBtnC = document.getElementById('next-btn-c');
+      
+      scFeedback.style.opacity = '';
+      scFeedback.style.transition = '';
+
+      scText.style.display = 'block';
+      scText.innerHTML = ev.text;
+      scText.className = 'story-text';
+      void scText.offsetWidth;
+      scText.classList.add('visible');
+
+      scOptions.innerHTML = '';
+      scOptions.style.display = 'flex';
+      scOptions.className = 'options-container hidden-element';
+      void scOptions.offsetWidth;
+      scOptions.classList.add('visible');
+
+      scFeedback.style.display = 'none';
+      nextBtnC.style.display = 'none';
+      nextBtnC.classList.remove('instant-visible');
+
+      if (ev.isAutoFinalTransition) {
+          scOptions.style.display = 'none';
+          setTimeout(() => {
+              triggerFinalQuestioningTransition();
+          }, 3000);
+          return;
+      }
+
+      if (ev.options && ev.options.length > 0) {
+        ev.options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = 'btn';
+          btn.style.marginTop = '0';
+          btn.textContent = opt.label;
+          btn.onclick = () => handleClinicOptionClick(opt, btn);
+          scOptions.appendChild(btn);
+        });
+        startIdleTimer();
+      }
+    }
+
+    function handleClinicOptionClick(opt, btn) {
+        handleGenericOptionClick(opt, 'scene-clinic-game', document.getElementById('sc-text'), document.getElementById('sc-options'), document.getElementById('sc-feedback'), document.getElementById('next-btn-c'), renderClinicEvent, getNextClinicEventId, btn);
+    }
+
+    function initWardEvents() {
+      wardRandomEvents = ["3-1", "3-2", "3-3", "3-4"];
+      shuffleArray(wardRandomEvents);
+    }
+
+    function getNextWardEventId() {
+      if (wardRandomEvents.length > 0) {
+        return wardRandomEvents.pop();
+      }
+      return !hasPassedClinic ? "3-5-a" : "3-5-b";
+    }
+
+    const wardEventsData = {
+      "3-1": {
+        text: "環顧四周，能夠看見病床皆已蒙塵，唯有中間的床位格外整潔，一條蛇正盤踞其上，那雙異瞳似乎能夠看穿人的內心……？",
+        options: [
+          {
+            label: "主動靠近",
+            effect: () => {
+              fearValue -= 5;
+              snakeIndex += 5;
+              return { text: "想要更加靠近時，蛇的身影卻消失在了黑暗裡，好似從未存在過。" };
+            }
+          },
+          {
+            label: "靜觀其變",
+            effect: () => {
+              return { text: "那究竟是幻覺，抑或是真實？" };
+            }
+          },
+          {
+            label: "轉身逃離",
+            effect: () => {
+              fearValue += 5;
+              snakeIndex -= 10;
+              return { text: "謹記，遠離會帶來危險的一切事物。" };
+            }
+          }
+        ]
+      },
+      "3-2": {
+        text: "腳腕漫上一股黏膩濕滑的觸感，低頭所見，是幾條觸手般的菌絲，困住了前行的腳步。",
+        options: [
+          {
+            label: "動手清除",
+            effect: () => {
+              fearValue += 10;
+              return { text: "觸碰到的瞬間，菌絲竟收緊了力道，奮力掙扎後才勉強脫身……。" };
+            }
+          },
+          {
+            label: "靜觀其變",
+            effect: () => {
+              return { text: "一段時間後菌絲鬆開了箝制，緩緩褪去，只留下腳腕上一道濕痕。" };
+            }
+          },
+          {
+            label: "仔細觀察",
+            effect: () => {
+              snakeIndex += 5;
+              return { text: "菌絲彷彿能夠感知到視線，放輕了纏勒的力度，而後緩緩退開，只在腳腕上留下一道濕痕。" };
+            }
+          }
+        ]
+      },
+      "3-3": {
+        text: "人群的聲音再度響起，這一次變得更加清晰……。<br><br>「褻瀆屍體的罪人！」<br><br>同時，一道穿著白袍的模糊身影，出現在了面前。",
+        options: [
+          {
+            label: "凝神細聽",
+            effect: () => {
+              sheepIndex += 10;
+              return { text: "「把他沉下去！沉下去！」" };
+            }
+          },
+          {
+            label: "無視",
+            effect: () => {
+              return { text: "雖然並不理解，但那聽上去不是應該知道的事……。" };
+            }
+          },
+          {
+            label: "尋求幫助",
+            effect: () => {
+              fearValue -= 5;
+              sheepIndex -= 10;
+              return { text: "「別擔心，會沒事的……。」<br><br>「醫生」輕輕地低語。" };
+            }
+          }
+        ]
+      },
+      "3-4": {
+        text: "牆上的裂縫裡，似乎藏著一隻眼睛，正直直注視前方……它的瞳孔會是什麼形狀？",
+        options: [
+          {
+            label: "豎瞳",
+            effect: () => {
+              fearValue += 5;
+              snakeIndex += 10;
+              return { text: "如蛇一般，冰冷銳利。" };
+            }
+          },
+          {
+            label: "橫瞳",
+            effect: () => {
+              fearValue += 5;
+              sheepIndex += 10;
+              return { text: "如羊一般，溫和沉著。" };
+            }
+          },
+          {
+            label: "圓瞳",
+            effect: () => {
+              fearValue += 5;
+              return { text: "如人一般，深沉憂鬱。" };
+            }
+          }
+        ]
+      },
+      "3-5-a": {
+        text: "原先尚且存在的微弱燈光乍然熄滅，只留下無盡黑暗。伴隨刺骨寒冷，形成了沉重的壓迫感，令人窒息……。",
+        options: [
+          {
+            label: "停留原地",
+            effect: () => {
+              fearValue += 10;
+              return { text: "越發濃烈的恐懼，並不是嘗試保持冷靜便能控制的。<br><br>慌不擇路之下，竟來到了醫院的診療室……。", triggerZoneTransition: true, targetZone: 'clinic', isSpecialAutoTransition: true };
+            }
+          },
+          {
+            label: "立刻逃離",
+            effect: () => {
+              return { text: "慌不擇路之下，竟來到了醫院的診療室……。", triggerZoneTransition: true, targetZone: 'clinic', isSpecialAutoTransition: true };
+            }
+          }
+        ]
+      },
+      "3-5-b": {
+        text: "強烈的眩暈襲來，讓人幾乎站立不穩，意識沉入黑暗之際，似乎聽見誰正低語……。",
+        isAutoFinalTransition: true
+      }
+    };
+
+    function enterWardScene() {
+      stopIdleTimer();
+      const sceneWardIntro = document.getElementById('scene-ward-intro');
+      const p1 = document.getElementById('ward-p1');
+      const introNextBtn = document.getElementById('next-btn-ward-intro');
+
+      sceneWardIntro.style.display = 'block';
+      p1.classList.remove('visible', 'instant-visible');
+      introNextBtn.classList.remove('visible', 'instant-visible');
+
+      wardIntroTimeouts = [];
+
+      wardIntroTimeouts.push(setTimeout(() => { p1.classList.add('visible'); }, 50));
+      wardIntroTimeouts.push(setTimeout(() => { introNextBtn.classList.add('visible'); }, 2550));
+
+      introNextBtn.onclick = () => {
+        sceneWardIntro.style.display = 'none';
+        enterWardRulesScene();
+      };
+    }
+
+    function enterWardRulesScene() {
+      stopIdleTimer();
+      const sceneWardRules = document.getElementById('scene-ward-rules');
+      const title = document.getElementById('ward-s2-title');
+      const items = document.querySelectorAll('.ward-s2-item');
+      const actionBtn = document.getElementById('action-btn-ward-rules');
+
+      sceneWardRules.style.display = 'block';
+      document.body.classList.add('show-announcement');
+      title.classList.remove('visible', 'instant-visible');
+      items.forEach(i => i.classList.remove('visible', 'instant-visible'));
+      actionBtn.classList.remove('visible', 'instant-visible');
+
+      wardRulesState = 'playing';
+      actionBtn.textContent = 'Skip';
+      wardRulesTimeouts = [];
+
+      wardRulesTimeouts.push(setTimeout(() => { title.classList.add('visible'); }, 100));
+      wardRulesTimeouts.push(setTimeout(() => { actionBtn.classList.add('visible'); }, 1600));
+
+      items.forEach((item, index) => {
+        wardRulesTimeouts.push(setTimeout(() => {
+          item.classList.add('visible');
+        }, 1600 + (index * 1500))); 
+      });
+
+      wardRulesTimeouts.push(setTimeout(() => { 
+        wardRulesState = 'done';
+        actionBtn.textContent = 'Next';
+      }, 1600 + (items.length * 1500) + 500));
+
+      actionBtn.onclick = () => {
+        if (wardRulesState === 'playing') {
+          wardRulesTimeouts.forEach(clearTimeout);
+          title.classList.add('instant-visible');
+          items.forEach(i => i.classList.add('instant-visible'));
+          actionBtn.classList.add('instant-visible');
+          wardRulesState = 'done';
+          actionBtn.textContent = 'Next';
+        } else {
+          sceneWardRules.style.display = 'none';
+          document.body.classList.remove('show-announcement');
+
+          if (recordsNotebook) {
+            document.getElementById('notebook-tabs').style.display = 'flex'; 
+            document.getElementById('tab-ward').style.display = 'inline-block'; 
+
+            const sceneFb = document.getElementById('scene-ward-feedback');
+            sceneFb.style.display = 'block';
+            
+            const wardFbText = document.getElementById('ward-fb-text');
+            wardFbText.innerHTML = '還是記住這些規則為好。';
+            wardFbText.classList.add('instant-visible');
+            
+            const fbNext = document.getElementById('ward-fb-next');
+            fbNext.classList.add('instant-visible');
+
+            fbNext.onclick = () => {
+              sceneFb.style.display = 'none';
+              startWardGameplay();
+            };
+          } else {
+            startWardGameplay();
+          }
+        }
+      };
+    }
+
+    function startWardGameplay() {
+       document.getElementById('scene-ward-game').style.display = 'block';
+       renderWardEvent(getNextWardEventId());
+    }
+
+    function renderWardEvent(eventId) {
+      stopIdleTimer();
+      if (!eventId) return;
+
+      const ev = wardEventsData[eventId];
+      
+      swFeedback.style.opacity = '';
+      swFeedback.style.transition = '';
+
+      swText.style.display = 'block';
+      swText.innerHTML = ev.text;
+      swText.className = 'story-text';
+      void swText.offsetWidth;
+      swText.classList.add('visible');
+
+      swOptions.innerHTML = '';
+      swOptions.style.display = 'flex';
+      swOptions.className = 'options-container hidden-element';
+      void swOptions.offsetWidth;
+      swOptions.classList.add('visible');
+
+      swFeedback.style.display = 'none';
+      nextBtnW.style.display = 'none';
+      nextBtnW.classList.remove('instant-visible');
+
+      if (ev.isAutoFinalTransition) {
+          swOptions.style.display = 'none';
+          setTimeout(() => {
+              triggerFinalQuestioningTransition();
+          }, 3000);
+          return;
+      }
+
+      if (ev.options && ev.options.length > 0) {
+        ev.options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = 'btn';
+          btn.style.marginTop = '0';
+          btn.textContent = opt.label;
+          btn.onclick = () => handleWardOptionClick(opt, btn);
+          swOptions.appendChild(btn);
+        });
+        startIdleTimer();
+      }
+    }
+
+    function handleWardOptionClick(opt, btn) {
+        handleGenericOptionClick(opt, 'scene-ward-game', swText, swOptions, swFeedback, nextBtnW, renderWardEvent, getNextWardEventId, btn);
+    }
+  </script>
+</body>
+</html>
