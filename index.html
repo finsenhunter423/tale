@@ -993,7 +993,7 @@
       uvOverlay.style.opacity = '1'; 
 
       uvText.style.display = 'block';
-      uvText.innerHTML = "強烈的恐懼湧上，使身體不自覺戰慄……此時，前方亮起了一道溫暖的紫色光芒。";
+      uvText.innerHTML = "強烈的恐懼湧上，使身體不自覺戰慄……此時，前方亮起了一道溫暖的「光」。";
       uvText.className = 'story-text';
       void uvText.offsetWidth; 
       uvText.classList.add('visible');
@@ -1395,14 +1395,14 @@
             text = '當面目被扭曲，喉間發出群眾的嘶吼，事實似乎也不再重要。';
         } else if (q1Answer === '「蛇」' && q2Answer === '「蛇」' && (q3Answer === '怪物' || q3Answer === '「蛇」')) {
             title = '【蛇毒】';
-            text = '菌絲黏膩濕滑的觸感攀上，那份冰冷揮之不去，有一道聲音正輕柔地哼著歌謠……。';
+            text = '菌絲黏膩濕滑的觸感攀上，是誰的凝視正靠近？ ';
         } else if (q1Answer === '「蛇」' && q2Answer === '「蛇」' && q3Answer === '醫者') {
             title = '【深淵】';
-            text = '觸手從沼底升起，將迷失的孩子沉入其中，是誰的身影正靠近？';
+            text = '觸手從沼底升起，將迷失的孩子沉入永夜。冰冷之中，有一道聲音正輕柔地哼著歌謠……。 ';
         } else if ((q1Answer === '「蛇」' && q2Answer === '「羊群」' && q3Answer === '「蛇」') || 
                    (q1Answer === '「蛇」' && q2Answer === '「羊群」' && q3Answer === '醫者' && !hasLens)) {
             title = '【向光】';
-            text = '在紫外光的照耀中，一切恐懼都得到了「治癒」……。';
+            text = '在紫外光的照耀下，一切恐懼都得到了「治癒」……。';
         } else if (q1Answer === '「蛇」' && q2Answer === '「羊群」' && q3Answer === '醫者' && hasLens) {
             title = '【救贖】';
             text = '透鏡折射出溫暖的光芒，當「存在」的希望再一次眷顧，從沼澤裡現身的，會是曾經的他嗎……？';
