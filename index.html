@@ -738,38 +738,6 @@
   </div>
 
   <script>
-    // == Audio Objects Definition ==
-    const bgm = new Audio("The Dentist's Swamp_BGM.mp3");
-    bgm.loop = true;
-    bgm.volume = 0.3
-    
-    const endMonsterAudio = new Audio("endding-monster.mp3");
-endMonsterAudio.volume = 0.5;
-const endSnakeAudio = new Audio("endding-snake.mp3");
-endSnakeAudio.volume = 0.5;
-    const endAbyssAudio = new Audio("endding-abyss.mp3");
-    endAbyssAudio.volume = 0.5;
-    const endLightAudio = new Audio("endding-light.mp3");
-    endLightAudio.volume = 0.5;
-    const endRedemptionAudio = new Audio("Found Existence_end.mp3");
-    endRedemptionAudio.loop = true;
-    endRedemptionAudio.volume = 0.5;
-    
-    let currentEndingAudio = null;
-
-    function stopAllAudio() {
-        if (bgm) { 
-            bgm.pause(); 
-            bgm.currentTime = 0; 
-        }
-        if (currentEndingAudio) { 
-            currentEndingAudio.pause(); 
-            currentEndingAudio.currentTime = 0; 
-            currentEndingAudio = null; 
-        }
-    }
-
-    // == Game Variables ==
     let fearValue = 0; 
     let sheepIndex = 0;
     let snakeIndex = 0;
@@ -884,41 +852,6 @@ endSnakeAudio.volume = 0.5;
     let wardRulesState = 'playing';
     let wardRulesTimeouts = [];
     let wardIntroPlayed = false;
-
-    // == Utility & Typing Effects ==
-    function typeWriterEffect(element, text, duration, callback) {
-        element.innerHTML = '';
-        let i = 0;
-        let typingTime = 2000; 
-        let delay = typingTime / text.length;
-
-        let interval = setInterval(() => {
-            element.innerHTML += text.charAt(i);
-            i++;
-            if (i >= text.length) {
-                clearInterval(interval);
-            }
-        }, delay);
-
-        setTimeout(() => {
-            clearInterval(interval); 
-            element.innerHTML = text; 
-            if (callback) callback();
-        }, duration);
-    }
-
-    function playRedemptionSequence(callback) {
-        const overlayText = document.getElementById('overlay-text');
-        overlayText.style.opacity = '1';
-
-        typeWriterEffect(overlayText, 'After seeking and seeking', 5050, () => {
-            overlayText.innerHTML = ''; 
-            typeWriterEffect(overlayText, 'Finally, I reached my own answer', 5050, () => {
-                overlayText.innerHTML = '';
-                if (callback) callback();
-            });
-        });
-    }
 
     function isBadChild() {
         return hasCandy || ateCandy || candyInteractionCount > 0;
@@ -1290,7 +1223,7 @@ endSnakeAudio.volume = 0.5;
            hideAllScenes();
            document.querySelector('.ui-container').style.display = 'none';
            
-           // 迷失結局：重置恐懼值、羊群指數、蛇指數
+           // 迷失結局：重置恐懼值、羊群指數、蛇指數 (其餘如手札、隨身物品、特定題目觸發次數不重置)
            fearValue = 0;
            sheepIndex = 0;
            snakeIndex = 0;
@@ -1355,38 +1288,6 @@ endSnakeAudio.volume = 0.5;
         }, 500);
     }
 
-    function getEndingDetails() {
-        let title = '';
-        let text = '';
-        if (q1Answer === '「羊群」' && q2Answer === '「蛇」' && q3Answer === '怪物') {
-            title = '【罪孽】';
-            text = '踩著羊群的腳印站在岸邊，被沉入沼澤的，究竟是罪人，又或者蒙冤的替罪者……？';
-        } else if (q1Answer === '「羊群」' && q2Answer === '「蛇」' && q3Answer === '「蛇」') {
-            title = '【沉沼】';
-            text = '呼吸瞬間凝滯，彷彿置身泥潭。視線沒入黑暗之際，「羊群」仍咆哮著對「怪物」的審判……。';
-        } else if (q1Answer === '「羊群」' && q2Answer === '「羊群」' && (q3Answer === '怪物' || q3Answer === '「蛇」')) {
-            title = '【群羊】';
-            text = '當面目被扭曲，喉間發出群眾的嘶吼，事實似乎也不再重要。';
-        } else if (q1Answer === '「蛇」' && q2Answer === '「蛇」' && (q3Answer === '怪物' || q3Answer === '「蛇」')) {
-            title = '【蛇毒】';
-            text = '菌絲黏膩濕滑的觸感攀上，是誰的凝視正靠近？ ';
-        } else if (q1Answer === '「蛇」' && q2Answer === '「蛇」' && q3Answer === '醫者') {
-            title = '【深淵】';
-            text = '觸手從沼底升起，將迷失的孩子沉入永夜。冰冷之中，有一道聲音正輕柔地哼著歌謠……。 ';
-        } else if ((q1Answer === '「蛇」' && q2Answer === '「羊群」' && q3Answer === '「蛇」') || 
-                   (q1Answer === '「蛇」' && q2Answer === '「羊群」' && q3Answer === '醫者' && !hasLens)) {
-            title = '【向光】';
-            text = '在紫外光的照耀下，一切恐懼都得到了「治癒」……。';
-        } else if (q1Answer === '「蛇」' && q2Answer === '「羊群」' && q3Answer === '醫者' && hasLens) {
-            title = '【救贖】';
-            text = '透鏡折射出溫暖的光芒，當「存在」的希望再一次眷顧，從沼澤裡現身的，會是曾經的他嗎……？';
-        } else {
-            title = '【未知的結局】';
-            text = '你的選擇引導向了一個未知的深淵……。';
-        }
-        return { title, text };
-    }
-
     function triggerEndingTransition() {
         stopIdleTimer();
         const overlayText = document.getElementById('overlay-text');
@@ -1396,42 +1297,15 @@ endSnakeAudio.volume = 0.5;
         void blackOverlay.offsetWidth;
         blackOverlay.style.opacity = '1';
         
-        // 詰問結束，進入結局畫面前的轉場畫面停止音樂
-        bgm.pause();
-        
-        let endingInfo = getEndingDetails();
-
         setTimeout(() => {
             document.getElementById('scene-final-q').style.display = 'none';
             
             setTimeout(() => {
-                const proceedToEnding = () => {
-                    blackOverlay.style.opacity = '0';
-                    setTimeout(() => {
-                        blackOverlay.style.display = 'none';
-                        revealEnding(endingInfo);
-                    }, 500);
-                };
-
-                if (endingInfo.title === '【蛇毒】') {
-                    currentEndingAudio = endSnakeAudio;
-                    currentEndingAudio.play();
-                    currentEndingAudio.onended = proceedToEnding;
-                } else if (endingInfo.title === '【深淵】') {
-                    currentEndingAudio = endAbyssAudio;
-                    currentEndingAudio.play();
-                    currentEndingAudio.onended = proceedToEnding;
-                } else if (endingInfo.title === '【向光】') {
-                    currentEndingAudio = endLightAudio;
-                    currentEndingAudio.play();
-                    currentEndingAudio.onended = proceedToEnding;
-                } else if (endingInfo.title === '【救贖】') {
-                    currentEndingAudio = endRedemptionAudio;
-                    currentEndingAudio.play();
-                    playRedemptionSequence(proceedToEnding);
-                } else {
-                    proceedToEnding();
-                }
+                blackOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    blackOverlay.style.display = 'none';
+                }, 500);
+                calculateEnding();
             }, 1500); 
         }, 500); 
     }
@@ -1504,17 +1378,47 @@ endSnakeAudio.volume = 0.5;
         return btn;
     }
 
-    function revealEnding(info) {
+    function calculateEnding() {
         document.getElementById('scene-final-ending').style.display = 'block';
         
+        let title = '';
+        let text = '';
+
+        if (q1Answer === '「羊群」' && q2Answer === '「蛇」' && q3Answer === '怪物') {
+            title = '【罪孽】';
+            text = '踩著羊群的腳印站在岸邊，被沉入沼澤的，究竟是罪人，又或者蒙冤的替罪者……？';
+        } else if (q1Answer === '「羊群」' && q2Answer === '「蛇」' && q3Answer === '「蛇」') {
+            title = '【沉沼】';
+            text = '呼吸瞬間凝滯，彷彿置身泥潭。視線沒入黑暗之際，「羊群」仍咆哮著對「怪物」的審判……。';
+        } else if (q1Answer === '「羊群」' && q2Answer === '「羊群」' && (q3Answer === '怪物' || q3Answer === '「蛇」')) {
+            title = '【群羊】';
+            text = '當面目被扭曲，喉間發出群眾的嘶吼，事實似乎也不再重要。';
+        } else if (q1Answer === '「蛇」' && q2Answer === '「蛇」' && (q3Answer === '怪物' || q3Answer === '「蛇」')) {
+            title = '【蛇毒】';
+            text = '菌絲黏膩濕滑的觸感攀上，是誰的凝視正靠近？ ';
+        } else if (q1Answer === '「蛇」' && q2Answer === '「蛇」' && q3Answer === '醫者') {
+            title = '【深淵】';
+            text = '觸手從沼底升起，將迷失的孩子沉入永夜。冰冷之中，有一道聲音正輕柔地哼著歌謠……。 ';
+        } else if ((q1Answer === '「蛇」' && q2Answer === '「羊群」' && q3Answer === '「蛇」') || 
+                   (q1Answer === '「蛇」' && q2Answer === '「羊群」' && q3Answer === '醫者' && !hasLens)) {
+            title = '【向光】';
+            text = '在紫外光的照耀下，一切恐懼都得到了「治癒」……。';
+        } else if (q1Answer === '「蛇」' && q2Answer === '「羊群」' && q3Answer === '醫者' && hasLens) {
+            title = '【救贖】';
+            text = '透鏡折射出溫暖的光芒，當「存在」的希望再一次眷顧，從沼澤裡現身的，會是曾經的他嗎……？';
+        } else {
+            title = '【未知的結局】';
+            text = '你的選擇引導向了一個未知的深淵……。';
+        }
+
         const titleEl = document.getElementById('ending-title');
         const textEl = document.getElementById('ending-text');
         const btnEl = document.getElementById('ending-retry-btn');
 
-        titleEl.textContent = info.title;
-        textEl.textContent = info.text;
+        titleEl.textContent = title;
+        textEl.textContent = text;
         
-        if (info.title === '【群羊】' || info.title === '【蛇毒】') {
+        if (title === '【群羊】' || title === '【蛇毒】') {
             titleEl.style.color = '#bd1f1f';
             textEl.style.color = '#bd1f1f';
         } else {
@@ -1548,9 +1452,6 @@ endSnakeAudio.volume = 0.5;
       blackOverlay.style.opacity = '1';
       overlayText.style.opacity = '1';
 
-      // 觸發「實驗」結局，於劇情文字消失後（此轉場畫面時）停止音樂
-      bgm.pause();
-
       setTimeout(() => {
         hideAllScenes();
         document.getElementById('exp-title').classList.remove('visible', 'instant-visible');
@@ -1581,9 +1482,6 @@ endSnakeAudio.volume = 0.5;
       blackOverlay.style.opacity = '1';
       overlayText.style.opacity = '1';
 
-      // 觸發「怪物」結局，於劇情文字消失後（此轉場畫面時）停止音樂
-      bgm.pause();
-
       setTimeout(() => {
         hideAllScenes();
         document.getElementById('monster-title').classList.remove('visible', 'instant-visible');
@@ -1592,26 +1490,20 @@ endSnakeAudio.volume = 0.5;
 
         sceneMonster.style.display = 'block';
 
-        // 1.5秒全黑轉場後，維持全黑並播放專屬音檔，播畢後進入畫面
-        currentEndingAudio = endMonsterAudio;
-        currentEndingAudio.play();
-        currentEndingAudio.onended = () => {
-            blackOverlay.style.opacity = '0';
-            overlayText.style.opacity = '0';
-            setTimeout(() => {
-              blackOverlay.style.display = 'none';
-              overlayText.textContent = ''; 
-              setTimeout(() => { document.getElementById('monster-p1').classList.add('visible'); }, 50);
-              setTimeout(() => { document.getElementById('monster-title').classList.add('visible'); }, 2550);
-              setTimeout(() => { document.getElementById('monster-retry-btn').classList.add('visible'); }, 4000);
-            }, 500);
-        };
+        blackOverlay.style.opacity = '0';
+        overlayText.style.opacity = '0';
+        
+        setTimeout(() => {
+          blackOverlay.style.display = 'none';
+          overlayText.textContent = ''; 
+          setTimeout(() => { document.getElementById('monster-p1').classList.add('visible'); }, 50);
+          setTimeout(() => { document.getElementById('monster-title').classList.add('visible'); }, 2550);
+          setTimeout(() => { document.getElementById('monster-retry-btn').classList.add('visible'); }, 4000);
+        }, 500);
       }, 1500); 
     }
 
     function resetGameState() {
-        stopAllAudio(); // 確保重新開始時音樂停止
-
         fearValue = 0;
         sheepIndex = 0;
         snakeIndex = 0;
@@ -1725,9 +1617,6 @@ endSnakeAudio.volume = 0.5;
     }
 
     startBtn.addEventListener('click', function() {
-      stopAllAudio();
-      bgm.play().catch(e => console.log("Audio play blocked", e));
-
       introScreen.style.display = 'none';
       gameScreen.style.display = 'block';
       gameScreen.style.animation = 'fadeIn 1.5s ease-in-out';
@@ -2604,54 +2493,108 @@ endSnakeAudio.volume = 0.5;
           {
             label: "轉身逃離",
             effect: () => {
-              sheepIndex += 5;
-              return { text: "對於異樣之物，恐懼往往是最初的反應。" };
+              fearValue += 5;
+              snakeIndex -= 10;
+              return { text: "謹記，遠離會帶來危險的一切事物。" };
             }
           }
         ]
       },
       "3-2": {
-        text: "耳邊傳來一陣極其輕微的「咩咩」聲，似乎有羊群正在不遠處遊蕩。",
+        text: "腳腕漫上一股黏膩濕滑的觸感，低頭所見，是幾條觸手般的菌絲，困住了前行的腳步。",
         options: [
-          { label: "跟隨聲音", effect: () => { sheepIndex += 10; return { text: "隱隱約約之中，那些黑影似乎也正在觀察著這邊。" }; } },
-          { label: "反向離開", effect: () => { snakeIndex += 5; return { text: "遠離一切未知，才是在醫院裡保命的最佳方式。" }; } }
+          {
+            label: "動手清除",
+            effect: () => {
+              fearValue += 10;
+              return { text: "觸碰到的瞬間，菌絲竟收緊了力道，奮力掙扎後才勉強脫身……。" };
+            }
+          },
+          {
+            label: "靜觀其變",
+            effect: () => {
+              return { text: "一段時間後菌絲鬆開了箝制，緩緩褪去，只留下腳腕上一道濕痕。" };
+            }
+          },
+          {
+            label: "仔細觀察",
+            effect: () => {
+              snakeIndex += 5;
+              return { text: "菌絲彷彿能夠感知到視線，放輕了纏勒的力度，而後緩緩退開，只在腳腕上留下一道濕痕。" };
+            }
+          }
         ]
       },
       "3-3": {
-        text: "一道人影佇立於前方，背對著這邊，手中似乎還拿著什麼……。",
+        text: "人群的聲音再度響起，這一次變得更加清晰……。<br><br>「褻瀆屍體的罪人！」<br><br>同時，一道穿著白袍的模糊身影，出現在了面前。",
         options: [
-          { label: "「你是誰？」", effect: () => { return { text: "「……只是一個路過的醫生罷了。」", goto: "3-3-1" }; } },
-          { label: "立刻逃離", effect: () => { fearValue += 10; return { text: "無論是誰，都必然來者不善。" }; } }
-        ]
-      },
-      "3-3-1": {
-        text: "那道身影轉過頭來，昏暗的光線打在他殘缺的面孔上，嘴角掛著詭異的笑意：「你……是來找糖果的嗎？」",
-        options: [
-          { label: "是", effect: () => { 
-              if (isBadChild()) {
-                  fearValue += 10;
-                  return { text: "「你說謊了……。」" };
-              } else {
-                  return { text: "「壞孩子，這裡沒有糖果……。」" };
-              }
-            } 
+          {
+            label: "凝神細聽",
+            effect: () => {
+              sheepIndex += 10;
+              return { text: "「把他沉下去！沉下去！」" };
+            }
           },
-          { label: "否", effect: () => { return { text: "「是嗎……也是，『壞孩子』是找不到糖果的……。」" }; } },
-          { label: "轉身逃跑", effect: () => { fearValue += 5; return { text: "直覺告訴自己，這裡相當危險。" }; } }
+          {
+            label: "無視",
+            effect: () => {
+              return { text: "雖然並不理解，但那聽上去不是應該知道的事……。" };
+            }
+          },
+          {
+            label: "尋求幫助",
+            effect: () => {
+              fearValue -= 5;
+              sheepIndex -= 10;
+              return { text: "「別擔心，會沒事的……。」<br><br>「醫生」輕輕地低語。" };
+            }
+          }
         ]
       },
       "3-4": {
-        text: "角落裡放置著一個破損的鳥籠，裡頭空無一物。",
+        text: "牆上的裂縫裡，似乎藏著一隻眼睛，正直直注視前方……它的瞳孔會是什麼形狀？",
         options: [
-          { label: "上前查看", effect: () => { fearValue += 5; return { text: "籠內有幾根白色的羽毛，似乎曾有什麼被困在這裡。" }; } },
-          { label: "置之不理", effect: () => { return { text: "無關緊要的東西，還是少碰為妙。" }; } }
+          {
+            label: "豎瞳",
+            effect: () => {
+              fearValue += 5;
+              snakeIndex += 10;
+              return { text: "如蛇一般，冰冷銳利。" };
+            }
+          },
+          {
+            label: "橫瞳",
+            effect: () => {
+              fearValue += 5;
+              sheepIndex += 10;
+              return { text: "如羊一般，溫和沉著。" };
+            }
+          },
+          {
+            label: "圓瞳",
+            effect: () => {
+              fearValue += 5;
+              return { text: "如人一般，深沉憂鬱。" };
+            }
+          }
         ]
       },
       "3-5-a": {
         text: "原先尚且存在的微弱燈光乍然熄滅，只留下無盡黑暗。伴隨刺骨寒冷，形成了沉重的壓迫感，令人窒息……。",
         options: [
-          { label: "停留原地", effect: () => { fearValue += 10; return { text: "越發濃烈的恐懼，並不是嘗試保持冷靜便能控制的。<br><br>慌不擇路之下，竟來到了醫院的診療室……。", triggerZoneTransition: true, targetZone: 'clinic', isSpecialAutoTransition: true }; } },
-          { label: "立刻逃離", effect: () => { return { text: "慌不擇路之下，竟來到了醫院的診療室……。", triggerZoneTransition: true, targetZone: 'clinic', isSpecialAutoTransition: true }; } }
+          {
+            label: "停留原地",
+            effect: () => {
+              fearValue += 10;
+              return { text: "越發濃烈的恐懼，並不是嘗試保持冷靜便能控制的。<br><br>慌不擇路之下，竟來到了醫院的診療室……。", triggerZoneTransition: true, targetZone: 'clinic', isSpecialAutoTransition: true };
+            }
+          },
+          {
+            label: "立刻逃離",
+            effect: () => {
+              return { text: "慌不擇路之下，竟來到了醫院的診療室……。", triggerZoneTransition: true, targetZone: 'clinic', isSpecialAutoTransition: true };
+            }
+          }
         ]
       },
       "3-5-b": {
@@ -2669,7 +2612,7 @@ endSnakeAudio.volume = 0.5;
       sceneWardIntro.style.display = 'block';
       p1.classList.remove('visible', 'instant-visible');
       introNextBtn.classList.remove('visible', 'instant-visible');
-      
+
       wardIntroTimeouts = [];
 
       wardIntroTimeouts.push(setTimeout(() => { p1.classList.add('visible'); }, 50));
@@ -2759,10 +2702,6 @@ endSnakeAudio.volume = 0.5;
       if (!eventId) return;
 
       const ev = wardEventsData[eventId];
-      const swText = document.getElementById('sw-text');
-      const swOptions = document.getElementById('sw-options');
-      const swFeedback = document.getElementById('sw-feedback');
-      const nextBtnW = document.getElementById('next-btn-w');
       
       swFeedback.style.opacity = '';
       swFeedback.style.transition = '';
@@ -2805,7 +2744,7 @@ endSnakeAudio.volume = 0.5;
     }
 
     function handleWardOptionClick(opt, btn) {
-        handleGenericOptionClick(opt, 'scene-ward-game', document.getElementById('sw-text'), document.getElementById('sw-options'), document.getElementById('sw-feedback'), document.getElementById('next-btn-w'), renderWardEvent, getNextWardEventId, btn);
+        handleGenericOptionClick(opt, 'scene-ward-game', swText, swOptions, swFeedback, nextBtnW, renderWardEvent, getNextWardEventId, btn);
     }
   </script>
 </body>
