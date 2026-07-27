@@ -738,6 +738,36 @@
   </div>
 
   <script>
+    const bgm = new Audio("The Dentist's Swamp_BGM.mp3");
+    bgm.loop = true;
+    bgm.volume = 0.3
+    
+    const endMonsterAudio = new Audio("endding-monster.mp3");
+endMonsterAudio.volume = 0.5;
+const endSnakeAudio = new Audio("endding-snake.mp3");
+endSnakeAudio.volume = 0.5;
+    const endAbyssAudio = new Audio("endding-abyss.mp3");
+    endAbyssAudio.volume = 0.5;
+    const endLightAudio = new Audio("endding-light.mp3");
+    endLightAudio.volume = 0.5;
+    const endRedemptionAudio = new Audio("Found Existence_end.mp3");
+    endRedemptionAudio.loop = true;
+    endRedemptionAudio.volume = 0.5;
+    
+    let currentEndingAudio = null;
+
+    function stopAllAudio() {
+        if (bgm) { 
+            bgm.pause(); 
+            bgm.currentTime = 0; 
+        }
+        if (currentEndingAudio) { 
+            currentEndingAudio.pause(); 
+            currentEndingAudio.currentTime = 0; 
+            currentEndingAudio = null; 
+        }
+    }
+
     let fearValue = 0; 
     let sheepIndex = 0;
     let snakeIndex = 0;
