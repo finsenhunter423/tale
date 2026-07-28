@@ -81,6 +81,8 @@
     opacity: 0;
     transform: translateY(10px);
     transition: opacity 2s ease, transform 2s ease, color 0.8s ease;
+
+    will-change: opacity, transform;
   }
 
   .visible {
@@ -121,11 +123,13 @@
   .scene-title {
     font-size: 1.5rem;
     margin-bottom: 30px;
-    text-align: center;
+    text-align: left;
     opacity: 0;
     transform: translateY(10px);
-    transition: opacity 1s ease, transform 1s ease, color 0.8s ease;
+    transition: opacity 1.5s ease, transform 1.5s ease, color 0.8s ease;
     letter-spacing: 2px;
+
+    will-change: opacity, transform;
   }
 
   .bullet-list {
@@ -1521,6 +1525,8 @@
         titleEl.classList.remove('visible', 'instant-visible');
         textEl.classList.remove('visible', 'instant-visible');
         btnEl.classList.remove('visible', 'instant-visible');
+
+        void textEl.offsetWidth;
 
         setTimeout(() => { textEl.classList.add('visible'); }, 50);
         setTimeout(() => { titleEl.classList.add('visible'); }, 2550);
