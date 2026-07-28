@@ -1390,51 +1390,48 @@
     }
 
     function triggerEndingTransition() {
-        stopIdleTimer();
-        const overlayText = document.getElementById('overlay-text');
-        overlayText.textContent = '';
-        
-        blackOverlay.style.display = 'block';
-        void blackOverlay.offsetWidth;
-        blackOverlay.style.opacity = '1'; 
-        
-        let endingInfo = getEndingDetails();
+    stopIdleTimer();
+    const overlayText = document.getElementById('overlay-text');
+    overlayText.textContent = '';
+    
+    blackOverlay.style.display = 'block';
+    void blackOverlay.offsetWidth;
+    blackOverlay.style.opacity = '1'; 
+    
+    let endingInfo = getEndingDetails();
+    
+    setTimeout(() => {
+        document.getElementById('scene-final-q').style.display = 'none';
 
-        setTimeout(() => {
-            document.getElementById('scene-final-q').style.display = 'none';
-            
+        const proceedToEnding = () => {
+            blackOverlay.style.opacity = '0';
             setTimeout(() => {
-                const proceedToEnding = () => {
-                    blackOverlay.style.opacity = '0';
-                    setTimeout(() => {
-                        blackOverlay.style.display = 'none';
-                        revealEnding(endingInfo);
-                    }, 500);
-                };
-
-                if (endingInfo.title === '【蛇毒】') {
-                    currentEndingAudio = endSnakeAudio;
-                    currentEndingAudio.play();
-                    currentEndingAudio.onended = proceedToEnding;
-                } else if (endingInfo.title === '【深淵】') {
-                    currentEndingAudio = endAbyssAudio;
-                    currentEndingAudio.play();
-                    currentEndingAudio.onended = proceedToEnding;
-                } else if (endingInfo.title === '【向光】') {
-                    currentEndingAudio = endLightAudio;
-                    currentEndingAudio.play();
-                    currentEndingAudio.onended = proceedToEnding;
-                } else if (endingInfo.title === '【救贖】') {
-                    currentEndingAudio = endRedemptionAudio;
-                    currentEndingAudio.play();
-                    playRedemptionSequence(proceedToEnding);
-                } else {
-                    proceedToEnding();
-                }
-            }, 1500); 
-        }, 500); 
-    }
-
+                blackOverlay.style.display = 'none';
+                revealEnding(endingInfo);
+            }, 500);
+        };
+        
+        if (endingInfo.title === '【蛇毒】') {
+            currentEndingAudio = endSnakeAudio;
+            currentEndingAudio.play();
+            currentEndingAudio.onended = proceedToEnding;
+        } else if (endingInfo.title === '【深淵】') {
+            currentEndingAudio = endAbyssAudio;
+            currentEndingAudio.play();
+            currentEndingAudio.onended = proceedToEnding;
+        } else if (endingInfo.title === '【向光】') {
+            currentEndingAudio = endLightAudio;
+            currentEndingAudio.play();
+            currentEndingAudio.onended = proceedToEnding;
+        } else if (endingInfo.title === '【救贖】') {
+            currentEndingAudio = endRedemptionAudio;
+            currentEndingAudio.play();
+            playRedemptionSequence(proceedToEnding);
+        } else {
+            proceedToEnding();
+        }
+    }, 1500); 
+}
     function startFinalQuestioning() {
         document.getElementById('scene-final-q').style.display = 'block';
         q1Answer = ''; q2Answer = ''; q3Answer = '';
@@ -1498,7 +1495,7 @@
                 } else {
                     triggerEndingTransition();
                 }
-            }, 2500); 
+            }, 2000); 
         };
         return btn;
     }
