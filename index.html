@@ -126,7 +126,7 @@
     text-align: center;
     opacity: 0;
     transform: translateY(10px);
-    transition: opacity 1.5s ease, transform 1.5s ease, color 0.8s ease;
+    transition: opacity 1s ease, transform 1s ease, color 0.8s ease;
     letter-spacing: 2px;
 
     will-change: opacity, transform;
@@ -1378,7 +1378,7 @@
             text = '菌絲黏膩濕滑的觸感攀上，是誰的凝視正靠近？ ';
         } else if (q1Answer === '「蛇」' && q2Answer === '「蛇」' && q3Answer === '醫者') {
             title = '【深淵】';
-            text = '觸手從沼底升起，將迷失的孩子沉入永夜。冰冷之中，有一道聲音正輕柔地哼著歌謠……。 ';
+            text = '觸手從沼底升起，將迷途的孩子沉入永夜。冰冷之中，有一道聲音正輕柔地哼著歌謠……。 ';
         } else if ((q1Answer === '「蛇」' && q2Answer === '「羊群」' && q3Answer === '「蛇」') || 
                    (q1Answer === '「蛇」' && q2Answer === '「羊群」' && q3Answer === '醫者' && !hasLens)) {
             title = '【向光】';
@@ -1387,8 +1387,7 @@
             title = '【救贖】';
             text = '透鏡折射出溫暖的光芒，當「存在」的希望再一次眷顧，從沼澤裡現身的，會是曾經的他嗎……？';
         } else {
-            title = '【未知的結局】';
-            text = '你的選擇引導向了一個未知的深淵……。';
+            return null;
         }
         return { title, text };
     }
@@ -1406,6 +1405,11 @@
     
     setTimeout(() => {
         document.getElementById('scene-final-q').style.display = 'none';
+
+        if (!endingInfo) {
+            handleLostEndingTransition();
+            return;
+        }
 
         const proceedToEnding = () => {
             blackOverlay.style.opacity = '0';
@@ -2217,6 +2221,16 @@
             }
 
             if (result.skipFeedback) {
+                if (fearValue >= 50 && !uvTriggered) {
+                    uvTriggered = true;
+                    nextBtn.style.display = 'none';
+                    setTimeout(() => {
+                        triggerUVBlackScreen(() => {
+                            setupStandardNextBtn();
+                        });
+                    }, 3000);
+                    return;
+                }
                 setupStandardNextBtn();
                 return;
             }
@@ -2246,7 +2260,7 @@
                 setTimeout(() => handleMonsterEndingTransition(), 3000);
                 return;
             }
-
+            
             if (fearValue >= 50 && !uvTriggered) {
                 uvTriggered = true;
                 nextBtn.style.display = 'none';
