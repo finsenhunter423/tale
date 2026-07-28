@@ -1246,7 +1246,7 @@
       
       idleTimer = setTimeout(() => {
         triggerIdle();
-      }, 40000);
+      }, 30000);
     }
 
     function hideAllScenes() {
@@ -1498,7 +1498,7 @@
                 } else {
                     triggerEndingTransition();
                 }
-            }, 1000); 
+            }, 2500); 
         };
         return btn;
     }
@@ -2020,7 +2020,7 @@
         text: "好幾道聲音窸窣作響，像是一群人在交談，情緒激動。",
         options: [
           { label: "凝神細聽", effect: () => { sheepIndex += 10; return { text: "「罪人……沉沼……。」他們在說的是什麼？" }; } },
-          { label: "無視", effect: () => { return { text: "或許這些詭異的聲音，會自己停止……。" }; } },
+          { label: "無視", effect: () => { return { text: "或許這些詭異的說話聲，會自己停止……。" }; } },
           { label: "捂上耳朵", effect: () => { snakeIndex += 5; return { text: "非禮勿聽。" }; } }
         ]
       },
