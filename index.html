@@ -1403,13 +1403,14 @@
     
     let endingInfo = getEndingDetails();
     
+    if (!endingInfo) {
+        document.getElementById('scene-final-q').style.display = 'none';
+        handleLostEndingTransition();
+        return;
+    }
+
     setTimeout(() => {
         document.getElementById('scene-final-q').style.display = 'none';
-
-        if (!endingInfo) {
-            handleLostEndingTransition();
-            return;
-        }
 
         const proceedToEnding = () => {
             blackOverlay.style.opacity = '0';
