@@ -741,7 +741,7 @@
     // == Audio Objects Definition ==
     const bgm = new Audio("The Dentist's Swamp_BGM.mp3");
     bgm.loop = true;
-    bgm.volume = 0.4;
+    bgm.volume = 0.3;
     
     const endMonsterAudio = new Audio("endding-monster.mp3");
     endMonsterAudio.volume = 0.5;
@@ -753,7 +753,7 @@
     endLightAudio.volume = 0.5; 
     const endRedemptionAudio = new Audio("Found Existence_end.mp3");
     endRedemptionAudio.loop = true;
-    endRedemptionAudio.volume = 0.5;
+    endRedemptionAudio.volume = 0.3;
     
     let currentEndingAudio = null;
 
@@ -1340,7 +1340,9 @@
         blackOverlay.style.display = 'block';
         void blackOverlay.offsetWidth;
         blackOverlay.style.opacity = '1';
-        
+
+        bgm.pause();
+
         setTimeout(() => {
             hideAllScenes();
             document.querySelector('.ui-container').style.display = 'none';
@@ -1351,7 +1353,7 @@
                     blackOverlay.style.display = 'none';
                     startFinalQuestioning();
                 }, 500);
-            }, 1500); 
+            }, 2000); 
         }, 500);
     }
 
@@ -1394,10 +1396,7 @@
         
         blackOverlay.style.display = 'block';
         void blackOverlay.offsetWidth;
-        blackOverlay.style.opacity = '1';
-        
-        // 詰問結束，進入結局畫面前的轉場畫面停止音樂
-        bgm.pause();
+        blackOverlay.style.opacity = '1'; 
         
         let endingInfo = getEndingDetails();
 
@@ -2864,3 +2863,4 @@
   </script>
 </body>
 </html>
+
