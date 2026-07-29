@@ -2197,31 +2197,27 @@
         };
 
         let showFeedbackAndProceed = () => {
-            if (isLostEnding) {
-                handleLostEndingTransition();
-                return;
-            }
-
-            // 若恐懼值超過 50 且尚未觸發 UV，優先執行劇情與 UV 流程，UV 結束後直接進入下一場景
             if (fearValue >= 50 && !uvTriggered) {
-                uvTriggered = true;
-                nextBtn.style.display = 'none';
-                
-                // 顯示該選項對應的劇情畫面
-                fbEl.innerHTML = finalFeedbackHtml;
-                fbEl.style.display = 'block';
-                fbEl.className = 'story-text instant-visible';
-                
-                // 劇情畫面呈現 3 秒後進入 UV 全黑轉場
-                setTimeout(() => {
-                    triggerUVBlackScreen(() => {
-                        // UV 結束後，直接隱藏目前場景的劇情文字，進入下一場景/狀態
-                        fbEl.style.display = 'none';
-                        nextAction();
-                    });
-                }, 3000);
-                return;
-            }
+        uvTriggered = true;
+        nextBtn.style.display = 'none';
+        
+        fbEl.innerHTML = finalFeedbackHtml;
+        fbEl.style.display = 'block';
+        fbEl.className = 'story-text instant-visible';
+        
+        setTimeout(() => {
+            triggerUVBlackScreen(() => {
+                fbEl.style.display = 'none';
+                nextAction();
+            });
+        }, 3000);
+        return;
+    }
+    
+    if (isLostEnding) {
+        handleLostEndingTransition();
+        return;
+    }
 
             if (result.isSpecialAutoTransition) {
                 fbEl.innerHTML = finalFeedbackHtml;
