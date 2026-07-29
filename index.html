@@ -2198,13 +2198,7 @@
 
         let showFeedbackAndProceed = () => {
             if (isLostEnding) {
-                fbEl.innerHTML = finalFeedbackHtml;
-                fbEl.style.display = 'block';
-                fbEl.className = 'story-text instant-visible';
-                nextBtn.style.display = 'none';
-                setTimeout(() => {
-                    handleLostEndingTransition();
-                }, 3000);
+                handleLostEndingTransition();
                 return;
             }
 
