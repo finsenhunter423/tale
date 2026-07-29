@@ -787,6 +787,7 @@
     let count_2_1 = 0;
     let count_2_1_1 = 0;
     let count_2_1_2 = 0;
+    let count_2_2 = 0;
     let candyInteractionCount = 0;
 
     let uvTriggered = false;
@@ -1292,10 +1293,11 @@
            hideAllScenes();
            document.querySelector('.ui-container').style.display = 'none';
            
-           // 迷失結局：重置恐懼值、羊群指數、蛇指數
+           // 迷失結局：重置恐懼值、羊群指數、蛇指數、透鏡
            fearValue = 0;
            sheepIndex = 0;
            snakeIndex = 0;
+           hasLens = false;
            updateFearUI();
            uvTriggered = false;
            
@@ -1639,6 +1641,7 @@
         count_2_1 = 0;
         count_2_1_1 = 0;
         count_2_1_2 = 0;
+        count_2_2 = 0;
         candyInteractionCount = 0;
 
         updateFearUI();
@@ -1936,7 +1939,7 @@
         ]
       },
       "1-4": {
-        text: "牆邊靠著一張陳舊的木桌，上面放置的糖果罐，卻十分嶄新。",
+        text: "牆邊靠著一張陳舊的木桌，上面放置的糖果罐卻十分嶄新。",
         options: [
           { label: "拿走糖果", effect: (btn) => { 
               if (!hasCandy) {
@@ -2026,7 +2029,7 @@
         text: "好幾道聲音窸窣作響，像是一群人在交談，情緒激動。",
         options: [
           { label: "凝神細聽", effect: () => { sheepIndex += 10; return { text: "「罪人……沉沼……。」他們在說的是什麼？" }; } },
-          { label: "無視", effect: () => { return { text: "或許這些詭異的說話聲，會自己停止……。" }; } },
+          { label: "無視", effect: () => { fearValue += 5; return { text: "或許這些詭異的說話聲，會自己停止……。" }; } },
           { label: "捂上耳朵", effect: () => { snakeIndex += 5; return { text: "非禮勿聽。" }; } }
         ]
       },
@@ -2389,11 +2392,18 @@
           { label: "置之不理", effect: () => { return { text: "那只是普通的醫療器具罷了……或許。" }; } }
         ]
       },
+      "2-2-n": {
+        text: "診療椅旁架著一塊透鏡，光線折射出的蛇紋，看起來似乎有些……令人熟悉？",
+        options: [
+          { label: "上前查看", effect: () => { fearValue -= 5; snakeIndex += 10; return { text: "影影綽綽，恍惚間，彷彿忘卻了一部分恐懼。", goto: "2-2-1" }; } },
+          { label: "置之不理", effect: () => { return { text: "……那只不過是錯覺。" }; } }
+        ]
+      },
       "2-2-1": {
         text: "如此美麗的透鏡……是否將其帶走？",
         options: [
           { label: "是", effect: () => { hasLens = true; inventoryBtn.style.display = 'block'; return { text: "希望之光，必將私藏。" }; } },
-          { label: "否", effect: () => { return { text: "異樣之物，只可遠觀。" }; } }
+          { label: "否", effect: () => { return { text: "異樣之物，只可靜觀。" }; } }
         ]
       },
       "2-3": {
@@ -2535,6 +2545,10 @@
           if (count_2_1_2 > 0) actualId = "2-1-2-n";
           count_2_1_2++;
       }
+      if (eventId === "2-2") {
+          if (count_2_2 > 0) actualId = "2-2-n";
+          count_2_2++;
+      }
 
       const ev = clinicEventsData[actualId];
       const scText = document.getElementById('sc-text');
@@ -2602,125 +2616,40 @@
       "3-1": {
         text: "環顧四周，能夠看見病床皆已蒙塵，唯有中間的床位格外整潔，一條蛇正盤踞其上，那雙異瞳似乎能夠看穿人的內心……？",
         options: [
-          {
-            label: "主動靠近",
-            effect: () => {
-              fearValue -= 5;
-              snakeIndex += 5;
-              return { text: "想要更加靠近時，蛇的身影卻消失在了黑暗裡，好似從未存在過。" };
-            }
-          },
-          {
-            label: "靜觀其變",
-            effect: () => {
-              return { text: "那究竟是幻覺，抑或是真實？" };
-            }
-          },
-          {
-            label: "轉身逃離",
-            effect: () => {
-              fearValue += 5;
-              snakeIndex -= 10;
-              return { text: "謹記，遠離會帶來危險的一切事物。" };
-            }
-          }
+          { label: "主動靠近", effect: () => { fearValue -= 5; snakeIndex += 5; return { text: "想要更加靠近時，蛇的身影卻消失在了黑暗裡，好似從未存在過。" }; } },
+          { label: "靜觀其變", effect: () => { return { text: "那究竟是幻覺，抑或是真實？" }; } },
+          { label: "轉身逃離", effect: () => { fearValue += 5; snakeIndex += 10; return { text: "謹記，遠離會帶來危險的一切事物。" }; } }
         ]
       },
       "3-2": {
         text: "腳腕漫上一股黏膩濕滑的觸感，低頭所見，是幾條觸手般的菌絲，困住了前行的腳步。",
         options: [
-          {
-            label: "動手清除",
-            effect: () => {
-              fearValue += 10;
-              return { text: "觸碰到的瞬間，菌絲竟收緊了力道，奮力掙扎後才勉強脫身……。" };
-            }
-          },
-          {
-            label: "靜觀其變",
-            effect: () => {
-              return { text: "一段時間後菌絲鬆開了箝制，只留下腳腕上一道濕痕。" };
-            }
-          },
-          {
-            label: "仔細觀察",
-            effect: () => {
-              snakeIndex += 5;
-              return { text: "菌絲彷彿能夠感知到視線，放輕了纏勒的力度，而後緩緩退開，只留下一道濕痕。" };
-            }
-          }
+          { label: "動手清除", effect: () => { fearValue += 10; return { text: "觸碰到的瞬間，菌絲竟收緊了力道，奮力掙扎後才勉強脫身……。" }; } },
+          { label: "靜觀其變", effect: () => { return { text: "一段時間後菌絲鬆開了箝制，只留下腳腕上一道濕痕。" }; } },
+          { label: "仔細觀察", effect: () => { snakeIndex += 5; return { text: "菌絲彷彿能夠感知到視線，放輕了纏勒的力度，而後緩緩退開，只留下一道濕痕。" }; } }
         ]
       },
       "3-3": {
         text: "人群的聲音再度響起，這一次變得更加清晰……。<br><br>「褻瀆屍體的罪人！」<br><br>同時，一道穿著白袍的模糊身影，出現在了面前。",
         options: [
-          {
-            label: "凝神細聽",
-            effect: () => {
-              sheepIndex += 10;
-              return { text: "「把他沉下去！沉下去！」" };
-            }
-          },
-          {
-            label: "無視",
-            effect: () => {
-              return { text: "雖然並不理解，但那聽上去不是應該知道的事……。" };
-            }
-          },
-          {
-            label: "尋求幫助",
-            effect: () => {
-              fearValue -= 5;
-              sheepIndex -= 10;
-              return { text: "「別擔心，會沒事的……。」<br><br>「醫生」輕輕地低語。" };
-            }
-          }
+          { label: "凝神細聽", effect: () => { sheepIndex += 10; return { text: "「把他沉下去！沉下去！」" }; } },
+          { label: "無視", effect: () => { fearValue += 10; return { text: "雖然並不理解，但那聽上去不是應該知道的事……。" }; } },
+          { label: "尋求幫助", effect: () => { fearValue -= 5; sheepIndex -= 10; return { text: "「別擔心，會沒事的……。」<br><br>「醫生」輕輕地低語。" }; } }
         ]
       },
       "3-4": {
         text: "牆上的裂縫裡，似乎藏著一隻眼睛，正直直注視前方……它的瞳孔會是什麼形狀？",
         options: [
-          {
-            label: "豎瞳",
-            effect: () => {
-              fearValue += 5;
-              snakeIndex += 10;
-              return { text: "如蛇一般，冰冷銳利。" };
-            }
-          },
-          {
-            label: "橫瞳",
-            effect: () => {
-              fearValue += 5;
-              sheepIndex += 10;
-              return { text: "如羊一般，溫和沉著。" };
-            }
-          },
-          {
-            label: "圓瞳",
-            effect: () => {
-              fearValue += 5;
-              return { text: "如人一般，深沉憂鬱。" };
-            }
-          }
+          { label: "豎瞳", effect: () => { fearValue += 5; snakeIndex += 10; return { text: "如蛇一般，冰冷銳利。" }; } },
+          { label: "橫瞳", effect: () => { fearValue += 5; sheepIndex += 10; return { text: "如羊一般，溫和沉著。" }; } },
+          { label: "圓瞳", effect: () => { fearValue += 5; return { text: "如人一般，深沉憂鬱。" }; } }
         ]
       },
       "3-5-a": {
         text: "原先尚且存在的微弱燈光乍然熄滅，只留下無盡黑暗。伴隨刺骨寒冷，形成了沉重的壓迫感，令人窒息……。",
         options: [
-          {
-            label: "停留原地",
-            effect: () => {
-              fearValue += 10;
-              return { text: "越發濃烈的恐懼，並不是嘗試保持冷靜便能控制的。<br><br>慌不擇路之下，竟來到了醫院的診療室……。", triggerZoneTransition: true, targetZone: 'clinic', isSpecialAutoTransition: true };
-            }
-          },
-          {
-            label: "立刻逃離",
-            effect: () => {
-              return { text: "慌不擇路之下，竟來到了醫院的診療室……。", triggerZoneTransition: true, targetZone: 'clinic', isSpecialAutoTransition: true };
-            }
-          }
+          { label: "停留原地", effect: () => { fearValue += 10; return { text: "越發濃烈的恐懼，並不是嘗試保持冷靜便能控制的。<br><br>慌不擇路之下，竟來到了醫院的診療室……。", triggerZoneTransition: true, targetZone: 'clinic', isSpecialAutoTransition: true }; } },
+          { label: "立刻逃離", effect: () => { return { text: "慌不擇路之下，竟來到了醫院的診療室……。", triggerZoneTransition: true, targetZone: 'clinic', isSpecialAutoTransition: true }; } }
         ]
       },
       "3-5-b": {
