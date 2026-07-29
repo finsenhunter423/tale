@@ -2203,17 +2203,27 @@
             }
 
             if (result.isSpecialAutoTransition) {
-                 fbEl.innerHTML = finalFeedbackHtml;
-                 fbEl.style.display = 'block';
-                 fbEl.className = 'story-text instant-visible';
-                 nextBtn.style.display = 'none';
-                 setTimeout(() => {
-                     triggerBlackScreenTransition(() => {
-                         document.getElementById(containerId).style.display = 'none';
-                         transitionToZone(result.targetZone);
-                     });
-                 }, 3000);
-                 return;
+                fbEl.innerHTML = finalFeedbackHtml;
+                fbEl.style.display = 'block';
+                fbEl.className = 'story-text instant-visible';
+                nextBtn.style.display = 'none';
+
+                let doTransition = () => {
+                    triggerBlackScreenTransition(() => {
+                        document.getElementById(containerId).style.display = 'none';
+                        transitionToZone(result.targetZone);
+                    });
+                };
+
+                setTimeout(() => {
+                    if (fearValue >= 50 && !uvTriggered) {
+                        uvTriggered = true;
+                        triggerUVBlackScreen(doTransition);
+                    } else {
+                        doTransition();
+                    }
+                }, 3000);
+                return;
             }
 
             if (result.skipFeedback) {
