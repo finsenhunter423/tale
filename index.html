@@ -1331,7 +1331,12 @@
              blackOverlay.style.display = 'none';
              overlayText.textContent = ''; 
              setTimeout(() => { 
-               lp1.classList.add('visible'); 
+               lp1.classList.add('visible');
+
+               if (bgm.paused) {
+                     bgm.currentTime = 0;
+               } 
+
                bgm.play().catch(e => console.log("Audio play blocked", e));
              }, 50);
              setTimeout(() => { lp2.classList.add('visible'); }, 2000);
