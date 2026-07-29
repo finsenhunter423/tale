@@ -1328,7 +1328,10 @@
            setTimeout(() => {
              blackOverlay.style.display = 'none';
              overlayText.textContent = ''; 
-             setTimeout(() => { lp1.classList.add('visible'); }, 50);
+             setTimeout(() => { 
+               lp1.classList.add('visible'); 
+               bgm.play().catch(e => console.log("Audio play blocked", e));
+             }, 50);
              setTimeout(() => { lp2.classList.add('visible'); }, 2000);
              setTimeout(() => { lostNextBtn.classList.add('visible'); }, 4000);
            }, 500);
@@ -1617,7 +1620,8 @@
     }
 
     function resetGameState() {
-        stopAllAudio(); // 確保重新開始時音樂停止
+        stopAllAudio();
+        if (bgm) { bgm.currentTime = 0; }
 
         fearValue = 0;
         sheepIndex = 0;
@@ -1989,7 +1993,7 @@
               if (hasCandy) {
                 return { text: "貪求過多，並不是好的行為。" }; 
               } else {
-                return { text: "來路不明的饋贈，反而是一種陷阱。" }; 
+                return { text: "來路不明的饋贈，反而令人心生疑竇。" }; 
               }
             } 
           }
@@ -2007,7 +2011,7 @@
               }
             }
           },
-          { label: "立刻離開", effect: () => { fearValue += 10; return { text: "在廢棄的醫院裡的，會是什麼人？" }; } }
+          { label: "立刻逃跑", effect: () => { fearValue += 10; return { text: "在廢棄的醫院裡的，會是什麼人？" }; } }
         ]
       },
       "1-5-n": {
@@ -2022,7 +2026,7 @@
               }
             }
           },
-          { label: "立刻離開", effect: () => { fearValue += 10; return { text: "那個人……是醫院的醫生嗎？" }; } }
+          { label: "立刻逃跑", effect: () => { fearValue += 10; return { text: "那個人……是醫院的醫生嗎？" }; } }
         ]
       },
       "1-6": {
@@ -2339,7 +2343,7 @@
               }
             }
           },
-          { label: "轉身逃跑", effect: () => {
+          { label: "立刻逃跑", effect: () => {
               return { text: "亨特……這個名字，似乎在哪裡聽過？" }; 
             }
           }
@@ -2617,12 +2621,12 @@
         text: "環顧四周，能夠看見病床皆已蒙塵，唯有中間的床位格外整潔，一條蛇正盤踞其上，那雙異瞳似乎能夠看穿人的內心……？",
         options: [
           { label: "主動靠近", effect: () => { fearValue -= 5; snakeIndex += 5; return { text: "想要更加靠近時，蛇的身影卻消失在了黑暗裡，好似從未存在過。" }; } },
-          { label: "靜觀其變", effect: () => { return { text: "那究竟是幻覺，抑或是真實？" }; } },
-          { label: "轉身逃離", effect: () => { fearValue += 5; snakeIndex += 10; return { text: "謹記，遠離會帶來危險的一切事物。" }; } }
+          { label: "靜觀其變", effect: () => { return { text: "那究竟是幻覺，抑或真實？" }; } },
+          { label: "轉身逃離", effect: () => { fearValue += 5; snakeIndex -= 10; return { text: "謹記，遠離會帶來危險的一切事物。" }; } }
         ]
       },
       "3-2": {
-        text: "腳腕漫上一股黏膩濕滑的觸感，低頭所見，是幾條觸手般的菌絲，困住了前行的腳步。",
+        text: "腳腕漫上一股黏膩濕滑的觸感，低頭所見，是幾道觸手般的菌絲，困住了前行的腳步。",
         options: [
           { label: "動手清除", effect: () => { fearValue += 10; return { text: "觸碰到的瞬間，菌絲竟收緊了力道，奮力掙扎後才勉強脫身……。" }; } },
           { label: "靜觀其變", effect: () => { return { text: "一段時間後菌絲鬆開了箝制，只留下腳腕上一道濕痕。" }; } },
