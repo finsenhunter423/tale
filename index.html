@@ -2154,10 +2154,16 @@
 
         let nextAction = () => {
             if (result.triggerZoneTransition) {
-                triggerBlackScreenTransition(() => {
+                const doSceneSwitch = () => {
                     document.getElementById(containerId).style.display = 'none';
                     transitionToZone(result.targetZone);
-                });
+                };
+
+                if (result.hasUV) { 
+                    doSceneSwitch();
+                } else {
+                    triggerBlackScreenTransition(doSceneSwitch);
+                }
             } else {
                 const nextId = result.goto ? result.goto : getNextIdFn();
                 if (nextId) renderEventFn(nextId);
